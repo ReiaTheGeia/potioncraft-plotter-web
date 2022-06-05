@@ -17,13 +17,16 @@ const App: React.FC = () => {
       ingredientId: "Windbloom" as IngredientId,
       grindPercent: 1,
     });
-
     builder.addItem({
       type: "stir-cauldron",
-      distance: 5,
+      distance: 3.5,
+    });
+    builder.addItem({
+      type: "pour-solvent",
+      distance: 1,
     });
     // builder.addItem({
-    //   type: "pour-solvent",
+    //   type: "stir-cauldron",
     //   distance: 2,
     // });
   }, [builder]);

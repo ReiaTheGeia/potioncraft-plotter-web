@@ -1,3 +1,4 @@
+import { last } from "lodash";
 import { inject, injectable, singleton } from "microinject";
 
 import { curveToPoints } from "@/curves";
@@ -10,6 +11,7 @@ import {
 import {
   Point,
   pointAdd,
+  pointDistance,
   pointEquals,
   pointNormalize,
   pointSubtract,
@@ -67,6 +69,9 @@ export class Plotter {
   ): PlotResult {
     const { ingredientId, grindPercent } = item;
 
+    const addPosition =
+      last(result.pendingPoints) ?? last(result.committedPoints) ?? PointZero;
+
     const ingredient = this.ingredientRegistry.getIngredient(ingredientId);
     if (!ingredient) {
       throw new Error(`Unknown ingredient: ${ingredientId}`);
@@ -88,11 +93,8 @@ export class Plotter {
       takePercent * ingredientLength
     );
 
-    const pendingEnd =
-      result.pendingPoints[result.pendingPoints.length - 1] ?? PointZero;
-
     const appendPendingPoints = addedPoints.map((point) =>
-      pointAdd(pendingEnd, point)
+      pointAdd(addPosition, point)
     );
 
     return appendPendingPlotPoints(appendPendingPoints, item, result);
@@ -103,18 +105,25 @@ export class Plotter {
     result: PlotResult
   ): PlotResult {
     const currentPoint =
-      result.pendingPoints[result.pendingPoints.length - 1] ?? PointZero;
+      result.committedPoints[result.committedPoints.length - 1] ?? PointZero;
     if (pointEquals(currentPoint, PointZero)) {
       return result;
     }
 
-    const { distance } = item;
+    let { distance } = item;
+
+    const distanceToOrigin = pointDistance(currentPoint, PointZero);
+    if (distance > distanceToOrigin) {
+      distance = distanceToOrigin;
+    }
 
     const newPoints = pointArrayLineFromDistance(
       currentPoint,
       pointNormalize(pointSubtract(PointZero, currentPoint)),
       distance
     );
+
+    console.log("Solvent adding new points", newPoints);
 
     return commitPlotPoints(newPoints, item, result);
   }
@@ -164,6 +173,15 @@ function commitPlotPoints(
   source: PlotItem,
   result: PlotResult
 ): PlotResult {
+  if (points.length === 0) {
+    return result;
+  }
+
+  const difference = pointSubtract(
+    last(points)!,
+    last(result.committedPoints) ?? PointZero
+  );
+
   return Object.assign({}, result, {
     committedPoints: result.committedPoints.concat(
       points.map((point) => ({
@@ -171,6 +189,9 @@ function commitPlotPoints(
         y: point.y,
         source,
       }))
+    ),
+    pendingPoints: result.pendingPoints.map((point) =>
+      pointAdd(point, difference)
     ),
   });
 }

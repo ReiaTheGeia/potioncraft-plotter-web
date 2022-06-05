@@ -5,6 +5,7 @@ import {
   linearInterpolate,
   Point,
   pointAdd,
+  pointDistance,
   pointMagnitude,
   pointScale,
   pointSubtract,
@@ -14,7 +15,18 @@ import {
 export type PointArray = Point[];
 
 export function pointArrayLength(pointArray: PointArray): number {
-  return sum(pointArray.map((point) => pointMagnitude(point)));
+  if (pointArray.length <= 1) {
+    return 0;
+  }
+
+  let length = 0;
+  let previousPoint = pointArray[0];
+  for (let i = 1; i < pointArray.length; i++) {
+    length += pointDistance(previousPoint, pointArray[i]);
+    previousPoint = pointArray[i];
+  }
+
+  return length;
 }
 
 export function pointArrayLineFromDistance(
@@ -24,10 +36,21 @@ export function pointArrayLineFromDistance(
   spacing: number = PATH_SPACING_PHYSICS
 ) {
   const pointArray: PointArray = [];
+  if (pointMagnitude(direction) === 0) {
+    throw new Error("direction must be valid.");
+  }
 
+  if (distance <= 0) {
+    return [];
+  }
+
+  let previousPoint = start;
   let remainingDistance = distance;
   while (remainingDistance >= spacing) {
-    pointArray.push(pointAdd(start, pointScale(direction, spacing)));
+    const point = pointAdd(previousPoint, pointScale(direction, spacing));
+    pointArray.push(point);
+    remainingDistance -= spacing;
+    previousPoint = point;
   }
 
   if (remainingDistance > 0) {
@@ -66,7 +89,8 @@ export function takePointArrayByDistance<T extends Point>(
   let previousPoint = array[0];
   for (let i = 1; i < array.length; i++) {
     const p = array[i];
-    const length = pointMagnitude(pointSubtract(p, previousPoint));
+    const length = pointDistance(p, previousPoint);
+    console.log("Distance from", previousPoint, "to", p, "is", length);
     if (takenLength + length >= takeLength) {
       const remainingLength = takeLength - takenLength;
       const splitPoint = linearInterpolate(
@@ -82,11 +106,15 @@ export function takePointArrayByDistance<T extends Point>(
         ...array.slice(i)
       );
       break;
+    } else {
+      takenLength += length;
+      console.log(
+        "Adding point to collection.  Taken length now at",
+        takenLength
+      );
+      taken.push(p);
+      previousPoint = p;
     }
-
-    takenLength += length;
-    taken.push(p);
-    previousPoint = p;
   }
 
   return [taken, remainder];
