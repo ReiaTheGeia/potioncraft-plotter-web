@@ -1,7 +1,7 @@
 {
-  "name": "9by9",
+  "name": "potioncraft-plotter",
   "version": "0.0.1",
-  "description": "Multi dimensional tic-tac-toe",
+  "description": "Plotting tool for potioncraft brews",
   "main": "src/index.ts",
   "scripts": {
     "clean": "rimraf dist",
@@ -18,13 +18,12 @@
     "Typescript",
     "PotionCraft"
   ],
-  "author": "William Matthews",
-  "license": "ISC",
+  "author": "William Matthews (robophred@gmail.com)",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@types/lodash": "^4.14.144",
-    "@types/react": "^16.9.9",
-    "@types/react-dom": "^16.9.2",
-    "@types/react-jss": "^8.6.4",
+    "@types/react": "^18.0.12",
+    "@types/react-dom": "^18.0.5",
     "@types/webpack-env": "^1.14.1",
     "cross-env": "^6.0.3",
     "css-loader": "^6.7.1",
@@ -40,12 +39,14 @@
     "webpack-dev-server": "^4.9.1"
   },
   "dependencies": {
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.8.2",
+    "@mui/material": "^5.8.2",
     "classnames": "^2.2.6",
     "lodash": "^4.17.15",
     "microinject": "^0.11.4",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
-    "react-jss": "^10.0.0",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
     "rxjs": "^7.5.5",
     "type-fest": "^2.13.0"
   }

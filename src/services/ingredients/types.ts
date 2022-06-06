@@ -7,7 +7,7 @@ export function ingredientId(id: string): IngredientId {
 }
 
 export interface IngredientDescriptor {
-  id: IngredientId;
-  path: CubicBezierCurve[];
-  preGrindPercent: number;
+  readonly id: IngredientId;
+  readonly path: CubicBezierCurve[];
+  readonly preGrindPercent: number;
 }

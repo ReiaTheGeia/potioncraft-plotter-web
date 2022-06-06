@@ -19,7 +19,10 @@ container.load(modules);
 
 export default container;
 
-export const ContainerProvider: React.FC = ({ children }) => {
+export interface ContainerProviderProps {
+  children: React.ReactNode;
+}
+export const ContainerProvider = ({ children }: ContainerProviderProps) => {
   return (
     <ContainerContext.Provider value={container}>
       {children}
