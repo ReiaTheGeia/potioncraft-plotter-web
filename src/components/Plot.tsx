@@ -33,15 +33,15 @@ const Plot = ({ className, plot }: PlotProps) => {
         MAP_EXTENT_RADIUS * 2
       } ${MAP_EXTENT_RADIUS * 2}`}
     >
-      <path d={commitPath} stroke="black" fill="none" strokeWidth={0.2} />
-      <path d={pendingPath} stroke="lightgrey" fill="none" strokeWidth={0.2} />
-      {/* <path
-        d="M 0,0 C 0.0001,0 0,0 0.5,1.25 C 0.9999999,2.5 0.9999,2.5 1,2.5 C 1.0001,2.5 -1.0001,2.5 -1,2.5 C -0.9999,2.5 -1,2.5 -0.5,3.75 C 0,5 0.0001,5 0,5"
-        stroke="green"
-        fill="none"
-        opacity={0.8}
-        strokeWidth={0.2}
-      /> */}
+      <g transform="scale(1, -1)">
+        <path d={commitPath} stroke="black" fill="none" strokeWidth={0.2} />
+        <path
+          d={pendingPath}
+          stroke="lightgrey"
+          fill="none"
+          strokeWidth={0.2}
+        />
+      </g>
     </svg>
   );
 };
