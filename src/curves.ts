@@ -57,11 +57,19 @@ export function getCurvePoint(curve: CubicBezierCurve, t: number): Point {
   };
 }
 
+const curveLengthCache = new Map<CubicBezierCurve, number>();
 export function getCurveLength(
-  curve: CubicBezierCurve,
-  resolution: number = BEZIER_CURVE_LENGTH_RESOLUTION
+  curve: CubicBezierCurve
+  // resolution: number = BEZIER_CURVE_LENGTH_RESOLUTION
 ): number {
+  const resolution = BEZIER_CURVE_LENGTH_RESOLUTION;
+  const cached = curveLengthCache.get(curve);
+  if (cached !== undefined) {
+    return cached;
+  }
+
   let length = 0.0;
+
   let previousPoint = getCurvePoint(curve, 0);
 
   for (let index = 1; index <= resolution; index++) {
@@ -71,19 +79,30 @@ export function getCurveLength(
     previousPoint = point;
   }
 
+  curveLengthCache.set(curve, length);
+
   return length;
 }
 
+const curvePointsCache = new Map<CubicBezierCurve, readonly Point[]>();
 export function curveToPoints(
-  curve: CubicBezierCurve,
-  spacing: number = PATH_SPACING_PHYSICS,
-  resolution: number = 1
-): Point[] {
-  if (spacing <= Number.EPSILON) {
-    throw new Error("curveToPoints: spacing must be greater than 0");
-  }
-  if (resolution <= 0) {
-    throw new Error("curveToPoints: resolution must be greater than 0");
+  curve: CubicBezierCurve
+  // spacing: number = PATH_SPACING_PHYSICS,
+  // resolution: number = 1
+): readonly Point[] {
+  const spacing: number = PATH_SPACING_PHYSICS;
+  const resolution: number = 1;
+
+  // if (spacing <= Number.EPSILON) {
+  //   throw new Error("curveToPoints: spacing must be greater than 0");
+  // }
+  // if (resolution <= 0) {
+  //   throw new Error("curveToPoints: resolution must be greater than 0");
+  // }
+
+  const cached = curvePointsCache.get(curve);
+  if (cached !== undefined) {
+    return cached;
   }
 
   const points: Point[] = [];
@@ -116,6 +135,12 @@ export function curveToPoints(
   if (remainingDistance > 0) {
     points.push(getCurvePoint(curve, 1));
   }
+
+  Object.freeze(points);
+  for (const p of points) {
+    Object.freeze(p);
+  }
+  curvePointsCache.set(curve, points);
 
   return points;
 }

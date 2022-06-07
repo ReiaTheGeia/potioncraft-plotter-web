@@ -7,9 +7,11 @@ import {
   Typography,
   Slider,
   Grid,
-  Fab,
+  Button,
+  IconButton,
+  TextField,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 import { useObservation } from "@/hooks/observe";
 
@@ -17,10 +19,12 @@ import {
   AddIngredientPlotBuilderItem,
   PlotBuilder,
   PlotBuilderItem,
+  PourSolventPlotBuilderItem,
+  StirCauldronPlotBuilderItem,
 } from "@/services/plotter/PlotBuilder";
+import { IngredientId } from "@/services/ingredients/types";
 
 import IngredientSelector from "./IngredientSelector";
-import { IngredientId } from "@/services/ingredients/types";
 
 export interface PlotItemsListProps {
   className?: string;
@@ -38,10 +42,19 @@ const Root = styled("div")(({ theme }) => ({
     paddingRight: theme.spacing(2),
   },
   "& .list-item": {
+    position: "relative",
     marginBottom: theme.spacing(1),
   },
-  "& .add-item": {
+  "& .list-item .delete-button": {
+    position: "absolute",
+    top: "5px",
+    right: "15px",
+  },
+  "& .buttons": {
     alignSelf: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
 }));
 
@@ -54,9 +67,17 @@ const PlotItemsList = ({ className, builder }: PlotItemsListProps) => {
           <PlotListItem key={i} item={item} />
         ))}
       </ul>
-      <Fab className="add-item" onClick={() => builder.addIngredient()}>
-        <AddIcon />
-      </Fab>
+      <div className="buttons">
+        <Button color="primary" onClick={() => builder.addIngredient()}>
+          <AddIcon /> Ingredient
+        </Button>
+        <Button color="primary" onClick={() => builder.addStirCauldron()}>
+          <AddIcon /> Stir Cauldron
+        </Button>
+        <Button color="primary" onClick={() => builder.addPourSolvent()}>
+          <AddIcon /> Pour Solvent
+        </Button>
+      </div>
     </Root>
   );
 };
@@ -67,6 +88,12 @@ interface PlotListItemProps {
 const PlotListItem = ({ item }: PlotListItemProps) => {
   if (item instanceof AddIngredientPlotBuilderItem) {
     return <AddIngredientPlotListItem item={item} />;
+  }
+  if (item instanceof StirCauldronPlotBuilderItem) {
+    return <StirCauldronPlotListItem item={item} />;
+  }
+  if (item instanceof PourSolventPlotBuilderItem) {
+    return <PourSolventPlotListItem item={item} />;
   }
 
   return <div>Unknown PlotItem {item.constructor.name}</div>;
@@ -86,6 +113,13 @@ const AddIngredientPlotListItem = ({
       className="list-item"
       style={{ backgroundColor: valid ? undefined : "salmon" }}
     >
+      <IconButton
+        size="small"
+        className="delete-button"
+        onClick={() => item.delete()}
+      >
+        <DeleteIcon />
+      </IconButton>
       <CardContent>
         <div>
           <Typography variant="overline">Ingredient</Typography>
@@ -107,6 +141,93 @@ const AddIngredientPlotListItem = ({
             step={0.001}
           />
         </Grid>
+      </CardContent>
+    </Card>
+  );
+};
+
+interface StirCauldronPlotListItemProps {
+  item: StirCauldronPlotBuilderItem;
+}
+
+const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
+  const valid = useObservation(item.isValid$) ?? false;
+  const [duration, setDuration] = React.useState("");
+  const onTextFieldChanged = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+      item.setDistance(asNumber);
+      setDuration(e.target.value);
+    },
+    [item]
+  );
+  return (
+    <Card
+      className="list-item"
+      style={{ backgroundColor: valid ? undefined : "salmon" }}
+    >
+      <IconButton
+        size="small"
+        className="delete-button"
+        onClick={() => item.delete()}
+      >
+        <DeleteIcon />
+      </IconButton>
+      <CardContent>
+        <div>
+          <Typography variant="overline">Stir Cauldron</Typography>
+        </div>
+        <TextField
+          label="Distance"
+          value={duration}
+          onChange={onTextFieldChanged}
+        />
+      </CardContent>
+    </Card>
+  );
+};
+
+interface PourSolventPlotListItemProps {
+  item: PourSolventPlotBuilderItem;
+}
+const PourSolventPlotListItem = ({ item }: PourSolventPlotListItemProps) => {
+  const valid = useObservation(item.isValid$) ?? false;
+  const [duration, setDuration] = React.useState("");
+  const onTextFieldChanged = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+      item.setDistance(asNumber);
+      setDuration(e.target.value);
+    },
+    [item]
+  );
+  return (
+    <Card
+      className="list-item"
+      style={{ backgroundColor: valid ? undefined : "salmon" }}
+    >
+      <IconButton
+        size="small"
+        className="delete-button"
+        onClick={() => item.delete()}
+      >
+        <DeleteIcon />
+      </IconButton>
+      <CardContent>
+        <div>
+          <Typography variant="overline">Pour Solvent</Typography>
+        </div>
+        <TextField
+          label="Distance"
+          value={duration}
+          onChange={onTextFieldChanged}
+        />
       </CardContent>
     </Card>
   );

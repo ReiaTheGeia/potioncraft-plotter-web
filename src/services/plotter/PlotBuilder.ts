@@ -47,9 +47,31 @@ export class PlotBuilder {
   }
 
   addIngredient(): AddIngredientPlotBuilderItem {
-    const item = new AddIngredientPlotBuilderItem();
+    const item = new AddIngredientPlotBuilderItem((item) =>
+      this._deleteItem(item)
+    );
     this._items$.next([...this._items$.value, item]);
     return item;
+  }
+
+  addStirCauldron(): StirCauldronPlotBuilderItem {
+    const item = new StirCauldronPlotBuilderItem((item) =>
+      this._deleteItem(item)
+    );
+    this._items$.next([...this._items$.value, item]);
+    return item;
+  }
+
+  addPourSolvent(): PourSolventPlotBuilderItem {
+    const item = new PourSolventPlotBuilderItem((item) =>
+      this._deleteItem(item)
+    );
+    this._items$.next([...this._items$.value, item]);
+    return item;
+  }
+
+  private _deleteItem(item: PlotBuilderItem) {
+    this._items$.next(this._items$.value.filter((x) => x !== item));
   }
 }
 
@@ -69,7 +91,7 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
 
   private readonly _plotItem$: Observable<PlotItem | null>;
 
-  constructor() {
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
     super();
     this._isValid$ = combineLatest([
       this._ingredientId$,
@@ -126,5 +148,115 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
 
   setGrindPercent(percent: number) {
     this._grindPercent$.next(percent);
+  }
+
+  delete() {
+    this._delete(this);
+  }
+}
+
+export class StirCauldronPlotBuilderItem extends PlotBuilderItem {
+  private readonly _isValid$: Observable<boolean>;
+  private readonly _distance$ = new BehaviorSubject<number | null>(null);
+
+  private readonly _plotItem$: Observable<PlotItem | null>;
+
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
+    super();
+    this._isValid$ = combineLatest([this._distance$]).pipe(
+      map(() => this.isValid)
+    );
+
+    this._plotItem$ = combineLatest([this._distance$]).pipe(
+      map(([stirDistance]) => {
+        if (!this.isValid) {
+          return null;
+        }
+
+        return {
+          type: "stir-cauldron",
+          distance: stirDistance!,
+        };
+      })
+    );
+  }
+
+  get isValid$() {
+    return this._isValid$;
+  }
+
+  get isValid() {
+    // TODO: Check if ingredientId is valid
+    const stirDistance = this._distance$.value;
+    return stirDistance != null && stirDistance >= 0;
+  }
+
+  get plotItem$(): Observable<PlotItem | null> {
+    return this._plotItem$;
+  }
+
+  get distance$(): Observable<number | null> {
+    return this._distance$;
+  }
+
+  setDistance(distance: number | null) {
+    this._distance$.next(distance);
+  }
+
+  delete() {
+    this._delete(this);
+  }
+}
+
+export class PourSolventPlotBuilderItem extends PlotBuilderItem {
+  private readonly _isValid$: Observable<boolean>;
+  private readonly _distance$ = new BehaviorSubject<number | null>(null);
+
+  private readonly _plotItem$: Observable<PlotItem | null>;
+
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
+    super();
+    this._isValid$ = combineLatest([this._distance$]).pipe(
+      map(() => this.isValid)
+    );
+
+    this._plotItem$ = combineLatest([this._distance$]).pipe(
+      map(([stirDistance]) => {
+        if (!this.isValid) {
+          return null;
+        }
+
+        return {
+          type: "pour-solvent",
+          distance: stirDistance!,
+        };
+      })
+    );
+  }
+
+  get isValid$() {
+    return this._isValid$;
+  }
+
+  get isValid() {
+    // TODO: Check if ingredientId is valid
+    const stirDistance = this._distance$.value;
+    return stirDistance != null && stirDistance >= 0;
+  }
+
+  get plotItem$(): Observable<PlotItem | null> {
+    return this._plotItem$;
+  }
+
+  get distance$(): Observable<number | null> {
+    return this._distance$;
+  }
+
+  setDistance(distance: number | null) {
+    this._distance$.next(distance);
+  }
+
+  delete() {
+    this._delete(this);
   }
 }
