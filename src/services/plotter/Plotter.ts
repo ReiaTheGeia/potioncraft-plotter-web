@@ -76,13 +76,15 @@ export class Plotter {
     }
 
     const ingredientPoints: PointArray = [];
+    let ingredientLength = 0;
     for (const curve of ingredient.path) {
       const points = curveToPoints(curve);
       ingredientPoints.push(...points);
+      // Use the cached length, as curveToPoints is cached and will return consistent array references.
+      // Note, this produces a very slightly incorrect length, a difference of around e-15.
+      ingredientLength += pointArrayLengthCached(points);
     }
 
-    // Use the cached length, as curveToPoints is cached and will return consistent array references.
-    const ingredientLength = pointArrayLengthCached(ingredientPoints);
     const takePercent =
       ingredient.preGrindPercent +
       grindPercent * (1 - ingredient.preGrindPercent);

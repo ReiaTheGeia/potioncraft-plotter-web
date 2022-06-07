@@ -13,8 +13,9 @@ import {
 } from "./points";
 
 export type PointArray = Point[];
+export type ReadOnlyPointArray = readonly Point[];
 
-export function pointArrayLength(pointArray: PointArray): number {
+export function pointArrayLength(pointArray: ReadOnlyPointArray): number {
   if (pointArray.length <= 1) {
     return 0;
   }
@@ -29,8 +30,8 @@ export function pointArrayLength(pointArray: PointArray): number {
   return length;
 }
 
-const pointArrayLengthCache = new Map<PointArray, number>();
-export function pointArrayLengthCached(pointArray: PointArray): number {
+const pointArrayLengthCache = new Map<ReadOnlyPointArray, number>();
+export function pointArrayLengthCached(pointArray: ReadOnlyPointArray): number {
   if (pointArray.length <= 1) {
     return 0;
   }
