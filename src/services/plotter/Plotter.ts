@@ -4,7 +4,7 @@ import { inject, injectable, singleton } from "microinject";
 import { curveToPoints } from "@/curves";
 import {
   PointArray,
-  pointArrayLength,
+  pointArrayLengthCached,
   pointArrayLineFromDistance,
   takePointArrayByDistance,
 } from "@/point-array";
@@ -36,14 +36,12 @@ export class Plotter {
   ) {}
 
   plotItems(items: readonly PlotItem[]): PlotResult {
-    console.log("Plotting", items);
     let result: PlotResult = {
       committedPoints: [],
       pendingPoints: [],
     };
 
     for (const item of items) {
-      console.log("Plotting item", item);
       result = this._plotItem(item, result);
     }
 
@@ -83,7 +81,8 @@ export class Plotter {
       ingredientPoints.push(...points);
     }
 
-    const ingredientLength = pointArrayLength(ingredientPoints);
+    // Use the cached length, as curveToPoints is cached and will return consistent array references.
+    const ingredientLength = pointArrayLengthCached(ingredientPoints);
     const takePercent =
       ingredient.preGrindPercent +
       grindPercent * (1 - ingredient.preGrindPercent);

@@ -29,6 +29,23 @@ export function pointArrayLength(pointArray: PointArray): number {
   return length;
 }
 
+const pointArrayLengthCache = new Map<PointArray, number>();
+export function pointArrayLengthCached(pointArray: PointArray): number {
+  if (pointArray.length <= 1) {
+    return 0;
+  }
+
+  let length = pointArrayLengthCache.get(pointArray);
+  if (length !== undefined) {
+    return length;
+  }
+
+  length = pointArrayLength(pointArray);
+  pointArrayLengthCache.set(pointArray, length);
+
+  return length;
+}
+
 export function pointArrayLineFromDistance(
   start: Point,
   direction: Point,
@@ -90,7 +107,6 @@ export function takePointArrayByDistance<T extends Point>(
   for (let i = 1; i < array.length; i++) {
     const p = array[i];
     const length = pointDistance(p, previousPoint);
-    console.log("Distance from", previousPoint, "to", p, "is", length);
     if (takenLength + length >= takeLength) {
       const remainingLength = takeLength - takenLength;
       const splitPoint = linearInterpolate(
@@ -108,10 +124,6 @@ export function takePointArrayByDistance<T extends Point>(
       break;
     } else {
       takenLength += length;
-      console.log(
-        "Adding point to collection.  Taken length now at",
-        takenLength
-      );
       taken.push(p);
       previousPoint = p;
     }
