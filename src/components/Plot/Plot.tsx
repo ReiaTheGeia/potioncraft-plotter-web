@@ -17,25 +17,46 @@ import {
 } from "./PlotViewModel";
 import { useObservation } from "@/hooks/observe";
 import { PointZero } from "@/points";
+import PlotDetails from "./components/PlotDetails";
+import StepDetails from "./components/StepDetails";
 
 export interface PlotProps {
   className?: string;
   plot: PlotResult;
 }
 
-const Root = styled("div")({
+const Root = styled("div")(({ theme }) => ({
   backgroundColor: "#DABE99",
   overflow: "auto",
+  position: "relative",
+  "& .plot-details": {
+    position: "absolute",
+    top: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+  "& .inspect-source": {
+    position: "absolute",
+    top: theme.spacing(2),
+    left: theme.spacing(2),
+  },
   "& .plot-svg": {
     display: "block",
   },
-});
+}));
 
 const Plot = ({ className, plot }: PlotProps) => {
   const viewModel = useDICreate(PlotViewModel);
 
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
+  const inspectSource = useObservation(viewModel.inspectSource$) ?? null;
+
+  const onLineMouseOver = React.useCallback(
+    (line: PlotLine) => {
+      viewModel.mouseOverSource(line.source);
+    },
+    [viewModel]
+  );
 
   const [committedLines, pendingLines] = resultToPlotLines(
     plot.committedPoints,
@@ -69,12 +90,26 @@ const Plot = ({ className, plot }: PlotProps) => {
             />
             <circle cx={0} cy={0} r={POTION_RADIUS} fill="blue" />
             {committedLines.map((line, i) => (
-              <PlotLine key={i} line={line} pending={false} />
+              <PlotLine
+                key={i}
+                line={line}
+                pending={false}
+                onMouseOver={onLineMouseOver}
+              />
             ))}
             {pendingLines.map((line, i) => (
-              <PlotLine key={i} line={line} pending={true} />
+              <PlotLine
+                key={i}
+                line={line}
+                pending={true}
+                onMouseOver={onLineMouseOver}
+              />
             ))}
           </svg>
+          {inspectSource && (
+            <StepDetails className="inspect-source" step={inspectSource} />
+          )}
+          <PlotDetails className="plot-details" plot={plot} />
         </PanZoomHandler>
       </PlotViewModelContext.Provider>
     </Root>
@@ -84,13 +119,19 @@ const Plot = ({ className, plot }: PlotProps) => {
 interface PlotLineProps {
   line: PlotLine;
   pending: boolean;
+  onMouseOver(line: PlotLine): void;
 }
-const PlotLine = ({ line, pending }: PlotLineProps) => {
+const PlotLine = ({ line, pending, onMouseOver }: PlotLineProps) => {
   const viewModel = usePlotViewModel();
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const [mouseOver, setMouseOver] = React.useState(false);
   const { points, source, evenOdd } = line;
   const ingredientRegistry = useDIDependency(IngredientRegistry);
+
+  const onPathMouseOver = React.useCallback(() => {
+    onMouseOver(line);
+    setMouseOver(true);
+  }, [line, onMouseOver]);
 
   if (points.length === 0) {
     return null;
@@ -123,7 +164,7 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
       stroke={color}
       strokeWidth={(mouseOver ? 0.8 : 0.4) / scale}
       fill="none"
-      onMouseOver={() => setMouseOver(true)}
+      onMouseOver={onPathMouseOver}
       onMouseOut={() => setMouseOver(false)}
     />
   );

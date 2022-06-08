@@ -9,6 +9,7 @@ import {
   PointZero,
 } from "@/points";
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
+import { PlotItem } from "@/services/plotter/types";
 
 export const PlotViewModelContext = React.createContext<PlotViewModel | null>(
   null
@@ -25,6 +26,7 @@ export function usePlotViewModel(): PlotViewModel {
 export class PlotViewModel {
   private readonly _viewOffset$ = new BehaviorSubject<Point>(PointZero);
   private readonly _viewScale$ = new BehaviorSubject<number>(1);
+  private readonly _inspectSource = new BehaviorSubject<PlotItem | null>(null);
 
   private _viewportWidth: number = 0;
   private _viewportHeight: number = 0;
@@ -35,6 +37,10 @@ export class PlotViewModel {
 
   get viewScale$(): Observable<number> {
     return this._viewScale$;
+  }
+
+  get inspectSource$(): Observable<PlotItem | null> {
+    return this._inspectSource;
   }
 
   viewportResize(width: number, height: number) {
@@ -59,6 +65,10 @@ export class PlotViewModel {
     this._viewOffset$.next(
       pointAdd(this._viewOffset$.value, { x: dx * z, y: dy * z })
     );
+  }
+
+  mouseOverSource(source: PlotItem): void {
+    this._inspectSource.next(source);
   }
 
   private _clientToWorld(client: Point): Point {

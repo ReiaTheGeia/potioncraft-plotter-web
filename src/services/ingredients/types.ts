@@ -10,6 +10,7 @@ export interface IngredientDescriptor {
   readonly id: IngredientId;
   readonly name: string;
   readonly color: string;
+  readonly price: number;
   readonly path: CubicBezierCurve[];
   readonly preGrindPercent: number;
 }
