@@ -31,3 +31,8 @@ export interface PlotResult {
   committedPoints: PlotPoint[];
   pendingPoints: PlotPoint[];
 }
+
+export const EmptyPlotResult: Readonly<PlotResult> = Object.freeze({
+  committedPoints: [],
+  pendingPoints: [],
+}) as any;

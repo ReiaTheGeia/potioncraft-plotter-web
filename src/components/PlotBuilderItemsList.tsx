@@ -26,9 +26,12 @@ import { IngredientId } from "@/services/ingredients/types";
 
 import IngredientSelector from "./IngredientSelector";
 
-export interface PlotItemsListProps {
+export interface PlotBuilderItemsListProps {
   className?: string;
   builder: PlotBuilder;
+  highlightItem?: PlotBuilderItem | null;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
 }
 
 const Root = styled("div")(({ theme }) => ({
@@ -58,13 +61,25 @@ const Root = styled("div")(({ theme }) => ({
   },
 }));
 
-const PlotItemsList = ({ className, builder }: PlotItemsListProps) => {
+const PlotBuilderItemsList = ({
+  className,
+  builder,
+  highlightItem,
+  onMouseOver,
+  onMouseOut,
+}: PlotBuilderItemsListProps) => {
   const items = useObservation(builder.items$) ?? [];
   return (
     <Root className={className}>
       <ul className="list">
         {items.map((item, i) => (
-          <PlotListItem key={i} item={item} />
+          <PlotListItem
+            key={i}
+            item={item}
+            highlight={item === highlightItem}
+            onMouseOver={onMouseOver}
+            onMouseOut={onMouseOut}
+          />
         ))}
       </ul>
       <div className="buttons">
@@ -84,34 +99,64 @@ const PlotItemsList = ({ className, builder }: PlotItemsListProps) => {
 
 interface PlotListItemProps {
   item: PlotBuilderItem;
+  highlight?: boolean;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
 }
-const PlotListItem = ({ item }: PlotListItemProps) => {
+const PlotListItem = ({
+  item,
+  highlight = false,
+  onMouseOver,
+  onMouseOut,
+}: PlotListItemProps) => {
+  let content: React.ReactNode = (
+    <div>Unknown PlotItem {item.constructor.name}</div>
+  );
   if (item instanceof AddIngredientPlotBuilderItem) {
-    return <AddIngredientPlotListItem item={item} />;
-  }
-  if (item instanceof StirCauldronPlotBuilderItem) {
-    return <StirCauldronPlotListItem item={item} />;
-  }
-  if (item instanceof PourSolventPlotBuilderItem) {
-    return <PourSolventPlotListItem item={item} />;
+    content = <AddIngredientPlotListItem item={item} />;
+  } else if (item instanceof StirCauldronPlotBuilderItem) {
+    content = <StirCauldronPlotListItem item={item} />;
+  } else if (item instanceof PourSolventPlotBuilderItem) {
+    content = <PourSolventPlotListItem item={item} />;
   }
 
-  return <div>Unknown PlotItem {item.constructor.name}</div>;
+  return (
+    <PlotListItemCard
+      item={item}
+      highlight={highlight}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+    >
+      {content}
+    </PlotListItemCard>
+  );
 };
 
-interface AddIngredientPlotListItemProps {
-  item: AddIngredientPlotBuilderItem;
+interface PlotListItemCardProps {
+  item: PlotBuilderItem;
+  highlight: boolean;
+  children: React.ReactNode;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
 }
-const AddIngredientPlotListItem = ({
+
+const PlotListItemCard = ({
   item,
-}: AddIngredientPlotListItemProps) => {
+  highlight,
+  children,
+  onMouseOver,
+  onMouseOut,
+}: PlotListItemCardProps) => {
   const valid = useObservation(item.isValid$) ?? false;
-  const ingredientId = useObservation(item.ingredientId$) ?? null;
-  const grindPercent = useObservation(item.grindPercent$) ?? 0;
   return (
     <Card
       className="list-item"
-      style={{ backgroundColor: valid ? undefined : "salmon" }}
+      style={{
+        backgroundColor:
+          (!valid && "salmon") || (highlight && "lightblue") || undefined,
+      }}
+      onMouseOver={() => onMouseOver(item)}
+      onMouseOut={onMouseOut}
     >
       <IconButton
         size="small"
@@ -120,29 +165,42 @@ const AddIngredientPlotListItem = ({
       >
         <DeleteIcon />
       </IconButton>
-      <CardContent>
-        <div>
-          <Typography variant="overline">Ingredient</Typography>
-        </div>
-        <IngredientSelector
-          fullWidth
-          value={ingredientId ?? ""}
-          allowEmpty={ingredientId == null}
-          onChange={(id) => item.setIngredient(id as IngredientId)}
-        />
-        <Grid paddingTop={1}>
-          <Typography id="grind-label">Grind Percent</Typography>
-          <Slider
-            value={grindPercent}
-            onChange={(_, value) => item.setGrindPercent(value as number)}
-            aria-labelledby="grind-label"
-            min={0}
-            max={1}
-            step={0.001}
-          />
-        </Grid>
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
+  );
+};
+
+interface AddIngredientPlotListItemProps {
+  item: AddIngredientPlotBuilderItem;
+}
+const AddIngredientPlotListItem = ({
+  item,
+}: AddIngredientPlotListItemProps) => {
+  const ingredientId = useObservation(item.ingredientId$) ?? null;
+  const grindPercent = useObservation(item.grindPercent$) ?? 0;
+  return (
+    <div>
+      <div>
+        <Typography variant="overline">Ingredient</Typography>
+      </div>
+      <IngredientSelector
+        fullWidth
+        value={ingredientId}
+        allowEmpty={ingredientId == null}
+        onChange={(id) => item.setIngredient(id)}
+      />
+      <Grid paddingTop={1}>
+        <Typography id="grind-label">Grind Percent</Typography>
+        <Slider
+          value={grindPercent}
+          onChange={(_, value) => item.setGrindPercent(value as number)}
+          aria-labelledby="grind-label"
+          min={0}
+          max={1}
+          step={0.001}
+        />
+      </Grid>
+    </div>
   );
 };
 
@@ -151,7 +209,6 @@ interface StirCauldronPlotListItemProps {
 }
 
 const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
-  const valid = useObservation(item.isValid$) ?? false;
   const [duration, setDuration] = React.useState("");
   const onTextFieldChanged = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,28 +222,16 @@ const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
     [item]
   );
   return (
-    <Card
-      className="list-item"
-      style={{ backgroundColor: valid ? undefined : "salmon" }}
-    >
-      <IconButton
-        size="small"
-        className="delete-button"
-        onClick={() => item.delete()}
-      >
-        <DeleteIcon />
-      </IconButton>
-      <CardContent>
-        <div>
-          <Typography variant="overline">Stir Cauldron</Typography>
-        </div>
-        <TextField
-          label="Distance"
-          value={duration}
-          onChange={onTextFieldChanged}
-        />
-      </CardContent>
-    </Card>
+    <div>
+      <div>
+        <Typography variant="overline">Stir Cauldron</Typography>
+      </div>
+      <TextField
+        label="Distance"
+        value={duration}
+        onChange={onTextFieldChanged}
+      />
+    </div>
   );
 };
 
@@ -208,29 +253,17 @@ const PourSolventPlotListItem = ({ item }: PourSolventPlotListItemProps) => {
     [item]
   );
   return (
-    <Card
-      className="list-item"
-      style={{ backgroundColor: valid ? undefined : "salmon" }}
-    >
-      <IconButton
-        size="small"
-        className="delete-button"
-        onClick={() => item.delete()}
-      >
-        <DeleteIcon />
-      </IconButton>
-      <CardContent>
-        <div>
-          <Typography variant="overline">Pour Solvent</Typography>
-        </div>
-        <TextField
-          label="Distance"
-          value={duration}
-          onChange={onTextFieldChanged}
-        />
-      </CardContent>
-    </Card>
+    <div>
+      <div>
+        <Typography variant="overline">Pour Solvent</Typography>
+      </div>
+      <TextField
+        label="Distance"
+        value={duration}
+        onChange={onTextFieldChanged}
+      />
+    </div>
   );
 };
 
-export default PlotItemsList;
+export default PlotBuilderItemsList;

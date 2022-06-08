@@ -11,11 +11,11 @@ import {
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 import { PlotItem } from "@/services/plotter/types";
 
-export const PlotViewModelContext = React.createContext<PlotViewModel | null>(
+export const PlotViewModelContext = React.createContext<IPlotViewModel | null>(
   null
 );
 
-export function usePlotViewModel(): PlotViewModel {
+export function usePlotViewModel(): IPlotViewModel {
   const plotViewModel = React.useContext(PlotViewModelContext);
   if (!plotViewModel) {
     throw new Error("PlotViewModelContext not found");
@@ -23,7 +23,19 @@ export function usePlotViewModel(): PlotViewModel {
   return plotViewModel;
 }
 
-export class PlotViewModel {
+export interface IPlotViewModel {
+  readonly viewOffset$: Observable<Point>;
+  readonly viewScale$: Observable<number>;
+  readonly mouseOverItem$: Observable<PlotItem | null>;
+
+  viewportResize(width: number, height: number): void;
+  zoom(delta: number, on: Point | null | undefined): void;
+  pan(dx: number, dy: number, applyZoom?: boolean): void;
+
+  onMouseOverPlotItem(item: PlotItem | null): void;
+}
+
+export class PlotViewModel implements IPlotViewModel {
   private readonly _viewOffset$ = new BehaviorSubject<Point>(PointZero);
   private readonly _viewScale$ = new BehaviorSubject<number>(1);
   private readonly _inspectSource = new BehaviorSubject<PlotItem | null>(null);
@@ -39,7 +51,7 @@ export class PlotViewModel {
     return this._viewScale$;
   }
 
-  get inspectSource$(): Observable<PlotItem | null> {
+  get mouseOverItem$(): Observable<PlotItem | null> {
     return this._inspectSource;
   }
 
@@ -67,7 +79,7 @@ export class PlotViewModel {
     );
   }
 
-  mouseOverSource(source: PlotItem): void {
+  onMouseOverPlotItem(source: PlotItem | null): void {
     this._inspectSource.next(source);
   }
 

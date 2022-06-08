@@ -41,6 +41,8 @@ export class Plotter {
       pendingPoints: [],
     };
 
+    const now = Date.now();
+
     for (const item of items) {
       result = this._plotItem(item, result);
     }

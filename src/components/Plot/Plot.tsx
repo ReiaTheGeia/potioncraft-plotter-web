@@ -2,27 +2,29 @@ import React from "react";
 import Color from "color";
 import { styled } from "@mui/material";
 
-import { useDICreate, useDIDependency } from "@/container";
+import { useDICreate } from "@/container";
 
+import { useObservation } from "@/hooks/observe";
+import { PointZero } from "@/points";
 import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
 import { PointArray } from "@/point-array";
 
 import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
-import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
-import PanZoomHandler from "./components/PanZoomHandler";
 import {
+  IPlotViewModel,
   PlotViewModel,
   PlotViewModelContext,
   usePlotViewModel,
 } from "./PlotViewModel";
-import { useObservation } from "@/hooks/observe";
-import { PointZero } from "@/points";
+
+import PanZoomHandler from "./components/PanZoomHandler";
 import PlotDetails from "./components/PlotDetails";
 import StepDetails from "./components/StepDetails";
 
 export interface PlotProps {
   className?: string;
   plot: PlotResult;
+  viewModel?: IPlotViewModel;
 }
 
 const Root = styled("div")(({ theme }) => ({
@@ -44,16 +46,17 @@ const Root = styled("div")(({ theme }) => ({
   },
 }));
 
-const Plot = ({ className, plot }: PlotProps) => {
-  const viewModel = useDICreate(PlotViewModel);
+const Plot = ({ className, plot, viewModel: externalViewModel }: PlotProps) => {
+  const internalViewModel = useDICreate(PlotViewModel);
+  const viewModel = externalViewModel ?? internalViewModel;
 
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
-  const inspectSource = useObservation(viewModel.inspectSource$) ?? null;
+  const inspectSource = useObservation(viewModel.mouseOverItem$) ?? null;
 
   const onLineMouseOver = React.useCallback(
     (line: PlotLine) => {
-      viewModel.mouseOverSource(line.source);
+      viewModel.onMouseOverPlotItem(line.source);
     },
     [viewModel]
   );
@@ -94,7 +97,9 @@ const Plot = ({ className, plot }: PlotProps) => {
                 key={i}
                 line={line}
                 pending={false}
+                highlight={line.source === inspectSource}
                 onMouseOver={onLineMouseOver}
+                onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
               />
             ))}
             {pendingLines.map((line, i) => (
@@ -102,7 +107,9 @@ const Plot = ({ className, plot }: PlotProps) => {
                 key={i}
                 line={line}
                 pending={true}
+                highlight={line.source === inspectSource}
                 onMouseOver={onLineMouseOver}
+                onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
               />
             ))}
           </svg>
@@ -119,18 +126,23 @@ const Plot = ({ className, plot }: PlotProps) => {
 interface PlotLineProps {
   line: PlotLine;
   pending: boolean;
+  highlight: boolean;
   onMouseOver(line: PlotLine): void;
+  onMouseOut(): void;
 }
-const PlotLine = ({ line, pending, onMouseOver }: PlotLineProps) => {
+const PlotLine = ({
+  line,
+  pending,
+  highlight,
+  onMouseOver,
+  onMouseOut,
+}: PlotLineProps) => {
   const viewModel = usePlotViewModel();
   const scale = useObservation(viewModel.viewScale$) ?? 1;
-  const [mouseOver, setMouseOver] = React.useState(false);
   const { points, source, evenOdd } = line;
-  const ingredientRegistry = useDIDependency(IngredientRegistry);
 
   const onPathMouseOver = React.useCallback(() => {
     onMouseOver(line);
-    setMouseOver(true);
   }, [line, onMouseOver]);
 
   if (points.length === 0) {
@@ -140,8 +152,6 @@ const PlotLine = ({ line, pending, onMouseOver }: PlotLineProps) => {
   let color = "black";
   switch (source.type) {
     case "add-ingredient":
-      // color =
-      //   ingredientRegistry.getIngredient(source.ingredientId)?.color ?? "black";
       color = evenOdd ? "red" : "green";
       break;
     case "pour-solvent":
@@ -162,10 +172,10 @@ const PlotLine = ({ line, pending, onMouseOver }: PlotLineProps) => {
     <path
       d={path}
       stroke={color}
-      strokeWidth={(mouseOver ? 0.8 : 0.4) / scale}
+      strokeWidth={(highlight ? 0.8 : 0.4) / scale}
       fill="none"
       onMouseOver={onPathMouseOver}
-      onMouseOut={() => setMouseOver(false)}
+      onMouseOut={onMouseOut}
     />
   );
 };
