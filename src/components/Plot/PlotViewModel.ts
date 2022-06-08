@@ -48,26 +48,10 @@ export class PlotViewModel {
     const zoom = pzoom * delta;
     this._viewScale$.next(zoom);
     if (on) {
-      // FIXME: This should remain stationary if the mouse is in the center of the viewport, but instead it only remains stationary for mouse
-      // in the top left corner.
       const world = this._clientToWorld(on);
-      const delta = pointSubtract(world, prevWorld);
-      console.log("Mouse moved from", prevWorld, "to", world);
+      const delta = pointSubtract(prevWorld, world);
       this._viewOffset$.next(pointAdd(this._viewOffset$.value, delta));
     }
-    // console.log("At zoom level", zoom);
-    // console.log("top left", this._clientToWorld({ x: 0, y: 0 }));
-    // console.log(
-    //   "center",
-    //   this._clientToWorld({
-    //     x: this._viewportWidth / 2,
-    //     y: this._viewportHeight / 2,
-    //   })
-    // );
-    // console.log(
-    //   "bottom right",
-    //   this._clientToWorld({ x: this._viewportWidth, y: this._viewportHeight })
-    // );
   }
 
   pan(dx: number, dy: number, applyZoom = false) {
@@ -75,19 +59,6 @@ export class PlotViewModel {
     this._viewOffset$.next(
       pointAdd(this._viewOffset$.value, { x: dx * z, y: dy * z })
     );
-    // console.log("Offset", this._viewOffset$.value);
-    // console.log("top left", this._clientToWorld({ x: 0, y: 0 }));
-    // console.log(
-    //   "center",
-    //   this._clientToWorld({
-    //     x: this._viewportWidth / 2,
-    //     y: this._viewportHeight / 2,
-    //   })
-    // );
-    // console.log(
-    //   "bottom right",
-    //   this._clientToWorld({ x: this._viewportWidth, y: this._viewportHeight })
-    // );
   }
 
   private _clientToWorld(client: Point): Point {
