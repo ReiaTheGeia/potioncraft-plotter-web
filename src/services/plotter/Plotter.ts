@@ -43,12 +43,6 @@ export class Plotter {
 
     for (const item of items) {
       result = this._plotItem(item, result);
-      if (result.committedPoints.some((x) => x.source == null)) {
-        console.error("Plot item committed has no source after", item);
-      }
-      if (result.pendingPoints.some((x) => x.source == null)) {
-        console.error("Plot item pending has no source after", item);
-      }
     }
 
     return result;
@@ -131,11 +125,7 @@ export class Plotter {
       distance
     );
 
-    console.log("Pour solvent new points", newPoints);
-
-    result = commitPlotPoints(newPoints, item, result);
-    console.log("Pour solvent result", result);
-    return result;
+    return commitPlotPoints(newPoints, item, result);
   }
 
   private _plotStirCauldron(

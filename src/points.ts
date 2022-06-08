@@ -28,11 +28,11 @@ export function pointDistance(p1: Point, p2: Point) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
-export function pointAdd<T extends Point>(a: T, b: Point): T {
-  return Object.assign({}, a, {
+export function pointAdd(a: Point, b: Point) {
+  return {
     x: a.x + b.x,
     y: a.y + b.y,
-  });
+  };
 }
 
 export function pointSubtract(a: Point, b: Point) {

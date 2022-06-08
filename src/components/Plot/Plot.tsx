@@ -33,8 +33,10 @@ const Plot = ({ className, plot }: PlotProps) => {
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
 
-  const committedLines = resultToPlotLines(plot.committedPoints);
-  const pendingLines = resultToPlotLines(plot.pendingPoints);
+  const [committedLines, pendingLines] = resultToPlotLines(
+    plot.committedPoints,
+    plot.pendingPoints
+  );
 
   let left = -MAP_EXTENT_RADIUS + offset.x;
   let top = -MAP_EXTENT_RADIUS + offset.y;
@@ -80,7 +82,7 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
   const viewModel = usePlotViewModel();
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const [mouseOver, setMouseOver] = React.useState(false);
-  const { points, source } = line;
+  const { points, source, evenOdd } = line;
   const ingredientRegistry = useDIDependency(IngredientRegistry);
 
   if (points.length === 0) {
@@ -90,8 +92,9 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
   let color = "black";
   switch (source.type) {
     case "add-ingredient":
-      color =
-        ingredientRegistry.getIngredient(source.ingredientId)?.color ?? "black";
+      // color =
+      //   ingredientRegistry.getIngredient(source.ingredientId)?.color ?? "black";
+      color = evenOdd ? "red" : "green";
       break;
     case "pour-solvent":
       color = "blue";
@@ -99,7 +102,7 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
   }
 
   if (pending) {
-    color = Color(color).desaturate(0.5).lighten(0.5).hex();
+    color = Color(color).lighten(0.4).hex();
   }
 
   const path = line.points.reduce(
@@ -122,29 +125,55 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
 interface PlotLine {
   points: PointArray;
   source: PlotItem;
+  evenOdd: boolean;
 }
 
-function resultToPlotLines(points: PlotPoint[]) {
+function resultToPlotLines(committed: PlotPoint[], pending: PlotPoint[]) {
   let currentLine: PlotLine | null = null;
-  const lines: PlotLine[] = [];
-  for (const point of points) {
+  let sourceCounter = 0;
+
+  const commitedLines: PlotLine[] = [];
+  const pendingLines: PlotLine[] = [];
+
+  let lastSource: PlotItem | null = null;
+
+  for (const point of committed) {
     if (currentLine == null || currentLine.source != point.source) {
-      if (point.source == null) {
-        // FIXME: Somehow a point is missing a source if we add ingredient, stir a bit, then use solvent.
-        // Plotter does not detect any points not being added with sources, but it still goes missing somehow.
-        console.warn("Point has no source", point);
+      if (lastSource == null || lastSource !== point.source) {
+        sourceCounter++;
+        lastSource = point.source;
       }
       currentLine = {
         points: [],
         source: point.source,
+        evenOdd: sourceCounter % 2 === 1,
       };
-      lines.push(currentLine);
+      commitedLines.push(currentLine);
     }
 
     currentLine.points.push(point);
   }
 
-  return lines;
+  currentLine = null;
+
+  for (const point of pending) {
+    if (currentLine == null || currentLine.source != point.source) {
+      if (lastSource == null || lastSource !== point.source) {
+        sourceCounter++;
+        lastSource = point.source;
+      }
+      currentLine = {
+        points: [],
+        source: point.source,
+        evenOdd: sourceCounter % 2 === 1,
+      };
+      pendingLines.push(currentLine);
+    }
+
+    currentLine.points.push(point);
+  }
+
+  return [commitedLines, pendingLines];
 }
 
 export default Plot;

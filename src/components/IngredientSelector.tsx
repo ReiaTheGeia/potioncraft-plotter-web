@@ -6,8 +6,10 @@ import {
   SelectProps,
   SelectChangeEvent,
 } from "@mui/material";
-import { IngredientId } from "@/services/ingredients/types";
+
 import { useDIDependency } from "@/container";
+
+import { IngredientId } from "@/services/ingredients/types";
 import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 
 export interface IngredientSelectorProps
@@ -39,7 +41,7 @@ const IngredientSelector = ({
       {allowEmpty && <MenuItem value=""></MenuItem>}
       {registry.getIngredients().map((ingredient) => (
         <MenuItem key={ingredient.id} value={ingredient.id}>
-          {ingredient.id}
+          {ingredient.name}
         </MenuItem>
       ))}
     </Select>
