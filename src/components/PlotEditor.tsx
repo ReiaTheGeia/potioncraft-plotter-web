@@ -42,8 +42,10 @@ const PlotEditor = () => {
 
   return (
     <Root>
-      {!plot && <div className="plot">No Plot</div>}
-      {plot && <Plot className="plot" plot={plot} />}
+      <Plot
+        className="plot"
+        plot={plot ?? { committedPoints: [], pendingPoints: [] }}
+      />
       <div className="divider" />
       <PlotItemsList className="plotItems" builder={builder} />
     </Root>

@@ -38,7 +38,9 @@ const IngredientSelector = ({
     >
       {allowEmpty && <MenuItem value=""></MenuItem>}
       {registry.getIngredients().map((ingredient) => (
-        <MenuItem value={ingredient.id}>{ingredient.id}</MenuItem>
+        <MenuItem key={ingredient.id} value={ingredient.id}>
+          {ingredient.id}
+        </MenuItem>
       ))}
     </Select>
   );

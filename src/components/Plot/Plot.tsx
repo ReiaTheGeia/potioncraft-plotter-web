@@ -1,15 +1,20 @@
 import React from "react";
 import Color from "color";
+import { styled } from "@mui/material";
 
 import { useDICreate, useDIDependency } from "@/container";
 
-import { MAP_EXTENT_RADIUS } from "@/game-settings";
+import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
 import { PointArray } from "@/point-array";
 
 import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
 import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 import PanZoomHandler from "./components/PanZoomHandler";
-import { PlotViewModel, PlotViewModelContext } from "./PlotViewModel";
+import {
+  PlotViewModel,
+  PlotViewModelContext,
+  usePlotViewModel,
+} from "./PlotViewModel";
 import { useObservation } from "@/hooks/observe";
 import { PointZero } from "@/points";
 
@@ -17,6 +22,10 @@ export interface PlotProps {
   className?: string;
   plot: PlotResult;
 }
+
+const Root = styled("div")({
+  backgroundColor: "#DABE99",
+});
 
 const Plot = ({ className, plot }: PlotProps) => {
   const viewModel = useDICreate(PlotViewModel);
@@ -33,10 +42,13 @@ const Plot = ({ className, plot }: PlotProps) => {
   let height = MAP_EXTENT_RADIUS * 2 * (1 / scale);
 
   return (
-    <div className={className}>
+    <Root className={className}>
       <PlotViewModelContext.Provider value={viewModel}>
         <PanZoomHandler>
-          <svg viewBox={`${left} ${top} ${width} ${height}`}>
+          <svg
+            viewBox={`${left} ${top} ${width} ${height}`}
+            transform="scale(1, -1)"
+          >
             <rect
               x={-60}
               y={-60}
@@ -44,21 +56,19 @@ const Plot = ({ className, plot }: PlotProps) => {
               height={120}
               stroke="red"
               fill="none"
-              strokeWidth={0.2}
+              strokeWidth={0.2 / scale}
             />
-            <circle cx={0} cy={0} r={0.2} fill="blue" />
-            <g transform="scale(1, -1)">
-              {committedLines.map((line, i) => (
-                <PlotLine key={i} line={line} pending={false} />
-              ))}
-              {pendingLines.map((line, i) => (
-                <PlotLine key={i} line={line} pending={true} />
-              ))}
-            </g>
+            <circle cx={0} cy={0} r={POTION_RADIUS} fill="blue" />
+            {committedLines.map((line, i) => (
+              <PlotLine key={i} line={line} pending={false} />
+            ))}
+            {pendingLines.map((line, i) => (
+              <PlotLine key={i} line={line} pending={true} />
+            ))}
           </svg>
         </PanZoomHandler>
       </PlotViewModelContext.Provider>
-    </div>
+    </Root>
   );
 };
 
@@ -67,6 +77,8 @@ interface PlotLineProps {
   pending: boolean;
 }
 const PlotLine = ({ line, pending }: PlotLineProps) => {
+  const viewModel = usePlotViewModel();
+  const scale = useObservation(viewModel.viewScale$) ?? 1;
   const [mouseOver, setMouseOver] = React.useState(false);
   const { points, source } = line;
   const ingredientRegistry = useDIDependency(IngredientRegistry);
@@ -87,7 +99,7 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
   }
 
   if (pending) {
-    color = Color(color).desaturate(0.5).lighten(0.25).hex();
+    color = Color(color).desaturate(0.5).lighten(0.5).hex();
   }
 
   const path = line.points.reduce(
@@ -99,7 +111,7 @@ const PlotLine = ({ line, pending }: PlotLineProps) => {
     <path
       d={path}
       stroke={color}
-      strokeWidth={mouseOver ? 0.6 : 0.4}
+      strokeWidth={(mouseOver ? 0.8 : 0.4) / scale}
       fill="none"
       onMouseOver={() => setMouseOver(true)}
       onMouseOut={() => setMouseOver(false)}
@@ -117,6 +129,11 @@ function resultToPlotLines(points: PlotPoint[]) {
   const lines: PlotLine[] = [];
   for (const point of points) {
     if (currentLine == null || currentLine.source != point.source) {
+      if (point.source == null) {
+        // FIXME: Somehow a point is missing a source if we add ingredient, stir a bit, then use solvent.
+        // Plotter does not detect any points not being added with sources, but it still goes missing somehow.
+        console.warn("Point has no source", point);
+      }
       currentLine = {
         points: [],
         source: point.source,

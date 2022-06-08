@@ -43,6 +43,12 @@ export class Plotter {
 
     for (const item of items) {
       result = this._plotItem(item, result);
+      if (result.committedPoints.some((x) => x.source == null)) {
+        console.error("Plot item committed has no source after", item);
+      }
+      if (result.pendingPoints.some((x) => x.source == null)) {
+        console.error("Plot item pending has no source after", item);
+      }
     }
 
     return result;
@@ -125,7 +131,11 @@ export class Plotter {
       distance
     );
 
-    return commitPlotPoints(newPoints, item, result);
+    console.log("Pour solvent new points", newPoints);
+
+    result = commitPlotPoints(newPoints, item, result);
+    console.log("Pour solvent result", result);
+    return result;
   }
 
   private _plotStirCauldron(
@@ -151,6 +161,14 @@ function appendPendingPlotPoints(
   source: PlotItem,
   result: PlotResult
 ): PlotResult {
+  if (source == null) {
+    throw new Error("source is null");
+  }
+
+  if (points.length === 0) {
+    return result;
+  }
+
   return Object.assign({}, result, {
     pendingPoints: result.pendingPoints.concat(
       points.map((point) => ({
@@ -167,6 +185,10 @@ function commitPlotPoints(
   source: PlotItem,
   result: PlotResult
 ): PlotResult {
+  if (source == null) {
+    throw new Error("source is null");
+  }
+
   if (points.length === 0) {
     return result;
   }
@@ -184,8 +206,10 @@ function commitPlotPoints(
         source,
       }))
     ),
-    pendingPoints: result.pendingPoints.map((point) =>
-      pointAdd(point, difference)
-    ),
+    pendingPoints: result.pendingPoints.map((point) => ({
+      x: point.x + difference.x,
+      y: point.y + difference.y,
+      source: point.source,
+    })),
   });
 }
