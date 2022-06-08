@@ -25,6 +25,10 @@ export interface PlotProps {
 
 const Root = styled("div")({
   backgroundColor: "#DABE99",
+  overflow: "auto",
+  "& .plot-svg": {
+    display: "block",
+  },
 });
 
 const Plot = ({ className, plot }: PlotProps) => {
@@ -48,6 +52,9 @@ const Plot = ({ className, plot }: PlotProps) => {
       <PlotViewModelContext.Provider value={viewModel}>
         <PanZoomHandler>
           <svg
+            className="plot-svg"
+            width="100%"
+            height="100%"
             viewBox={`${left} ${top} ${width} ${height}`}
             transform="scale(1, -1)"
           >
