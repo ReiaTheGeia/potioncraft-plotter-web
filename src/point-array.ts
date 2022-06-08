@@ -100,7 +100,7 @@ export function takePointArrayByDistance<T extends Point>(
     return [array, [] as T[]];
   }
 
-  const taken: T[] = [];
+  const taken: T[] = [array[0]];
   const remainder: T[] = [];
 
   let takenLength = 0;
