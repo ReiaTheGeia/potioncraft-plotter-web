@@ -81,7 +81,8 @@ export class Plotter {
       const points = curveToPoints(curve);
       ingredientPoints.push(...points);
       // Use the cached length, as curveToPoints is cached and will return consistent array references.
-      // Note, this produces a very slightly incorrect length, a difference of around e-15.
+      // Note, this produces a very slightly incorrect length. A difference of around e-15 when compared to getting
+      // the length of the final ingredientPoints array.
       ingredientLength += pointArrayLengthCached(points);
     }
 
@@ -124,8 +125,6 @@ export class Plotter {
       distance
     );
 
-    console.log("Solvent adding new points", newPoints);
-
     return commitPlotPoints(newPoints, item, result);
   }
 
@@ -140,14 +139,8 @@ export class Plotter {
       distance
     );
 
-    const addedPlotPoints = addedPoints.map((p) => ({
-      x: p.x,
-      y: p.y,
-      source: item,
-    }));
-
     return {
-      committedPoints: result.committedPoints.concat(addedPlotPoints),
+      committedPoints: result.committedPoints.concat(addedPoints),
       pendingPoints: remainderPlotPoints,
     };
   }

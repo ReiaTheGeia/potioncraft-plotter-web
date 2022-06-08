@@ -8,6 +8,8 @@ export function ingredientId(id: string): IngredientId {
 
 export interface IngredientDescriptor {
   readonly id: IngredientId;
+  readonly name: string;
+  readonly color: string;
   readonly path: CubicBezierCurve[];
   readonly preGrindPercent: number;
 }

@@ -5,12 +5,11 @@ import { useDICreate } from "@/container";
 
 import { useObservation } from "@/hooks/observe";
 
-import { ingredients } from "@/services/ingredients/ingredients";
 import { PlotBuilder } from "@/services/plotter/PlotBuilder";
+import { ingredientId } from "@/services/ingredients/types";
 
 import Plot from "./Plot";
 import PlotItemsList from "./PlotItemsList";
-import { ingredientId } from "@/services/ingredients/types";
 
 const Root = styled("div")({
   width: "100%",
