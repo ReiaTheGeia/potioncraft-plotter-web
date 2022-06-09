@@ -38,8 +38,8 @@ const PlotEditor = () => {
   const viewModel = useDICreate(PlotEditorViewModel);
   const builder = viewModel.builder;
 
-  const debouncedPlot$ = builder.plot$.pipe(throttleTime(100));
-  const plot = useObservation(debouncedPlot$) ?? null;
+  const plotObserved = useObservation(builder.plot$) ?? null;
+  const plot = React.useDeferredValue(plotObserved);
   const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
 
   return (

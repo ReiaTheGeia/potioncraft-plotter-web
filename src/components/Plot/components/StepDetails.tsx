@@ -5,7 +5,7 @@ import { Card, CardContent, Typography, styled } from "@mui/material";
 import { useDIDependency } from "@/container";
 
 import { CubicBezierCurve } from "@/curves";
-import { POTION_RADIUS } from "@/game-settings";
+import { MAX_INGREDIENT_EXTENT, POTION_RADIUS } from "@/game-settings";
 
 import { AddIngredientPlotItem, PlotItem } from "@/services/plotter/types";
 import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
@@ -70,7 +70,9 @@ const AddIngredient = ({ step }: AddIngredientStepProps) => {
         <svg
           width="100px"
           height="100px"
-          viewBox="-7 -7 14 14"
+          viewBox={`-${MAX_INGREDIENT_EXTENT} -${MAX_INGREDIENT_EXTENT} ${
+            MAX_INGREDIENT_EXTENT * 2
+          } ${MAX_INGREDIENT_EXTENT * 2}`}
           transform="scale(1, -1)"
         >
           <circle cx={0} cy={0} r={POTION_RADIUS} fill="blue" />

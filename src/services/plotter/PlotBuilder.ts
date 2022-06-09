@@ -1,3 +1,4 @@
+import { isNotNull } from "@/utils";
 import { inject, injectable } from "microinject";
 import {
   BehaviorSubject,
@@ -35,11 +36,7 @@ export class PlotBuilder {
       this._itemSubscription = combineLatest(
         items.map((x) => x.plotItem$)
       ).subscribe((plotItems) => {
-        if (plotItems.indexOf(null) !== -1) {
-          this._plot$.next(null);
-        } else {
-          this._plot$.next(plotter.plotItems(plotItems as PlotItem[]));
-        }
+        this._plot$.next(plotter.plotItems(plotItems.filter(isNotNull)));
       });
     });
   }
@@ -119,7 +116,8 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
     combineLatest([this._ingredientId$, this._grindPercent$]).subscribe(
       ([ingredientId, grindPercent]) => {
         if (!this.isValid) {
-          return null;
+          this._plotItem$.next(null);
+          return;
         }
 
         this._plotItem$.next({
@@ -149,6 +147,10 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
     return this._ingredientId$;
   }
 
+  get ingredientId(): IngredientId | null {
+    return this._ingredientId$.value;
+  }
+
   get grindPercent$(): Observable<number> {
     return this._grindPercent$;
   }
@@ -162,10 +164,18 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
   }
 
   setIngredient(ingredientId: IngredientId | null) {
+    if (ingredientId === this._ingredientId$.value) {
+      return;
+    }
+
     this._ingredientId$.next(ingredientId);
   }
 
   setGrindPercent(percent: number) {
+    if (percent === this._grindPercent$.value) {
+      return;
+    }
+
     this._grindPercent$.next(percent);
   }
 
@@ -188,7 +198,8 @@ export class StirCauldronPlotBuilderItem extends PlotBuilderItem {
 
     combineLatest([this._distance$]).subscribe(([stirDistance]) => {
       if (!this.isValid) {
-        return null;
+        this._plotItem$.next(null);
+        return;
       }
 
       this._plotItem$.next({
@@ -243,7 +254,8 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
 
     combineLatest([this._distance$]).subscribe(([stirDistance]) => {
       if (!this.isValid) {
-        return null;
+        this._plotItem$.next(null);
+        return;
       }
 
       this._plotItem$.next({
