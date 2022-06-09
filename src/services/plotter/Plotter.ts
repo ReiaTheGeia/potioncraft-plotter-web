@@ -72,7 +72,7 @@ export class Plotter {
     const addPosition =
       last(result.pendingPoints) ?? last(result.committedPoints) ?? PointZero;
 
-    const ingredient = this.ingredientRegistry.getIngredient(ingredientId);
+    const ingredient = this.ingredientRegistry.getIngredientById(ingredientId);
     if (!ingredient) {
       throw new Error(`Unknown ingredient: ${ingredientId}`);
     }

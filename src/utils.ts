@@ -37,3 +37,7 @@ export function keepEveryK<T>(array: T[], k: number, keepLast = false) {
 export function isNotNull<T>(x: T | null | undefined): x is T {
   return x != null;
 }
+
+export function typedKeys<T>(obj: T): (keyof T)[] {
+  return Object.keys(obj) as any;
+}

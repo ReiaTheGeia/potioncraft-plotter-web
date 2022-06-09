@@ -2,25 +2,41 @@ import React from "react";
 import { throttleTime } from "rxjs";
 import { styled } from "@mui/material";
 
-import { useDICreate } from "@/container";
+import { useDICreate, useDIDependency } from "@/container";
 
 import { useObservation } from "@/hooks/observe";
 
-import { ingredientId } from "@/services/ingredients/types";
+import { EmptyPlotResult } from "@/services/plotter/types";
+import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
 
 import Plot from "../Plot";
 import PlotBuilderItemsList from "../PlotBuilderItemsList";
+import PotionMap from "../Map";
 
 import { PlotEditorViewModel } from "./PlotEditorViewModel";
-import { EmptyPlotResult } from "@/services/plotter/types";
-import { useQueryString } from "@/hooks/query-string";
+import PanZoomViewport from "../PanZoomViewport/PanZoomViewport";
 
 const Root = styled("div")({
   width: "100%",
   height: "100%",
   display: "flex",
   flexDirection: "row",
+  "& .plot-container": {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
+  "& .map": {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+  },
   "& .plot": {
+    position: "absolute",
+    top: 0,
+    left: 0,
     width: "100%",
     height: "100%",
   },
@@ -37,6 +53,9 @@ const Root = styled("div")({
 
 const PlotEditor = () => {
   const viewModel = useDICreate(PlotEditorViewModel);
+  const baseRegistry = useDIDependency(PotionBaseRegistry);
+  const map = baseRegistry.getPotionBaseById("water" as any)?.map;
+
   const builder = viewModel.builder;
 
   const plotObserved = useObservation(builder.plot$) ?? null;
@@ -63,11 +82,14 @@ const PlotEditor = () => {
 
   return (
     <Root>
-      <Plot
-        className="plot"
-        plot={plot ?? EmptyPlotResult}
-        viewModel={viewModel}
-      />
+      <PanZoomViewport className="plot-container" viewModel={viewModel}>
+        {map && <PotionMap className="map" map={map} viewModel={viewModel} />}
+        <Plot
+          className="plot"
+          plot={plot ?? EmptyPlotResult}
+          viewModel={viewModel}
+        />
+      </PanZoomViewport>
       <div className="divider" />
       <PlotBuilderItemsList
         className="plot-items"

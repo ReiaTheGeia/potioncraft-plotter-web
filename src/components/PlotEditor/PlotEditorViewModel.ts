@@ -2,18 +2,36 @@ import { BehaviorSubject, map, Observable } from "rxjs";
 
 import { inject } from "microinject";
 
-import { Point } from "@/points";
+import {
+  Point,
+  pointAdd,
+  pointScale,
+  pointSubtract,
+  PointZero,
+} from "@/points";
+
+import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
 import { PlotBuilder, PlotBuilderItem } from "@/services/plotter/PlotBuilder";
 import { PlotItem } from "@/services/plotter/types";
 
-import { IPlotViewModel, PlotViewModel } from "../Plot/PlotViewModel";
+import { IPlotViewModel } from "../Plot/PlotViewModel";
+import { IPanZoomViewportViewModel } from "../PanZoomViewport/PanZoomViewportViewModel";
 
-export class PlotEditorViewModel implements IPlotViewModel {
-  private readonly _plotViewModel = new PlotViewModel();
+export class PlotEditorViewModel
+  implements IPlotViewModel, IPanZoomViewportViewModel
+{
+  private readonly _viewOffset$ = new BehaviorSubject<Point>(PointZero);
+  private readonly _viewScale$ = new BehaviorSubject<number>(1);
   private readonly _mouseOverBuilderItem$ =
     new BehaviorSubject<PlotBuilderItem | null>(null);
   private readonly _shareString$: Observable<string>;
+  private readonly _mouseOverPlotItem$ = new BehaviorSubject<PlotItem | null>(
+    null
+  );
+
+  private _viewportWidth: number = 0;
+  private _viewportHeight: number = 0;
 
   constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
     this._shareString$ = this._builder.plot$.pipe(
@@ -30,34 +48,46 @@ export class PlotEditorViewModel implements IPlotViewModel {
   }
 
   get viewOffset$(): Observable<Point> {
-    return this._plotViewModel.viewOffset$;
+    return this._viewOffset$;
   }
   get viewScale$(): Observable<number> {
-    return this._plotViewModel.viewScale$;
+    return this._viewScale$;
   }
 
-  get mouseOverItem$(): Observable<PlotItem | null> {
-    return this._plotViewModel.mouseOverItem$;
+  get mouseOverPlotItem$(): Observable<PlotItem | null> {
+    return this._mouseOverPlotItem$;
   }
 
   get mouseOverBuilderItem$(): Observable<PlotBuilderItem | null> {
     return this._mouseOverBuilderItem$;
   }
 
-  viewportResize(width: number, height: number): void {
-    this._plotViewModel.viewportResize(width, height);
+  zoom(delta: number, on: Point | null = null) {
+    const prevWorld = on ? this._clientToWorld(on) : PointZero;
+    const pzoom = this._viewScale$.value;
+    const zoom = pzoom * delta;
+    this._viewScale$.next(zoom);
+    if (on) {
+      const world = this._clientToWorld(on);
+      const delta = pointSubtract(prevWorld, world);
+      this._viewOffset$.next(pointAdd(this._viewOffset$.value, delta));
+    }
   }
 
-  zoom(delta: number, on: Point | null | undefined): void {
-    this._plotViewModel.zoom(delta, on);
+  pan(dx: number, dy: number, applyZoom = false) {
+    const z = applyZoom ? 1 / this._viewScale$.value : 1;
+    this._viewOffset$.next(
+      pointAdd(this._viewOffset$.value, { x: dx * z, y: dy * z })
+    );
   }
 
-  pan(dx: number, dy: number): void {
-    this._plotViewModel.pan(dx, dy);
+  onViewportResized(width: number, height: number): void {
+    this._viewportWidth = width;
+    this._viewportHeight = height;
   }
 
   onMouseOverPlotItem(item: PlotItem | null): void {
-    this._plotViewModel.onMouseOverPlotItem(item);
+    this._mouseOverPlotItem$.next(item);
     this._mouseOverBuilderItem$.next(
       item ? this._builder.builderItemFor(item) : null
     );
@@ -65,6 +95,21 @@ export class PlotEditorViewModel implements IPlotViewModel {
 
   onMouseOverBuilderItem(item: PlotBuilderItem | null): void {
     this._mouseOverBuilderItem$.next(item);
-    this._plotViewModel.onMouseOverPlotItem(item ? item.plotItem : null);
+    this._mouseOverPlotItem$.next(item ? item.plotItem : null);
+  }
+
+  private _clientToWorld(client: Point): Point {
+    const offset = this._viewOffset$.value;
+    const scale = this._viewScale$.value;
+
+    client = pointScale(client, 1 / scale);
+    client = pointScale(client, (MAP_EXTENT_RADIUS * 2) / this._viewportWidth);
+    client = pointAdd(client, offset);
+    client = {
+      x: client.x - MAP_EXTENT_RADIUS,
+      y: client.y - MAP_EXTENT_RADIUS,
+    };
+
+    return client;
   }
 }

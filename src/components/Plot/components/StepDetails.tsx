@@ -47,7 +47,9 @@ const AddIngredientRoot = styled("div")({
 });
 const AddIngredient = ({ step }: AddIngredientStepProps) => {
   const ingredientRegistry = useDIDependency(IngredientRegistry);
-  const ingredient = ingredientRegistry.getIngredient(step.ingredientId) ?? {
+  const ingredient = ingredientRegistry.getIngredientById(
+    step.ingredientId
+  ) ?? {
     name: "Unknown",
     path: [] as CubicBezierCurve[],
   };

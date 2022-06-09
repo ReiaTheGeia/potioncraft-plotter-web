@@ -30,7 +30,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
       let baseCost = 0;
       let ingredientTypeCounts: Record<string, number> = {};
       for (const { ingredientId } of ingredients) {
-        const ingredient = ingredientRegistry.getIngredient(ingredientId);
+        const ingredient = ingredientRegistry.getIngredientById(ingredientId);
         if (!ingredient) {
           continue;
         }

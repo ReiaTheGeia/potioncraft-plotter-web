@@ -6,5 +6,5 @@ module.exports = {
   appPackageJson: resolve(root, "package.json"),
   appSrc: resolve(root, "./src"),
   appDist: resolve(root, "./dist"),
-  publicPath: "/9by9/"
+  publicPath: "/potioncraft-plotter-web/",
 };

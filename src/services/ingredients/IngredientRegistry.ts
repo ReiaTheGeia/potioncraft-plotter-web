@@ -10,7 +10,7 @@ export class IngredientRegistry {
     return ingredients;
   }
 
-  getIngredient(id: IngredientId): IngredientDescriptor | null {
+  getIngredientById(id: IngredientId): IngredientDescriptor | null {
     return ingredients.find((x) => x.id === id) ?? null;
   }
 }

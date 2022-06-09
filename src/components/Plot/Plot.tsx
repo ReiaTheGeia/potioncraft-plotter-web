@@ -2,8 +2,6 @@ import React from "react";
 import Color from "color";
 import { styled } from "@mui/material";
 
-import { useDICreate } from "@/container";
-
 import { useObservation } from "@/hooks/observe";
 import { PointZero } from "@/points";
 import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
@@ -13,23 +11,20 @@ import { keepEveryK } from "@/utils";
 import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
 import {
   IPlotViewModel,
-  PlotViewModel,
   PlotViewModelContext,
   usePlotViewModel,
 } from "./PlotViewModel";
 
-import PanZoomHandler from "./components/PanZoomHandler";
 import PlotDetails from "./components/PlotDetails";
 import StepDetails from "./components/StepDetails";
 
 export interface PlotProps {
   className?: string;
   plot: PlotResult;
-  viewModel?: IPlotViewModel;
+  viewModel: IPlotViewModel;
 }
 
 const Root = styled("div")(({ theme }) => ({
-  backgroundColor: "#DABE99",
   overflow: "auto",
   position: "relative",
   "& .plot-details": {
@@ -47,13 +42,10 @@ const Root = styled("div")(({ theme }) => ({
   },
 }));
 
-const Plot = ({ className, plot, viewModel: externalViewModel }: PlotProps) => {
-  const internalViewModel = useDICreate(PlotViewModel);
-  const viewModel = externalViewModel ?? internalViewModel;
-
+const Plot = ({ className, plot, viewModel }: PlotProps) => {
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
-  const inspectSource = useObservation(viewModel.mouseOverItem$) ?? null;
+  const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
 
   const onLineMouseOver = React.useCallback(
     (line: PlotLine) => {
@@ -67,58 +59,47 @@ const Plot = ({ className, plot, viewModel: externalViewModel }: PlotProps) => {
     plot.pendingPoints
   );
 
-  let left = -MAP_EXTENT_RADIUS + offset.x;
-  let top = -MAP_EXTENT_RADIUS + offset.y;
-  let width = MAP_EXTENT_RADIUS * 2 * (1 / scale);
-  let height = MAP_EXTENT_RADIUS * 2 * (1 / scale);
+  const left = -MAP_EXTENT_RADIUS + offset.x;
+  const top = -MAP_EXTENT_RADIUS + offset.y;
+  const width = MAP_EXTENT_RADIUS * 2 * (1 / scale);
+  const height = MAP_EXTENT_RADIUS * 2 * (1 / scale);
 
   return (
     <Root className={className}>
       <PlotViewModelContext.Provider value={viewModel}>
-        <PanZoomHandler>
-          <svg
-            className="plot-svg"
-            width="100%"
-            height="100%"
-            viewBox={`${left} ${top} ${width} ${height}`}
-            transform="scale(1, -1)"
-          >
-            <rect
-              x={-60}
-              y={-60}
-              width={120}
-              height={120}
-              stroke="red"
-              fill="none"
-              strokeWidth={0.2 / scale}
+        <svg
+          className="plot-svg"
+          width="100%"
+          height="100%"
+          viewBox={`${left} ${top} ${width} ${height}`}
+          transform="scale(1, -1)"
+        >
+          <circle cx={0} cy={0} r={POTION_RADIUS} fill="blue" />
+          {committedLines.map((line, i) => (
+            <PlotLine
+              key={i}
+              line={line}
+              pending={false}
+              highlight={line.source === inspectSource}
+              onMouseOver={onLineMouseOver}
+              onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
             />
-            <circle cx={0} cy={0} r={POTION_RADIUS} fill="blue" />
-            {committedLines.map((line, i) => (
-              <PlotLine
-                key={i}
-                line={line}
-                pending={false}
-                highlight={line.source === inspectSource}
-                onMouseOver={onLineMouseOver}
-                onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
-              />
-            ))}
-            {pendingLines.map((line, i) => (
-              <PlotLine
-                key={i}
-                line={line}
-                pending={true}
-                highlight={line.source === inspectSource}
-                onMouseOver={onLineMouseOver}
-                onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
-              />
-            ))}
-          </svg>
-          {inspectSource && (
-            <StepDetails className="inspect-source" step={inspectSource} />
-          )}
-          <PlotDetails className="plot-details" plot={plot} />
-        </PanZoomHandler>
+          ))}
+          {pendingLines.map((line, i) => (
+            <PlotLine
+              key={i}
+              line={line}
+              pending={true}
+              highlight={line.source === inspectSource}
+              onMouseOver={onLineMouseOver}
+              onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
+            />
+          ))}
+        </svg>
+        {inspectSource && (
+          <StepDetails className="inspect-source" step={inspectSource} />
+        )}
+        <PlotDetails className="plot-details" plot={plot} />
       </PlotViewModelContext.Provider>
     </Root>
   );

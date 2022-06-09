@@ -6,10 +6,11 @@ import { getModifiers } from "@/modifier-keys";
 import { useComponentBounds } from "@/hooks/component-bounds";
 import { useNativeEvent } from "@/hooks/native-event";
 
-import { usePlotViewModel } from "../PlotViewModel";
+import { IPanZoomViewportViewModel } from "./PanZoomViewportViewModel";
 
 export interface PanZoomHandlerProps {
   className?: string;
+  viewModel: IPanZoomViewportViewModel;
   children: React.ReactNode;
 }
 
@@ -21,14 +22,16 @@ const Root = styled("div")({
   height: "100%",
 });
 
-const PanZoomHandler = ({ className, children }: PanZoomHandlerProps) => {
-  const viewModel = usePlotViewModel();
-
+const PanZoomHandler = ({
+  className,
+  viewModel,
+  children,
+}: PanZoomHandlerProps) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const containerBounds = useComponentBounds(containerRef);
 
   React.useLayoutEffect(() => {
-    viewModel.viewportResize(containerBounds.width, containerBounds.height);
+    viewModel.onViewportResized(containerBounds.width, containerBounds.height);
   }, [containerBounds.width, containerBounds.height]);
 
   const onWheel = React.useCallback((e: WheelEvent) => {
