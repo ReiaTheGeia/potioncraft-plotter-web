@@ -19,6 +19,21 @@ export function windowArray<T>(array: T[], count: number): T[][] {
   return result;
 }
 
+export function keepEveryK<T>(array: T[], k: number, keepLast = false) {
+  if (array.length === 0) {
+    return array;
+  }
+
+  const a = [];
+  for (let i = 0; i < array.length; i += k) {
+    a.push(array[i]);
+  }
+  if (keepLast && (array.length - 1) % k !== 0) {
+    a.push(array[array.length - 1]);
+  }
+  return a;
+}
+
 export function isNotNull<T>(x: T | null | undefined): x is T {
   return x != null;
 }

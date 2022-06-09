@@ -8,6 +8,7 @@ import { useObservation } from "@/hooks/observe";
 import { PointZero } from "@/points";
 import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
 import { PointArray } from "@/point-array";
+import { keepEveryK } from "@/utils";
 
 import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
 import {
@@ -186,7 +187,11 @@ interface PlotLine {
   evenOdd: boolean;
 }
 
-function resultToPlotLines(committed: PlotPoint[], pending: PlotPoint[]) {
+function resultToPlotLines(
+  committed: PlotPoint[],
+  pending: PlotPoint[],
+  trim = 4
+) {
   let currentLine: PlotLine | null = null;
   let sourceCounter = 0;
 
@@ -229,6 +234,15 @@ function resultToPlotLines(committed: PlotPoint[], pending: PlotPoint[]) {
     }
 
     currentLine.points.push(point);
+  }
+
+  if (trim > 1) {
+    for (const line of commitedLines) {
+      line.points = keepEveryK(line.points, trim, true);
+    }
+    for (const line of pendingLines) {
+      line.points = keepEveryK(line.points, trim, true);
+    }
   }
 
   return [commitedLines, pendingLines];

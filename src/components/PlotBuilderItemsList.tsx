@@ -109,27 +109,35 @@ const PlotListItem = ({
   onMouseOver,
   onMouseOut,
 }: PlotListItemProps) => {
-  let content: React.ReactNode = (
-    <div>Unknown PlotItem {item.constructor.name}</div>
-  );
   if (item instanceof AddIngredientPlotBuilderItem) {
-    content = <AddIngredientPlotListItem item={item} />;
+    return (
+      <AddIngredientPlotListItem
+        item={item}
+        highlight={highlight}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
+      />
+    );
   } else if (item instanceof StirCauldronPlotBuilderItem) {
-    content = <StirCauldronPlotListItem item={item} />;
+    return (
+      <StirCauldronPlotListItem
+        item={item}
+        highlight={highlight}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
+      />
+    );
   } else if (item instanceof PourSolventPlotBuilderItem) {
-    content = <PourSolventPlotListItem item={item} />;
+    return (
+      <PourSolventPlotListItem
+        item={item}
+        highlight={highlight}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
+      />
+    );
   }
-
-  return (
-    <PlotListItemCard
-      item={item}
-      highlight={highlight}
-      onMouseOver={onMouseOver}
-      onMouseOut={onMouseOut}
-    >
-      {content}
-    </PlotListItemCard>
-  );
+  return <div>Unknown PlotItem {item.constructor.name}</div>;
 };
 
 interface PlotListItemCardProps {
@@ -172,14 +180,26 @@ const PlotListItemCard = ({
 
 interface AddIngredientPlotListItemProps {
   item: AddIngredientPlotBuilderItem;
+  highlight: boolean;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
 }
 const AddIngredientPlotListItem = ({
   item,
+  highlight,
+  onMouseOver,
+  onMouseOut,
 }: AddIngredientPlotListItemProps) => {
+  const [isChangingGrind, setIsChangingGrind] = React.useState(false);
   const ingredientId = useObservation(item.ingredientId$) ?? null;
   const grindPercent = useObservation(item.grindPercent$) ?? 0;
   return (
-    <div>
+    <PlotListItemCard
+      item={item}
+      highlight={highlight}
+      onMouseOver={isChangingGrind ? () => {} : onMouseOver}
+      onMouseOut={isChangingGrind ? () => {} : onMouseOut}
+    >
       <div>
         <Typography variant="overline">Ingredient</Typography>
       </div>
@@ -193,22 +213,39 @@ const AddIngredientPlotListItem = ({
         <Typography id="grind-label">Grind Percent</Typography>
         <Slider
           value={grindPercent}
-          onChange={(_, value) => item.setGrindPercent(value as number)}
+          onChange={(_, value) => {
+            React.startTransition(() => {
+              item.setGrindPercent(value as number);
+            });
+            setIsChangingGrind(true);
+          }}
+          onChangeCommitted={(_, value) => {
+            item.setGrindPercent(value as number);
+            setIsChangingGrind(false);
+          }}
           aria-labelledby="grind-label"
           min={0}
           max={1}
           step={0.001}
         />
       </Grid>
-    </div>
+    </PlotListItemCard>
   );
 };
 
 interface StirCauldronPlotListItemProps {
   item: StirCauldronPlotBuilderItem;
+  highlight: boolean;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
 }
 
-const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
+const StirCauldronPlotListItem = ({
+  item,
+  highlight,
+  onMouseOver,
+  onMouseOut,
+}: StirCauldronPlotListItemProps) => {
   const [duration, setDuration] = React.useState("");
   const onTextFieldChanged = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,13 +253,21 @@ const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
       if (isNaN(asNumber)) {
         asNumber = null;
       }
-      item.setDistance(asNumber);
       setDuration(e.target.value);
+
+      React.startTransition(() => {
+        item.setDistance(asNumber);
+      });
     },
     [item]
   );
   return (
-    <div>
+    <PlotListItemCard
+      item={item}
+      highlight={highlight}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+    >
       <div>
         <Typography variant="overline">Stir Cauldron</Typography>
       </div>
@@ -231,15 +276,22 @@ const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
         value={duration}
         onChange={onTextFieldChanged}
       />
-    </div>
+    </PlotListItemCard>
   );
 };
 
 interface PourSolventPlotListItemProps {
   item: PourSolventPlotBuilderItem;
+  highlight: boolean;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
 }
-const PourSolventPlotListItem = ({ item }: PourSolventPlotListItemProps) => {
-  const valid = useObservation(item.isValid$) ?? false;
+const PourSolventPlotListItem = ({
+  item,
+  highlight,
+  onMouseOver,
+  onMouseOut,
+}: PourSolventPlotListItemProps) => {
   const [duration, setDuration] = React.useState("");
   const onTextFieldChanged = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,13 +299,22 @@ const PourSolventPlotListItem = ({ item }: PourSolventPlotListItemProps) => {
       if (isNaN(asNumber)) {
         asNumber = null;
       }
-      item.setDistance(asNumber);
+
       setDuration(e.target.value);
+
+      React.startTransition(() => {
+        item.setDistance(asNumber);
+      });
     },
     [item]
   );
   return (
-    <div>
+    <PlotListItemCard
+      item={item}
+      highlight={highlight}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+    >
       <div>
         <Typography variant="overline">Pour Solvent</Typography>
       </div>
@@ -262,7 +323,7 @@ const PourSolventPlotListItem = ({ item }: PourSolventPlotListItemProps) => {
         value={duration}
         onChange={onTextFieldChanged}
       />
-    </div>
+    </PlotListItemCard>
   );
 };
 

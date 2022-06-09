@@ -38,15 +38,9 @@ const PlotEditor = () => {
   const viewModel = useDICreate(PlotEditorViewModel);
   const builder = viewModel.builder;
 
-  const debouncedPlot$ = builder.plot$.pipe(throttleTime(50));
+  const debouncedPlot$ = builder.plot$.pipe(throttleTime(100));
   const plot = useObservation(debouncedPlot$) ?? null;
   const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
-
-  React.useEffect(() => {
-    const item = builder.addIngredient();
-    item.setIngredient(ingredientId("Windbloom"));
-    item.setGrindPercent(0.5);
-  }, [builder]);
 
   return (
     <Root>
