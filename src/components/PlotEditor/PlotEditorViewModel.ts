@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, map, Observable } from "rxjs";
 
 import { inject } from "microinject";
 
@@ -13,11 +13,20 @@ export class PlotEditorViewModel implements IPlotViewModel {
   private readonly _plotViewModel = new PlotViewModel();
   private readonly _mouseOverBuilderItem$ =
     new BehaviorSubject<PlotBuilderItem | null>(null);
+  private readonly _shareString$: Observable<string>;
 
-  constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {}
+  constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
+    this._shareString$ = this._builder.plot$.pipe(
+      map((x) => _builder.getShareString())
+    );
+  }
 
   get builder(): PlotBuilder {
     return this._builder;
+  }
+
+  get shareString$(): Observable<string> {
+    return this._shareString$;
   }
 
   get viewOffset$(): Observable<Point> {

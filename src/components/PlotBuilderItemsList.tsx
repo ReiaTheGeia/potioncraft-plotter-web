@@ -284,21 +284,8 @@ const StirCauldronPlotListItem = ({
   onMouseOver,
   onMouseOut,
 }: StirCauldronPlotListItemProps) => {
-  const [duration, setDuration] = React.useState("");
-  const onTextFieldChanged = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      let asNumber: number | null = Number(e.target.value);
-      if (isNaN(asNumber)) {
-        asNumber = null;
-      }
-      setDuration(e.target.value);
-
-      React.startTransition(() => {
-        item.setDistance(asNumber);
-      });
-    },
-    [item]
-  );
+  const distance = useObservation(item.distance$) ?? 0;
+  const [inputDistance, setInputDistance] = React.useState<string | null>(null);
   return (
     <PlotListItemCard
       item={item}
@@ -311,8 +298,17 @@ const StirCauldronPlotListItem = ({
       </div>
       <TextField
         label="Distance"
-        value={duration}
-        onChange={onTextFieldChanged}
+        value={inputDistance ?? distance}
+        onChange={(e) => {
+          let asNumber: number | null = Number(e.target.value);
+          if (isNaN(asNumber)) {
+            asNumber = null;
+          }
+
+          setInputDistance(e.target.value);
+          item.setDistance(asNumber);
+        }}
+        onBlur={() => setInputDistance(null)}
       />
     </PlotListItemCard>
   );
@@ -330,22 +326,8 @@ const PourSolventPlotListItem = ({
   onMouseOver,
   onMouseOut,
 }: PourSolventPlotListItemProps) => {
-  const [duration, setDuration] = React.useState("");
-  const onTextFieldChanged = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      let asNumber: number | null = Number(e.target.value);
-      if (isNaN(asNumber)) {
-        asNumber = null;
-      }
-
-      setDuration(e.target.value);
-
-      React.startTransition(() => {
-        item.setDistance(asNumber);
-      });
-    },
-    [item]
-  );
+  const distance = useObservation(item.distance$);
+  const [inputDistance, setInputDistance] = React.useState<string | null>(null);
   return (
     <PlotListItemCard
       item={item}
@@ -358,8 +340,17 @@ const PourSolventPlotListItem = ({
       </div>
       <TextField
         label="Distance"
-        value={duration}
-        onChange={onTextFieldChanged}
+        value={inputDistance ?? distance}
+        onChange={(e) => {
+          let asNumber: number | null = Number(e.target.value);
+          if (isNaN(asNumber)) {
+            asNumber = null;
+          }
+
+          setInputDistance(e.target.value);
+          item.setDistance(asNumber);
+        }}
+        onBlur={() => setInputDistance(null)}
       />
     </PlotListItemCard>
   );

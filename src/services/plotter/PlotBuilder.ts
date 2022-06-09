@@ -7,6 +7,12 @@ import {
   Observable,
   Subscription,
 } from "rxjs";
+import pako from "pako";
+import {
+  encode as encodeBase64,
+  decode as decodeBase64,
+} from "base64-arraybuffer";
+
 import { IngredientId } from "../ingredients/types";
 
 import { Plotter } from "./Plotter";
@@ -53,6 +59,37 @@ export class PlotBuilder {
     return this._plot$;
   }
 
+  loadFromShareString(data: string) {
+    const array = decodeBase64(data);
+    const decoded = JSON.parse(pako.inflate(array, { to: "string" })) as any[];
+    const items = decoded.map((item) => {
+      switch (item.type) {
+        case "add-ingredient":
+          return AddIngredientPlotBuilderItem.fromJSON(item, (item) =>
+            this._deleteItem(item)
+          );
+        case "stir-cauldron":
+          return StirCauldronPlotBuilderItem.fromJSON(item, (item) =>
+            this._deleteItem(item)
+          );
+        case "pour-solvent":
+          return PourSolventPlotBuilderItem.fromJSON(item, (item) =>
+            this._deleteItem(item)
+          );
+        default:
+          throw new Error(`Unknown item type: ${item.type}`);
+      }
+    });
+    this._items$.next(items);
+  }
+
+  getShareString() {
+    console.log("getShareString");
+    const items = this._items$.value.map((x) => x.toJSON());
+    const encoded = pako.deflate(JSON.stringify(items));
+    return encodeBase64(encoded);
+  }
+
   addIngredient(): AddIngredientPlotBuilderItem {
     const item = new AddIngredientPlotBuilderItem((item) =>
       this._deleteItem(item)
@@ -95,6 +132,8 @@ export abstract class PlotBuilderItem {
   abstract readonly plotItem: PlotItem | null;
 
   abstract delete(): void;
+
+  abstract toJSON(): any;
 }
 
 export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
@@ -127,6 +166,24 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
         });
       }
     );
+  }
+
+  static fromJSON(
+    json: any,
+    del: (item: PlotBuilderItem) => void
+  ): AddIngredientPlotBuilderItem {
+    const item = new AddIngredientPlotBuilderItem(del);
+    item.setIngredient(json.ingredientId);
+    item.setGrindPercent(json.grindPercent);
+    return item;
+  }
+
+  toJSON() {
+    return {
+      type: "add-ingredient",
+      ingredientId: this._ingredientId$.value,
+      grindPercent: this._grindPercent$.value,
+    };
   }
 
   get isValid$() {
@@ -209,6 +266,22 @@ export class StirCauldronPlotBuilderItem extends PlotBuilderItem {
     });
   }
 
+  static fromJSON(
+    json: any,
+    del: (item: PlotBuilderItem) => void
+  ): StirCauldronPlotBuilderItem {
+    const item = new StirCauldronPlotBuilderItem(del);
+    item.setDistance(json.distance);
+    return item;
+  }
+
+  toJSON() {
+    return {
+      type: "stir-cauldron",
+      distance: this._distance$.value,
+    };
+  }
+
   get isValid$() {
     return this._isValid$;
   }
@@ -263,6 +336,22 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
         distance: stirDistance!,
       });
     });
+  }
+
+  static fromJSON(
+    json: any,
+    del: (item: PlotBuilderItem) => void
+  ): PourSolventPlotBuilderItem {
+    const item = new PourSolventPlotBuilderItem(del);
+    item.setDistance(json.distance);
+    return item;
+  }
+
+  toJSON() {
+    return {
+      type: "pour-solvent",
+      distance: this._distance$.value,
+    };
   }
 
   get isValid$() {

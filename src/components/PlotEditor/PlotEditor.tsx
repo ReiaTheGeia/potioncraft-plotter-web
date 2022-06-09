@@ -13,6 +13,7 @@ import PlotBuilderItemsList from "../PlotBuilderItemsList";
 
 import { PlotEditorViewModel } from "./PlotEditorViewModel";
 import { EmptyPlotResult } from "@/services/plotter/types";
+import { useQueryString } from "@/hooks/query-string";
 
 const Root = styled("div")({
   width: "100%",
@@ -41,6 +42,24 @@ const PlotEditor = () => {
   const plotObserved = useObservation(builder.plot$) ?? null;
   const plot = React.useDeferredValue(plotObserved);
   const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
+  const outputShareString = useObservation(viewModel.shareString$) ?? null;
+
+  React.useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.has("data")) {
+      const data = query.get("data")!;
+      builder.loadFromShareString(data);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!outputShareString) {
+      return;
+    }
+    const query = new URLSearchParams(window.location.search);
+    query.set("data", outputShareString);
+    window.history.replaceState({}, "", `?${query.toString()}`);
+  }, [outputShareString]);
 
   return (
     <Root>
