@@ -59,35 +59,42 @@ export class PlotBuilder {
     return this._plot$;
   }
 
-  loadFromShareString(data: string) {
-    const array = decodeBase64(data);
-    const decoded = JSON.parse(pako.inflate(array, { to: "string" })) as any[];
-    const items = decoded.map((item) => {
-      switch (item.type) {
-        case "add-ingredient":
-          return AddIngredientPlotBuilderItem.fromJSON(item, (item) =>
-            this._deleteItem(item)
-          );
-        case "stir-cauldron":
-          return StirCauldronPlotBuilderItem.fromJSON(item, (item) =>
-            this._deleteItem(item)
-          );
-        case "pour-solvent":
-          return PourSolventPlotBuilderItem.fromJSON(item, (item) =>
-            this._deleteItem(item)
-          );
-        default:
-          throw new Error(`Unknown item type: ${item.type}`);
-      }
-    });
-    this._items$.next(items);
+  loadFromShareString(dataStr: string) {
+    const array = decodeBase64(dataStr);
+    const dv = new DataView(array);
+    const version = dv.getUint8(0);
+    const data = array.slice(1);
+    if (version === 0) {
+      const decoded = JSON.parse(pako.inflate(data, { to: "string" })) as any[];
+      const items = decoded.map((item) => {
+        switch (item.type) {
+          case "add-ingredient":
+            return AddIngredientPlotBuilderItem.fromJSON(item, (item) =>
+              this._deleteItem(item)
+            );
+          case "stir-cauldron":
+            return StirCauldronPlotBuilderItem.fromJSON(item, (item) =>
+              this._deleteItem(item)
+            );
+          case "pour-solvent":
+            return PourSolventPlotBuilderItem.fromJSON(item, (item) =>
+              this._deleteItem(item)
+            );
+          default:
+            throw new Error(`Unknown item type: ${item.type}`);
+        }
+      });
+      this._items$.next(items);
+    }
   }
 
   getShareString() {
-    console.log("getShareString");
     const items = this._items$.value.map((x) => x.toJSON());
     const encoded = pako.deflate(JSON.stringify(items));
-    return encodeBase64(encoded);
+    const data = new Uint8Array(1 + encoded.length);
+    data.set(encoded, 1);
+    new DataView(data.buffer).setUint8(0, 0);
+    return encodeBase64(data);
   }
 
   addIngredient(): AddIngredientPlotBuilderItem {

@@ -298,7 +298,7 @@ const StirCauldronPlotListItem = ({
       </div>
       <TextField
         label="Distance"
-        value={inputDistance ?? distance}
+        value={inputDistance ?? distance ?? ""}
         onChange={(e) => {
           let asNumber: number | null = Number(e.target.value);
           if (isNaN(asNumber)) {
@@ -340,7 +340,7 @@ const PourSolventPlotListItem = ({
       </div>
       <TextField
         label="Distance"
-        value={inputDistance ?? distance}
+        value={inputDistance ?? distance ?? ""}
         onChange={(e) => {
           let asNumber: number | null = Number(e.target.value);
           if (isNaN(asNumber)) {
