@@ -2,14 +2,8 @@ import { BehaviorSubject, map, Observable, combineLatest } from "rxjs";
 
 import { inject } from "microinject";
 
-import {
-  Point,
-  pointAdd,
-  pointScale,
-  pointSubtract,
-  PointZero,
-} from "@/points";
-import { Size } from "@/size";
+import { Point, pointAdd, pointSubtract, PointZero } from "@/points";
+import { Size, SizeZero } from "@/size";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
@@ -22,10 +16,7 @@ import { IPanZoomViewportViewModel } from "../PanZoomViewport/PanZoomViewportVie
 export class PlotEditorViewModel
   implements IPlotViewModel, IPanZoomViewportViewModel
 {
-  private readonly _viewportSize$ = new BehaviorSubject<Size>({
-    width: MAP_EXTENT_RADIUS * 2,
-    height: MAP_EXTENT_RADIUS * 2,
-  });
+  private readonly _viewportSize$ = new BehaviorSubject<Size>(SizeZero);
 
   /**
    * The offset of the map on the viewport, in map units, unscaled.
@@ -109,9 +100,34 @@ export class PlotEditorViewModel
   }
 
   onViewportResized(width: number, height: number): void {
-    const prevSize = this._viewportSize$.value;
+    let prevSize = this._viewportSize$.value;
+    if (prevSize.width === 0 || prevSize.height === 0) {
+      prevSize = {
+        width: MAP_EXTENT_RADIUS * 2,
+        height: MAP_EXTENT_RADIUS * 2,
+      };
+    }
+
     this._viewportSize$.next({ width, height });
-    // FIXME: zoom in or out to fit the new size
+
+    if (width === 0 || height === 0) {
+      return;
+    }
+
+    let scaleFactor = 1;
+    if (width < height) {
+      scaleFactor = width / prevSize.width;
+    } else {
+      scaleFactor = height / prevSize.height;
+    }
+
+    // TODO: Keep the view centered.
+    // const offset: Point = {
+    //   x: (prevSize.width - width) / 2 / this._viewScale$.value,
+    //   y: (prevSize.height - height) / 2 / this._viewScale$.value,
+    // };
+    this._viewScale$.next(this._viewScale$.value * scaleFactor);
+    // this._viewOffset$.next(pointAdd(this._viewOffset$.value, offset));
   }
 
   onMouseOverPlotItem(item: PlotItem | null): void {

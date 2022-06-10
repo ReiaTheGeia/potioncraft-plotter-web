@@ -200,10 +200,10 @@ function renderPotionEffectEntity(
 
   ctx.translate(entity.x, entity.y);
 
-  ctx.beginPath();
-  ctx.fillStyle = "red";
-  ctx.arc(0, 0, POTION_RADIUS, 0, 2 * Math.PI);
-  ctx.fill();
+  // ctx.beginPath();
+  // ctx.fillStyle = "red";
+  // ctx.arc(0, 0, POTION_RADIUS, 0, 2 * Math.PI);
+  // ctx.fill();
 
   const container = makeImg(EffectSlotSrc);
   const containerW = container.width / 100;
