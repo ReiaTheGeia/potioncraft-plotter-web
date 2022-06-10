@@ -217,8 +217,8 @@ function renderPotionEffectEntity(
   const src = PotionEffectImageSrces[entity.effect];
   if (src) {
     const img = makeImg(src);
-    const w = img.width / 30;
-    const h = img.height / 30;
+    const w = img.width / 40;
+    const h = img.height / 40;
     ctx.scale(1, -1);
     ctx.translate(-w / 2, -h / 2);
     ctx.drawImage(img, 0, 0, w, h);
