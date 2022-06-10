@@ -54,7 +54,7 @@ const PanZoomViewport = ({
       e.preventDefault();
       e.stopPropagation();
     } else {
-      viewModel.pan(0, -e.deltaY * PAN_FACTOR, true);
+      viewModel.pan(0, e.deltaY * PAN_FACTOR, true);
       e.preventDefault();
       e.stopPropagation();
     }

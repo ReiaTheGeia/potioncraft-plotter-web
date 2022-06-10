@@ -6,7 +6,7 @@ import { useObservation } from "@/hooks/observe";
 import { usePromise } from "@/hooks/promise";
 
 import { PointZero } from "@/points";
-import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
+import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
 import {
   DangerZonePartMapEntity,
@@ -25,7 +25,7 @@ export interface MapProps {
 
 const Root = styled("div")(({ theme }) => ({
   backgroundColor: "#DABE99",
-  overflow: "auto",
+  overflow: "hidden",
   "& .map-svg": {
     display: "block",
   },
