@@ -41,3 +41,7 @@ export function isNotNull<T>(x: T | null | undefined): x is T {
 export function typedKeys<T>(obj: T): (keyof T)[] {
   return Object.keys(obj) as any;
 }
+
+export function degreesToRadians(degress: number): number {
+  return (degress * Math.PI) / 180;
+}

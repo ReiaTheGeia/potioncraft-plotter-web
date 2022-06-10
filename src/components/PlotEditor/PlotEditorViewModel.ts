@@ -63,6 +63,10 @@ export class PlotEditorViewModel
   }
 
   zoom(delta: number, on: Point | null = null) {
+    if (this._viewportWidth == 0 || this._viewportHeight == 0) {
+      return;
+    }
+
     const prevWorld = on ? this._clientToWorld(on) : PointZero;
     const pzoom = this._viewScale$.value;
     const zoom = pzoom * delta;
