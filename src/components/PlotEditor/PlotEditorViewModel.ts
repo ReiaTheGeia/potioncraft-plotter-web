@@ -1,4 +1,4 @@
-import { BehaviorSubject, map, Observable } from "rxjs";
+import { BehaviorSubject, map, Observable, combineLatest } from "rxjs";
 
 import { inject } from "microinject";
 
@@ -9,6 +9,7 @@ import {
   pointSubtract,
   PointZero,
 } from "@/points";
+import { Size } from "@/size";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
@@ -21,22 +22,36 @@ import { IPanZoomViewportViewModel } from "../PanZoomViewport/PanZoomViewportVie
 export class PlotEditorViewModel
   implements IPlotViewModel, IPanZoomViewportViewModel
 {
+  private readonly _viewportSize$ = new BehaviorSubject<Size>({
+    width: MAP_EXTENT_RADIUS * 2,
+    height: MAP_EXTENT_RADIUS * 2,
+  });
+
+  /**
+   * The offset of the map on the viewport, in map units, unscaled.
+   */
   private readonly _viewOffset$ = new BehaviorSubject<Point>(PointZero);
   private readonly _viewScale$ = new BehaviorSubject<number>(1);
   private readonly _mouseOverBuilderItem$ =
     new BehaviorSubject<PlotBuilderItem | null>(null);
   private readonly _shareString$: Observable<string>;
+  private readonly _mouseClientPosition$ = new BehaviorSubject<Point>(
+    PointZero
+  );
+  private readonly _mouseWorldPosition$: Observable<Point>;
   private readonly _mouseOverPlotItem$ = new BehaviorSubject<PlotItem | null>(
     null
   );
-
-  private _viewportWidth: number = 0;
-  private _viewportHeight: number = 0;
 
   constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
     this._shareString$ = this._builder.plot$.pipe(
       map((x) => _builder.getShareString())
     );
+    this._mouseWorldPosition$ = combineLatest([
+      this._mouseClientPosition$,
+      this._viewOffset$,
+      this._viewScale$,
+    ]).pipe(map(([clientPos]) => this._clientToWorld(clientPos)));
   }
 
   get builder(): PlotBuilder {
@@ -47,11 +62,19 @@ export class PlotEditorViewModel
     return this._shareString$;
   }
 
+  get viewportSize$(): Observable<Size> {
+    return this._viewportSize$;
+  }
+
   get viewOffset$(): Observable<Point> {
     return this._viewOffset$;
   }
   get viewScale$(): Observable<number> {
     return this._viewScale$;
+  }
+
+  get mouseWorldPosition$(): Observable<Point> {
+    return this._mouseWorldPosition$;
   }
 
   get mouseOverPlotItem$(): Observable<PlotItem | null> {
@@ -63,17 +86,13 @@ export class PlotEditorViewModel
   }
 
   zoom(delta: number, on: Point | null = null) {
-    if (this._viewportWidth == 0 || this._viewportHeight == 0) {
-      return;
-    }
-
     const prevWorld = on ? this._clientToWorld(on) : PointZero;
     const pzoom = this._viewScale$.value;
     const zoom = pzoom * delta;
     this._viewScale$.next(zoom);
     if (on) {
       const world = this._clientToWorld(on);
-      const delta = pointSubtract(prevWorld, world);
+      const delta = pointSubtract(world, prevWorld);
       this._viewOffset$.next(pointAdd(this._viewOffset$.value, delta));
     }
   }
@@ -85,9 +104,14 @@ export class PlotEditorViewModel
     );
   }
 
+  onMouseMove(clientX: number, clientY: number): void {
+    this._mouseClientPosition$.next({ x: clientX, y: clientY });
+  }
+
   onViewportResized(width: number, height: number): void {
-    this._viewportWidth = width;
-    this._viewportHeight = height;
+    const prevSize = this._viewportSize$.value;
+    this._viewportSize$.next({ width, height });
+    // FIXME: zoom in or out to fit the new size
   }
 
   onMouseOverPlotItem(item: PlotItem | null): void {
@@ -102,18 +126,31 @@ export class PlotEditorViewModel
     this._mouseOverPlotItem$.next(item ? item.plotItem : null);
   }
 
-  private _clientToWorld(client: Point): Point {
-    const offset = this._viewOffset$.value;
-    const scale = this._viewScale$.value;
+  private _clientToWorld(p: Point): Point {
+    const zoomFactor = this._viewScale$.value;
+    const { x: offsetX, y: offsetY } = this._viewOffset$.value;
 
-    client = pointScale(client, 1 / scale);
-    client = pointScale(client, (MAP_EXTENT_RADIUS * 2) / this._viewportWidth);
-    client = pointAdd(client, offset);
-    client = {
-      x: client.x - MAP_EXTENT_RADIUS,
-      y: client.y - MAP_EXTENT_RADIUS,
+    // Why the hell is offset operating in the opposite direction of crucible-web even with the same map renderer?
+
+    // return {
+    //   x: p.x / zoomFactor - MAP_EXTENT_RADIUS + offsetX,
+    //   y: (p.y / zoomFactor - MAP_EXTENT_RADIUS + offsetY) * -1,
+    // };
+
+    return {
+      x: p.x / zoomFactor - MAP_EXTENT_RADIUS - offsetX,
+      y: (p.y / zoomFactor - MAP_EXTENT_RADIUS - offsetY) * -1,
     };
+  }
 
-    return client;
+  private _worldToClient(p: Point): Point {
+    const zoomFactor = this._viewScale$.value;
+    const { x: offsetX, y: offsetY } = this._viewOffset$.value;
+
+    // Why the hell is this opposite of crucible-web even with the same client to world coord function?
+    return {
+      x: (p.x + MAP_EXTENT_RADIUS + offsetX) * zoomFactor,
+      y: (-p.y + MAP_EXTENT_RADIUS + offsetY) * zoomFactor,
+    };
   }
 }

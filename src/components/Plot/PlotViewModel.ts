@@ -10,6 +10,7 @@ import {
 } from "@/points";
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 import { PlotItem } from "@/services/plotter/types";
+import { Size } from "@/size";
 
 export const PlotViewModelContext = React.createContext<IPlotViewModel | null>(
   null
@@ -24,6 +25,7 @@ export function usePlotViewModel(): IPlotViewModel {
 }
 
 export interface IPlotViewModel {
+  readonly viewportSize$: Observable<Size>;
   readonly viewOffset$: Observable<Point>;
   readonly viewScale$: Observable<number>;
   readonly mouseOverPlotItem$: Observable<PlotItem | null>;

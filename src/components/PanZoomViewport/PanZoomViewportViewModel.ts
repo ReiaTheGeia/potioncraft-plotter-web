@@ -10,4 +10,5 @@ export interface IPanZoomViewportViewModel {
   pan(dx: number, dy: number, applyZoom?: boolean): void;
 
   onViewportResized(width: number, height: number): void;
+  onMouseMove(clientX: number, clientY: number): void;
 }

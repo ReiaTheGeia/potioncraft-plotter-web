@@ -1,8 +1,8 @@
 import React from "react";
-import { throttleTime } from "rxjs";
-import { styled } from "@mui/material";
+import { styled, Card, CardContent, Typography } from "@mui/material";
 
 import { useDICreate, useDIDependency } from "@/container";
+import { PointZero } from "@/points";
 
 import { useObservation } from "@/hooks/observe";
 
@@ -14,7 +14,8 @@ import PlotBuilderItemsList from "../PlotBuilderItemsList";
 import PotionMap from "../Map";
 
 import { PlotEditorViewModel } from "./PlotEditorViewModel";
-import PanZoomViewport from "../PanZoomViewport/PanZoomViewport";
+import PanZoomViewport from "../PanZoomViewport";
+import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
 const Root = styled("div")({
   width: "100%",
@@ -40,6 +41,11 @@ const Root = styled("div")({
     width: "100%",
     height: "100%",
   },
+  "& .mouse-coords": {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+  },
   "& .divider": {
     width: "2px",
     height: "100%",
@@ -60,8 +66,11 @@ const PlotEditor = () => {
 
   const plotObserved = useObservation(builder.plot$) ?? null;
   const plot = React.useDeferredValue(plotObserved);
+
   const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
   const outputShareString = useObservation(viewModel.shareString$) ?? null;
+
+  const mouseWorld = useObservation(viewModel.mouseWorldPosition$) ?? PointZero;
 
   React.useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -89,6 +98,13 @@ const PlotEditor = () => {
           plot={plot ?? EmptyPlotResult}
           viewModel={viewModel}
         />
+        <Card className="mouse-coords">
+          <CardContent>
+            <Typography variant="overline">
+              ({mouseWorld.x.toFixed(2)}, {mouseWorld.y.toFixed(2)})
+            </Typography>
+          </CardContent>
+        </Card>
       </PanZoomViewport>
       <div className="divider" />
       <PlotBuilderItemsList

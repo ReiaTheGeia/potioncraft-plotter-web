@@ -17,6 +17,7 @@ import {
 
 import PlotDetails from "./components/PlotDetails";
 import StepDetails from "./components/StepDetails";
+import { SizeZero } from "@/size";
 
 export interface PlotProps {
   className?: string;
@@ -25,7 +26,7 @@ export interface PlotProps {
 }
 
 const Root = styled("div")(({ theme }) => ({
-  overflow: "auto",
+  overflow: "hidden",
   position: "relative",
   "& .plot-details": {
     position: "absolute",
@@ -39,10 +40,14 @@ const Root = styled("div")(({ theme }) => ({
   },
   "& .plot-svg": {
     display: "block",
+    position: "absolute",
+    left: 0,
+    top: 0,
   },
 }));
 
 const Plot = ({ className, plot, viewModel }: PlotProps) => {
+  const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
@@ -59,42 +64,46 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
     plot.pendingPoints
   );
 
-  const left = -MAP_EXTENT_RADIUS + offset.x;
-  const top = -MAP_EXTENT_RADIUS + offset.y;
-  const width = MAP_EXTENT_RADIUS * 2 * (1 / scale);
-  const height = MAP_EXTENT_RADIUS * 2 * (1 / scale);
-
   return (
     <Root className={className}>
       <PlotViewModelContext.Provider value={viewModel}>
         <svg
           className="plot-svg"
-          width="100%"
-          height="100%"
-          viewBox={`${left} ${top} ${width} ${height}`}
-          transform="scale(1, -1)"
+          width={width}
+          height={height}
+          viewBox={`0 0 ${width} ${height}`}
         >
-          <circle cx={0} cy={0} r={POTION_RADIUS} fill="blue" />
-          {committedLines.map((line, i) => (
-            <PlotLine
-              key={i}
-              line={line}
-              pending={false}
-              highlight={line.source === inspectSource}
-              onMouseOver={onLineMouseOver}
-              onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
-            />
-          ))}
-          {pendingLines.map((line, i) => (
-            <PlotLine
-              key={i}
-              line={line}
-              pending={true}
-              highlight={line.source === inspectSource}
-              onMouseOver={onLineMouseOver}
-              onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
-            />
-          ))}
+          {/* In theory all these transforms can be done in one go, but neither order seems to work when combining them */}
+          <g transform={`scale(${scale})`}>
+            <g
+              transform={`translate(${MAP_EXTENT_RADIUS}, ${MAP_EXTENT_RADIUS})`}
+            >
+              <g transform="scale(1, -1)">
+                <g transform={`translate(${offset.x}, ${offset.y})`}>
+                  {committedLines.map((line, i) => (
+                    <PlotLine
+                      key={i}
+                      line={line}
+                      pending={false}
+                      highlight={line.source === inspectSource}
+                      onMouseOver={onLineMouseOver}
+                      onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
+                    />
+                  ))}
+                  {pendingLines.map((line, i) => (
+                    <PlotLine
+                      key={i}
+                      line={line}
+                      pending={true}
+                      highlight={line.source === inspectSource}
+                      onMouseOver={onLineMouseOver}
+                      onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
+                    />
+                  ))}
+                </g>
+              </g>
+            </g>
+          </g>
         </svg>
         {inspectSource && (
           <StepDetails className="inspect-source" step={inspectSource} />
@@ -154,7 +163,7 @@ const PlotLine = ({
     <path
       d={path}
       stroke={color}
-      strokeWidth={(highlight ? 0.8 : 0.4) / scale}
+      strokeWidth={(highlight ? 5 : 2) / scale}
       fill="none"
       onMouseOver={onPathMouseOver}
       onMouseOut={onMouseOut}

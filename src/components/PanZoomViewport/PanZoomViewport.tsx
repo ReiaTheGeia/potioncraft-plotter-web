@@ -14,15 +14,15 @@ export interface PanZoomHandlerProps {
   children: React.ReactNode;
 }
 
-export const ZOOM_FACTOR = 1.05;
-export const PAN_FACTOR = 0.05;
+export const ZOOM_FACTOR = 1.15;
+export const PAN_FACTOR = 0.15;
 
 const Root = styled("div")({
   width: "100%",
   height: "100%",
 });
 
-const PanZoomHandler = ({
+const PanZoomViewport = ({
   className,
   viewModel,
   children,
@@ -50,7 +50,7 @@ const PanZoomHandler = ({
       e.preventDefault();
       e.stopPropagation();
     } else if (modifiers.shiftKey) {
-      viewModel.pan(e.deltaY * PAN_FACTOR, 0, true);
+      viewModel.pan(-e.deltaY * PAN_FACTOR, 0, true);
       e.preventDefault();
       e.stopPropagation();
     } else {
@@ -68,10 +68,14 @@ const PanZoomHandler = ({
   useNativeEvent(containerRef, "wheel", onWheel, { passive: false });
 
   return (
-    <Root className={className} ref={containerRef}>
+    <Root
+      className={className}
+      ref={containerRef}
+      onMouseMove={(e) => viewModel.onMouseMove(e.clientX, e.clientY)}
+    >
       {children}
     </Root>
   );
 };
 
-export default PanZoomHandler;
+export default PanZoomViewport;
