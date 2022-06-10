@@ -9,6 +9,7 @@ import { SizeZero } from "@/size";
 import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
 import {
   DangerZonePartMapEntity,
+  ExperienceBonusMapEntity,
   MapEntity,
   PotionEffectMapEntity,
 } from "@/services/potion-bases/types";
@@ -111,6 +112,9 @@ function renderEntity(ctx: CanvasRenderingContext2D, entity: MapEntity) {
       return;
     case "PotionEffect":
       renderPotionEffectEntity(ctx, entity);
+      return;
+    case "ExperienceBonus":
+      renderExperienceBonusEntity(ctx, entity);
       return;
     default: {
       ctx.beginPath();
@@ -223,6 +227,39 @@ function renderPotionEffectEntity(
     ctx.translate(-w / 2, -h / 2);
     ctx.drawImage(img, 0, 0, w, h);
   }
+
+  ctx.restore();
+}
+
+const ExperienceBonusImagesSrc: Record<string, string> = {
+  Little: require("./assets/experience-bonus/xp-small.png"),
+  Medium: require("./assets/experience-bonus/xp-medium.png"),
+  Large: require("./assets/experience-bonus/xp-large.png"),
+};
+
+function renderExperienceBonusEntity(
+  ctx: CanvasRenderingContext2D,
+  entity: ExperienceBonusMapEntity
+) {
+  ctx.save();
+  ctx.translate(entity.x, entity.y);
+
+  const src = ExperienceBonusImagesSrc[entity.prefab];
+  if (src) {
+    const img = makeImg(src);
+    const w = img.width / 200;
+    const h = img.height / 200;
+    ctx.save();
+    ctx.scale(1, -1);
+    ctx.translate(-w / 2, -h / 2);
+    ctx.drawImage(img, 0, 0, w, h);
+    ctx.restore();
+  }
+
+  // ctx.beginPath();
+  // ctx.fillStyle = "green";
+  // ctx.arc(0, 0, 0.3, 0, 2 * Math.PI);
+  // ctx.fill();
 
   ctx.restore();
 }
