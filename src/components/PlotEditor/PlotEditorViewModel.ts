@@ -115,6 +115,12 @@ export class PlotEditorViewModel
     }
   }
 
+  setZoom(zoom: number) {
+    const delta = zoom / this._viewScale$.value;
+    const { width, height } = this._viewportSize$.value;
+    this.zoom(delta, { x: width / 2, y: height / 2 });
+  }
+
   pan(dx: number, dy: number, applyZoom = false) {
     const z = applyZoom ? 1 / this._viewScale$.value : 1;
     this._viewOffset$.next(

@@ -3,6 +3,7 @@ import React from "react";
 import { Slider } from "@mui/material";
 
 export interface IncDecSliderProps {
+  className?: string;
   value: number;
   /**
    * The rate of change at maximum deflection in units per second.
@@ -13,6 +14,7 @@ export interface IncDecSliderProps {
 }
 
 const IncDecSlider = ({
+  className,
   value,
   rate,
   onChange,
@@ -33,6 +35,7 @@ const IncDecSlider = ({
 
   return (
     <Slider
+      className={className}
       min={-1}
       max={1}
       step={0.01}

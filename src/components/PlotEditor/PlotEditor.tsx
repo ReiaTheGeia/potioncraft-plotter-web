@@ -13,6 +13,7 @@ import Plot from "../Plot";
 import PlotBuilderItemsList from "../PlotBuilderItemsList";
 import PotionMap from "../Map";
 import PanZoomViewport from "../PanZoomViewport";
+import IncDecSlider from "../IncDecSlider";
 
 import { PlotEditorViewModel } from "./PlotEditorViewModel";
 
@@ -25,6 +26,11 @@ const Root = styled("div")(({ theme }) => ({
   height: "100%",
   display: "flex",
   flexDirection: "row",
+  "& .outer-container": {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
   "& .plot-container": {
     position: "relative",
     width: "100%",
@@ -59,6 +65,12 @@ const Root = styled("div")(({ theme }) => ({
     bottom: theme.spacing(2),
     right: theme.spacing(2),
   },
+  "& .zoom": {
+    position: "absolute",
+    width: "200px",
+    bottom: theme.spacing(2),
+    left: theme.spacing(2),
+  },
   "& .divider": {
     width: "2px",
     height: "100%",
@@ -76,6 +88,7 @@ const PlotEditor = () => {
   const map = baseRegistry.getPotionBaseById("water" as any)?.map;
   const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
   const inspectEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
+  const scale = useObservation(viewModel.viewScale$) ?? 1;
 
   const builder = viewModel.builder;
 
@@ -106,13 +119,15 @@ const PlotEditor = () => {
 
   return (
     <Root>
-      <PanZoomViewport className="plot-container" viewModel={viewModel}>
-        {map && <PotionMap className="map" map={map} viewModel={viewModel} />}
-        <Plot
-          className="plot"
-          plot={plot ?? EmptyPlotResult}
-          viewModel={viewModel}
-        />
+      <div className="outer-container">
+        <PanZoomViewport className="plot-container" viewModel={viewModel}>
+          {map && <PotionMap className="map" map={map} viewModel={viewModel} />}
+          <Plot
+            className="plot"
+            plot={plot ?? EmptyPlotResult}
+            viewModel={viewModel}
+          />
+        </PanZoomViewport>
         {inspectSource && (
           <StepDetails className="inspect-source" step={inspectSource} />
         )}
@@ -127,7 +142,13 @@ const PlotEditor = () => {
             </Typography>
           </CardContent>
         </Card>
-      </PanZoomViewport>
+        <IncDecSlider
+          className="zoom"
+          value={scale}
+          rate={4}
+          onChange={(value) => viewModel.setZoom(value)}
+        />
+      </div>
       <div className="divider" />
       <PlotBuilderItemsList
         className="plot-items"
