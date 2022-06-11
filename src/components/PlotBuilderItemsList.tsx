@@ -25,6 +25,7 @@ import {
 import { IngredientId } from "@/services/ingredients/types";
 
 import IngredientSelector from "./IngredientSelector";
+import IncDecSlider from "./IncDecSlider";
 
 export interface PlotBuilderItemsListProps {
   className?: string;
@@ -196,7 +197,11 @@ const AddIngredientPlotListItem = ({
   const [isPreviewing, setIsPreviewing] = React.useState<boolean>(false);
   const isPreviewingRef = React.useRef(false);
 
-  const [isChangingGrind, setIsChangingGrind] = React.useState(false);
+  // Note: This is from when a transition was used to show the preview, we wanted
+  // the slider to update live while the preview was not.  However, we no longer use
+  // transitions as the system is now fast enough to deal without it.
+  const [localGrind, setLocalGrind] = React.useState<number | null>(null);
+
   const ingredientId = useObservation(item.ingredientId$) ?? null;
   const grindPercent = useObservation(item.grindPercent$) ?? 0;
 
@@ -209,8 +214,8 @@ const AddIngredientPlotListItem = ({
     <PlotListItemCard
       item={item}
       highlight={highlight}
-      onMouseOver={isChangingGrind ? () => {} : onMouseOver}
-      onMouseOut={isChangingGrind ? () => {} : onMouseOut}
+      onMouseOver={localGrind != null ? () => {} : onMouseOver}
+      onMouseOut={localGrind != null ? () => {} : onMouseOut}
     >
       <div>
         <Typography variant="overline">Ingredient</Typography>
@@ -250,16 +255,14 @@ const AddIngredientPlotListItem = ({
       <Grid paddingTop={1}>
         <Typography id="grind-label">Grind Percent</Typography>
         <Slider
-          value={grindPercent}
+          value={localGrind ?? grindPercent}
           onChange={(_, value) => {
-            React.startTransition(() => {
-              item.setGrindPercent(value as number);
-            });
-            setIsChangingGrind(true);
+            item.setGrindPercent(value as number);
+            setLocalGrind(value as number);
           }}
           onChangeCommitted={(_, value) => {
             item.setGrindPercent(value as number);
-            setIsChangingGrind(false);
+            setLocalGrind(null);
           }}
           aria-labelledby="grind-label"
           min={0}
@@ -284,7 +287,7 @@ const StirCauldronPlotListItem = ({
   onMouseOver,
   onMouseOut,
 }: StirCauldronPlotListItemProps) => {
-  const distance = useObservation(item.distance$) ?? 0;
+  const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
   return (
     <PlotListItemCard
@@ -309,6 +312,13 @@ const StirCauldronPlotListItem = ({
           item.setDistance(asNumber);
         }}
         onBlur={() => setInputDistance(null)}
+      />
+      <IncDecSlider
+        value={distance ?? 0}
+        rate={10}
+        onChange={(value) =>
+          item.setDistance(Math.max(0, Number(value.toFixed(3))))
+        }
       />
     </PlotListItemCard>
   );
@@ -351,6 +361,13 @@ const PourSolventPlotListItem = ({
           item.setDistance(asNumber);
         }}
         onBlur={() => setInputDistance(null)}
+      />
+      <IncDecSlider
+        value={distance ?? 0}
+        rate={10}
+        onChange={(value) =>
+          item.setDistance(Math.max(0, Number(value.toFixed(3))))
+        }
       />
     </PlotListItemCard>
   );

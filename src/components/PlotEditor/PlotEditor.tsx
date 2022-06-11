@@ -79,11 +79,11 @@ const PlotEditor = () => {
 
   const builder = viewModel.builder;
 
-  const plotObserved = useObservation(builder.plot$) ?? null;
-  const plot = React.useDeferredValue(plotObserved);
+  const plot = useObservation(builder.plot$, { useTransition: false }) ?? null;
 
   const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
-  const outputShareString = useObservation(viewModel.shareString$) ?? null;
+  const outputShareString =
+    useObservation(viewModel.shareString$, { useTransition: true }) ?? null;
 
   const mouseWorld = useObservation(viewModel.mouseWorldPosition$) ?? PointZero;
 

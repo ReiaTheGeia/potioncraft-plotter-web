@@ -73,10 +73,7 @@ export function pointArrayLineFromDistance(
 
   if (remainingDistance > 0) {
     pointArray.push(
-      pointAdd(
-        pointArray[pointArray.length - 1] ?? PointZero,
-        pointScale(direction, remainingDistance)
-      )
+      pointAdd(previousPoint, pointScale(direction, remainingDistance))
     );
   }
 
