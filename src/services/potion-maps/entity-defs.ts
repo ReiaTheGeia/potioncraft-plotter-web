@@ -7,7 +7,7 @@ import { MapEntity } from "./types";
 export interface EntityDefinition {
   readonly entityType: MapEntity["entityType"];
   getBounds(entity: MapEntity): Rectangle;
-  hitTest(p: Point, entity: MapEntity): boolean;
+  hitTest(p: Point, entity: MapEntity, radius?: number): boolean;
 }
 
 class RadiusEntity implements EntityDefinition {
@@ -24,8 +24,8 @@ class RadiusEntity implements EntityDefinition {
     return rectFromCircle(entity, this._radius);
   }
 
-  hitTest(p: Point, entity: MapEntity): boolean {
-    return pointMagnitude(pointSubtract(p, entity)) <= this._radius;
+  hitTest(p: Point, entity: MapEntity, radius = 0): boolean {
+    return pointMagnitude(pointSubtract(p, entity)) - radius <= this._radius;
   }
 }
 
@@ -45,8 +45,8 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
       // FIXME: Arent these different sizes?
       return rectFromCircle(entity, 0.3);
     },
-    hitTest: (p: Point, entity: MapEntity): boolean => {
-      return pointMagnitude(pointSubtract(p, entity)) <= 0.3;
+    hitTest: (p: Point, entity: MapEntity, radius = 0): boolean => {
+      return pointMagnitude(pointSubtract(p, entity)) - radius <= 0.3;
     },
   },
   Vortex: {
@@ -56,10 +56,10 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
       const radius = VortexRadii[vortex.prefab];
       return rectFromCircle(entity, radius);
     },
-    hitTest: (p: Point, entity: MapEntity): boolean => {
+    hitTest: (p: Point, entity: MapEntity, radius = 0): boolean => {
       const vortex = assertEntity(entity, "Vortex");
-      const radius = VortexRadii[vortex.prefab];
-      return pointMagnitude(pointSubtract(p, entity)) <= radius;
+      const vortexRadius = VortexRadii[vortex.prefab];
+      return pointMagnitude(pointSubtract(p, entity)) - radius <= vortexRadius;
     },
   },
 };

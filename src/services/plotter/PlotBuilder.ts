@@ -48,10 +48,14 @@ export class PlotBuilder {
         return;
       }
 
-      this._itemSubscription = combineLatest(
-        items.map((x) => x.plotItem$)
-      ).subscribe((plotItems) => {
-        this._plot$.next(plotter.plotItems(plotItems.filter(isNotNull)));
+      this._itemSubscription = combineLatest([
+        this._map$,
+        ...items.map((x) => x.plotItem$),
+      ]).subscribe(([map, ...plotItems]) => {
+        if (map == null) {
+          return null;
+        }
+        this._plot$.next(plotter.plotItems(plotItems.filter(isNotNull), map));
       });
     });
   }

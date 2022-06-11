@@ -1,6 +1,7 @@
 import { Point } from "@/points";
 
 import { IngredientId } from "../ingredients/types";
+import { MapEntity } from "../potion-maps/types";
 
 export type PlotItem =
   | AddIngredientPlotItem
@@ -25,6 +26,7 @@ export interface StirCauldronPlotItem {
 
 export interface PlotPoint extends Point {
   source: PlotItem;
+  entities: Readonly<MapEntity>[];
 }
 
 export interface PlotResult {

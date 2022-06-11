@@ -1,4 +1,10 @@
-import { BehaviorSubject, map, Observable, combineLatest } from "rxjs";
+import {
+  BehaviorSubject,
+  map,
+  Observable,
+  combineLatest,
+  debounceTime,
+} from "rxjs";
 import { first } from "lodash";
 
 import { inject } from "microinject";
@@ -40,9 +46,9 @@ export class PlotEditorViewModel
   private readonly _mouseOverEntity$: Observable<MapEntity | null>;
 
   constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
-    this._shareString$ = this._builder.plot$.pipe(
-      map((x) => _builder.getShareString())
-    );
+    this._shareString$ = this._builder.plot$
+      .pipe(debounceTime(1000))
+      .pipe(map((x) => _builder.getShareString()));
 
     this._mouseWorldPosition$ = combineLatest([
       this._mouseClientPosition$,

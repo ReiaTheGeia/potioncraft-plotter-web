@@ -19,6 +19,7 @@ import {
 } from "@/points";
 
 import { IngredientRegistry } from "../ingredients/IngredientRegistry";
+import { PotionMap } from "../potion-maps/PotionMap";
 
 import {
   AddIngredientPlotItem,
@@ -27,6 +28,7 @@ import {
   PourSolventPlotItem,
   StirCauldronPlotItem,
 } from "./types";
+import { POTION_RADIUS } from "@/game-settings";
 
 @injectable()
 @singleton()
@@ -35,7 +37,7 @@ export class Plotter {
     @inject(IngredientRegistry) private ingredientRegistry: IngredientRegistry
   ) {}
 
-  plotItems(items: readonly PlotItem[]): PlotResult {
+  plotItems(items: readonly PlotItem[], map: PotionMap): PlotResult {
     let result: PlotResult = {
       committedPoints: [],
       pendingPoints: [],
@@ -46,6 +48,13 @@ export class Plotter {
     for (const item of items) {
       result = this._plotItem(item, result);
     }
+
+    for (const point of result.committedPoints.concat(result.pendingPoints)) {
+      const entities = map.hitTest(point, POTION_RADIUS);
+      point.entities = entities as any;
+    }
+
+    // console.log("plotting took", Date.now() - now);
 
     return result;
   }
@@ -167,6 +176,7 @@ function appendPendingPlotPoints(
         x: point.x,
         y: point.y,
         source,
+        entities: [],
       }))
     ),
   });
@@ -196,6 +206,7 @@ function commitPlotPoints(
         x: point.x,
         y: point.y,
         source,
+        entities: [],
       }))
     ),
     pendingPoints: result.pendingPoints.map((point) => ({

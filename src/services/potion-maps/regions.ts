@@ -6,8 +6,8 @@ import { Rectangle } from "@/rectangles";
 
 const MAP_WIDTH = MAP_EXTENT_RADIUS * 2;
 const MAP_HEIGHT = MAP_EXTENT_RADIUS * 2;
-const REGION_WIDTH = 1;
-const REGION_HEIGHT = 1;
+const REGION_WIDTH = 0.5;
+const REGION_HEIGHT = 0.5;
 
 const ORIGIN_OFFSET: Point = { x: MAP_EXTENT_RADIUS, y: MAP_EXTENT_RADIUS };
 
