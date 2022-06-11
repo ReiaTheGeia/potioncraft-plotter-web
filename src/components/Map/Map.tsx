@@ -1,22 +1,24 @@
 import React from "react";
 import { styled } from "@mui/material";
 
-import { PotionMap } from "@/services/potion-bases/PotionMap";
-
-import { IMapViewModel } from "./MapViewModel";
-import { useObservation } from "@/hooks/observe";
+import { PointZero } from "@/points";
+import { degreesToRadians } from "@/utils";
 import { SizeZero } from "@/size";
+
 import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
+
+import { useObservation } from "@/hooks/observe";
+
+import { PotionMap } from "@/services/potion-bases/PotionMap";
 import {
   DangerZonePartMapEntity,
   ExperienceBonusMapEntity,
   MapEntity,
   PotionEffectMapEntity,
+  VortexMapEntity,
 } from "@/services/potion-bases/types";
-import Context from "@mui/base/TabsUnstyled/TabsContext";
-import { PointZero } from "@/points";
-import { forEach } from "lodash";
-import { degreesToRadians } from "@/utils";
+
+import { IMapViewModel } from "./MapViewModel";
 
 export interface MapProps {
   className?: string;
@@ -116,13 +118,9 @@ function renderEntity(ctx: CanvasRenderingContext2D, entity: MapEntity) {
     case "ExperienceBonus":
       renderExperienceBonusEntity(ctx, entity);
       return;
-    default: {
-      ctx.beginPath();
-      ctx.fillStyle = "black";
-      ctx.arc(entity.x, entity.y, 0.3, 0, 2 * Math.PI);
-      ctx.fill();
+    case "Vortex":
+      renderVortexEntity(ctx, entity);
       return;
-    }
   }
 }
 
@@ -260,6 +258,67 @@ function renderExperienceBonusEntity(
   // ctx.fillStyle = "green";
   // ctx.arc(0, 0, 0.3, 0, 2 * Math.PI);
   // ctx.fill();
+
+  ctx.restore();
+}
+
+const VortexBackgroundImagesSrc: Record<string, string> = {
+  Large: require("./assets/vortexes/Vortex Background Large.png"),
+  Medium: require("./assets/vortexes/Vortex Background Medium.png"),
+};
+
+const VortexImagesSrc: Record<string, string> = {
+  Large: require("./assets/vortexes/Vortex Large Idle.png"),
+  Medium: require("./assets/vortexes/Vortex Medium Idle.png"),
+};
+
+function renderVortexEntity(
+  ctx: CanvasRenderingContext2D,
+  entity: VortexMapEntity
+) {
+  ctx.save();
+  ctx.translate(entity.x, entity.y);
+
+  // let radius = 0;
+  // switch (entity.prefab) {
+  //   case "Large":
+  //     radius = 1.65;
+  //     break;
+  //   case "Medium":
+  //     radius = 1.25;
+  //     break;
+  // }
+
+  // if (radius > 0) {
+  //   ctx.beginPath();
+  //   ctx.fillStyle = "purple";
+  //   ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+  //   ctx.fill();
+  // }
+
+  // const backgroundSrc = VortexBackgroundImagesSrc[entity.prefab];
+  // if (backgroundSrc) {
+  //   const img = makeImg(backgroundSrc);
+  //   const w = img.width / 150;
+  //   const h = img.height / 150;
+  //   ctx.save();
+  //   ctx.scale(1, -1);
+  //   ctx.translate(-w / 2, -h / 2);
+  //   ctx.drawImage(img, 0, 0, w, h);
+  //   ctx.restore();
+  // }
+
+  const src = VortexImagesSrc[entity.prefab];
+  if (src) {
+    const img = makeImg(src);
+    const w = img.width / 100;
+    const h = img.height / 100;
+    ctx.save();
+    ctx.scale(1, -1);
+    ctx.translate(-w / 2, -h / 2);
+    ctx.drawImage(img, 0, 0, w, h);
+    ctx.restore();
+  }
 
   ctx.restore();
 }
