@@ -85,42 +85,76 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
     <Card className={className} variant="outlined">
       <CardContent>
         <Typography variant="h6">Details</Typography>
-        <div>
-          <Typography>Effects</Typography>
-          <Typography variant="overline">
-            {Object.keys(effects)
-              .map((effect) => `${effect} (${effects[effect]})`)
-              .join(", ")}
-          </Typography>
-        </div>
-        <div>
-          <Typography>Ingredient count: </Typography>
-          <Typography variant="overline">
-            {totalIngredients} ({totalUniqueIngredients} unique)
-          </Typography>
-        </div>
-        <div>
-          <Typography>Ingredient stress: </Typography>
-          <Typography variant="overline">{stress.toFixed(2)}</Typography>
-        </div>
-        <div>
-          <Typography>Base Cost: </Typography>
-          <Typography variant="overline">{baseCost}</Typography>
-        </div>
-        <div>
-          <Typography>Committed length: </Typography>
-          <Typography variant="overline">{length.toFixed(2)}</Typography>
-        </div>
-        <div>
-          <Typography>Ends at: </Typography>
-          <Typography variant="overline">
-            {endsAt.x.toFixed(2)}, {endsAt.y.toFixed(2)}
-          </Typography>
-        </div>
-        <div>
-          <Typography>Longest length in bones: </Typography>
-          <Typography variant="overline">{longestDanger.toFixed(2)}</Typography>
-        </div>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <Typography>Effects:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">
+                  {Object.keys(effects)
+                    .map((effect) => `${effect} (${effects[effect]})`)
+                    .join(", ")}
+                </Typography>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Typography>Ingredient count:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">
+                  {totalIngredients} ({totalUniqueIngredients} unique)
+                </Typography>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Typography>Ingredient stress:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">{stress.toFixed(2)}</Typography>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Typography>Base Cost:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">{baseCost}</Typography>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Typography>Committed length:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">{length.toFixed(2)}</Typography>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Typography>Ends at:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">
+                  {endsAt.x.toFixed(2)}, {endsAt.y.toFixed(2)}
+                </Typography>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <Typography>Longest length in bones:</Typography>
+              </td>
+              <td>
+                <Typography variant="overline">
+                  {longestDanger.toFixed(2)}
+                </Typography>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </CardContent>
     </Card>
   );
