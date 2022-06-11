@@ -1,3 +1,5 @@
+import { Value } from "classnames";
+
 export function windowArray<T>(array: T[], count: number): T[][] {
   const a = [...array];
 

@@ -44,7 +44,7 @@ function makeImg(src: string): HTMLImageElement {
   return img;
 }
 
-const MapSlotSrc = require("./assets/MapSlot.png");
+const MapSlotSrc = require("@/assets/MapSlot.png");
 
 const PotionMapComponent = ({ className, map, viewModel }: MapProps) => {
   const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
@@ -150,11 +150,11 @@ function renderEntity(ctx: CanvasRenderingContext2D, entity: MapEntity) {
 }
 
 const DangerZoneImageSrces: Record<string, string> = {
-  Bone1: require("./assets/danger-zone-parts/Bone1.png"),
-  Bone2: require("./assets/danger-zone-parts/Bone2.png"),
-  Fang1: require("./assets/danger-zone-parts/Fang1.png"),
-  Fang2: require("./assets/danger-zone-parts/Fang2.png"),
-  Skull1: require("./assets/danger-zone-parts/Skull1.png"),
+  Bone1: require("@/assets/danger-zone-parts/Bone1.png"),
+  Bone2: require("@/assets/danger-zone-parts/Bone2.png"),
+  Fang1: require("@/assets/danger-zone-parts/Fang1.png"),
+  Fang2: require("@/assets/danger-zone-parts/Fang2.png"),
+  Skull1: require("@/assets/danger-zone-parts/Skull1.png"),
 };
 
 function renderDangerZonePart(
@@ -180,32 +180,32 @@ function renderDangerZonePart(
 }
 
 const PotionEffectImageSrces: Record<string, string> = {
-  Acid: require("./assets/potion-effects/Acid.webp"),
-  Berserker: require("./assets/potion-effects/Berserker.webp"),
-  Bounce: require("./assets/potion-effects/Bounce.webp"),
-  Charm: require("./assets/potion-effects/Charm.webp"),
-  Crop: require("./assets/potion-effects/Crop.webp"),
-  Explosion: require("./assets/potion-effects/Explosion.webp"),
-  Fire: require("./assets/potion-effects/Fire.webp"),
-  Fly: require("./assets/potion-effects/Fly.webp"),
-  Frost: require("./assets/potion-effects/Frost.webp"),
-  Growth: require("./assets/potion-effects/Growth.webp"),
-  Hallucinations: require("./assets/potion-effects/Hallucinations.webp"),
-  Healing: require("./assets/potion-effects/Healing.webp"),
-  Invisibility: require("./assets/potion-effects/Invisibility.webp"),
-  Libido: require("./assets/potion-effects/Libido.webp"),
-  Light: require("./assets/potion-effects/Light.webp"),
-  Lightning: require("./assets/potion-effects/Lightning.webp"),
-  Mana: require("./assets/potion-effects/Mana.webp"),
-  Necromancy: require("./assets/potion-effects/Necromancy.webp"),
-  Poison: require("./assets/potion-effects/Poison.webp"),
-  SharpVision: require("./assets/potion-effects/SharpVision.webp"),
-  Sleep: require("./assets/potion-effects/Sleep.webp"),
-  SlowDown: require("./assets/potion-effects/SlowDown.webp"),
-  StoneSkin: require("./assets/potion-effects/StoneSkin.webp"),
+  Acid: require("@/assets/potion-effects/Acid.webp"),
+  Berserker: require("@/assets/potion-effects/Berserker.webp"),
+  Bounce: require("@/assets/potion-effects/Bounce.webp"),
+  Charm: require("@/assets/potion-effects/Charm.webp"),
+  Crop: require("@/assets/potion-effects/Crop.webp"),
+  Explosion: require("@/assets/potion-effects/Explosion.webp"),
+  Fire: require("@/assets/potion-effects/Fire.webp"),
+  Fly: require("@/assets/potion-effects/Fly.webp"),
+  Frost: require("@/assets/potion-effects/Frost.webp"),
+  Growth: require("@/assets/potion-effects/Growth.webp"),
+  Hallucinations: require("@/assets/potion-effects/Hallucinations.webp"),
+  Healing: require("@/assets/potion-effects/Healing.webp"),
+  Invisibility: require("@/assets/potion-effects/Invisibility.webp"),
+  Libido: require("@/assets/potion-effects/Libido.webp"),
+  Light: require("@/assets/potion-effects/Light.webp"),
+  Lightning: require("@/assets/potion-effects/Lightning.webp"),
+  Mana: require("@/assets/potion-effects/Mana.webp"),
+  Necromancy: require("@/assets/potion-effects/Necromancy.webp"),
+  Poison: require("@/assets/potion-effects/Poison.webp"),
+  SharpVision: require("@/assets/potion-effects/SharpVision.webp"),
+  Sleep: require("@/assets/potion-effects/Sleep.webp"),
+  SlowDown: require("@/assets/potion-effects/SlowDown.webp"),
+  StoneSkin: require("@/assets/potion-effects/StoneSkin.webp"),
 };
 
-const EffectSlotSrc = require("./assets/EffectSlot.png");
+const EffectSlotSrc = require("@/assets/EffectSlot.png");
 function renderPotionEffectEntity(
   ctx: CanvasRenderingContext2D,
   entity: PotionEffectMapEntity
@@ -256,9 +256,9 @@ function renderPotionEffectEntity(
 }
 
 const ExperienceBonusImagesSrc: Record<string, string> = {
-  Little: require("./assets/experience-bonus/xp-small.png"),
-  Medium: require("./assets/experience-bonus/xp-medium.png"),
-  Large: require("./assets/experience-bonus/xp-large.png"),
+  Little: require("@/assets/experience-bonus/xp-small.png"),
+  Medium: require("@/assets/experience-bonus/xp-medium.png"),
+  Large: require("@/assets/experience-bonus/xp-large.png"),
 };
 
 function renderExperienceBonusEntity(
@@ -289,8 +289,8 @@ function renderExperienceBonusEntity(
 }
 
 const VortexImagesSrc: Record<string, string> = {
-  Large: require("./assets/vortexes/Vortex Large Idle.png"),
-  Medium: require("./assets/vortexes/Vortex Medium Idle.png"),
+  Large: require("@/assets/vortexes/Vortex Large Idle.png"),
+  Medium: require("@/assets/vortexes/Vortex Medium Idle.png"),
 };
 
 function renderVortexEntity(
