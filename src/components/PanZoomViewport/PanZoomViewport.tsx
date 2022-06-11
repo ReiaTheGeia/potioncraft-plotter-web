@@ -7,6 +7,7 @@ import { useComponentBounds } from "@/hooks/component-bounds";
 import { useNativeEvent } from "@/hooks/native-event";
 
 import { IPanZoomViewportViewModel } from "./PanZoomViewportViewModel";
+import { Point, pointSubtract, PointZero } from "@/points";
 
 export interface PanZoomHandlerProps {
   className?: string;
@@ -29,6 +30,8 @@ const PanZoomViewport = ({
 }: PanZoomHandlerProps) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const containerBounds = useComponentBounds(containerRef);
+  const [dragPointer, setDragPointer] = React.useState<number | null>(null);
+  const [mouseLastPos, setMouseLastPos] = React.useState<Point>(PointZero);
 
   React.useLayoutEffect(() => {
     viewModel.onViewportResized(containerBounds.width, containerBounds.height);
@@ -60,6 +63,48 @@ const PanZoomViewport = ({
     }
   }, []);
 
+  const onPointerDown = React.useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (dragPointer != null) {
+        return;
+      }
+      if (e.defaultPrevented) {
+        return;
+      }
+      e.preventDefault();
+      setDragPointer(e.pointerId);
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setMouseLastPos({ x: e.clientX, y: e.clientY });
+    },
+    [dragPointer]
+  );
+
+  const onPointerMove = React.useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (dragPointer == null) {
+        return;
+      }
+      const p = { x: e.clientX, y: e.clientY };
+      const delta = pointSubtract(p, mouseLastPos);
+      setMouseLastPos(p);
+      // FIXME: Panning is miscalculated.  Mouse drifts from grab position.
+      viewModel.pan(delta.x, -delta.y, true);
+    },
+    [mouseLastPos, viewModel]
+  );
+
+  const onPointerUp = React.useCallback(
+    (e: React.PointerEvent) => {
+      if (e.pointerId != dragPointer) {
+        return;
+      }
+      setDragPointer(null);
+      setMouseLastPos(PointZero);
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    },
+    [dragPointer]
+  );
+
   // React listens to the root listener for all events,
   //  and chrome assumes the root event listener for mouse events
   //  never wants to preventDefault.
@@ -72,6 +117,9 @@ const PanZoomViewport = ({
       className={className}
       ref={containerRef}
       onMouseMove={(e) => viewModel.onMouseMove(e.clientX, e.clientY)}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
     >
       {children}
     </Root>
