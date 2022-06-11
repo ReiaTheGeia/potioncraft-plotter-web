@@ -2,8 +2,8 @@ import { injectable, singleton } from "microinject";
 
 import { typedKeys } from "@/utils";
 
-import { PotionBaseMaps } from "./maps";
-import { PotionMap } from "./PotionMap";
+import { PotionBaseMaps } from "../potion-maps/maps";
+import { PotionMap } from "../potion-maps/PotionMap";
 import { PotionBaseId, PotionBase } from "./types";
 
 @injectable()

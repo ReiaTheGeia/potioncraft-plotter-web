@@ -1,4 +1,5 @@
 import { BehaviorSubject, map, Observable, combineLatest } from "rxjs";
+import { first } from "lodash";
 
 import { inject } from "microinject";
 
@@ -12,6 +13,7 @@ import { PlotItem } from "@/services/plotter/types";
 
 import { IPlotViewModel } from "../Plot/PlotViewModel";
 import { IPanZoomViewportViewModel } from "../PanZoomViewport/PanZoomViewportViewModel";
+import { MapEntity } from "@/services/potion-maps/types";
 
 export class PlotEditorViewModel
   implements IPlotViewModel, IPanZoomViewportViewModel
@@ -23,9 +25,9 @@ export class PlotEditorViewModel
    */
   private readonly _viewOffset$ = new BehaviorSubject<Point>(PointZero);
   private readonly _viewScale$ = new BehaviorSubject<number>(1);
-  private readonly _mouseOverBuilderItem$ =
-    new BehaviorSubject<PlotBuilderItem | null>(null);
+
   private readonly _shareString$: Observable<string>;
+
   private readonly _mouseClientPosition$ = new BehaviorSubject<Point>(
     PointZero
   );
@@ -33,16 +35,31 @@ export class PlotEditorViewModel
   private readonly _mouseOverPlotItem$ = new BehaviorSubject<PlotItem | null>(
     null
   );
+  private readonly _mouseOverBuilderItem$ =
+    new BehaviorSubject<PlotBuilderItem | null>(null);
+  private readonly _mouseOverEntity$: Observable<MapEntity | null>;
 
   constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
     this._shareString$ = this._builder.plot$.pipe(
       map((x) => _builder.getShareString())
     );
+
     this._mouseWorldPosition$ = combineLatest([
       this._mouseClientPosition$,
       this._viewOffset$,
       this._viewScale$,
     ]).pipe(map(([clientPos]) => this._clientToWorld(clientPos)));
+
+    this._mouseOverEntity$ = combineLatest([
+      this._mouseWorldPosition$,
+      _builder.map$,
+    ]).pipe(
+      map(([worldPos, map]) => {
+        const entities = map?.hitTest(worldPos) ?? [];
+        const entity = first(entities);
+        return entity ?? null;
+      })
+    );
   }
 
   get builder(): PlotBuilder {
@@ -74,6 +91,10 @@ export class PlotEditorViewModel
 
   get mouseOverBuilderItem$(): Observable<PlotBuilderItem | null> {
     return this._mouseOverBuilderItem$;
+  }
+
+  get mouseOverEntity$(): Observable<MapEntity | null> {
+    return this._mouseOverEntity$;
   }
 
   zoom(delta: number, on: Point | null = null) {
@@ -146,16 +167,11 @@ export class PlotEditorViewModel
     const zoomFactor = this._viewScale$.value;
     const { x: offsetX, y: offsetY } = this._viewOffset$.value;
 
-    // Why the hell is offset operating in the opposite direction of crucible-web even with the same map renderer?
-
-    // return {
-    //   x: p.x / zoomFactor - MAP_EXTENT_RADIUS + offsetX,
-    //   y: (p.y / zoomFactor - MAP_EXTENT_RADIUS + offsetY) * -1,
-    // };
-
+    // offset is in world coords.
+    // We need to add offsetY instead of subtract as y is flipped in world coords when compared to screen.
     return {
       x: p.x / zoomFactor - MAP_EXTENT_RADIUS - offsetX,
-      y: (p.y / zoomFactor - MAP_EXTENT_RADIUS - offsetY) * -1,
+      y: (p.y / zoomFactor - MAP_EXTENT_RADIUS + offsetY) * -1,
     };
   }
 

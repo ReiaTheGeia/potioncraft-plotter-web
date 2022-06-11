@@ -15,8 +15,6 @@ import {
   usePlotViewModel,
 } from "./PlotViewModel";
 
-import PlotDetails from "./components/PlotDetails";
-import StepDetails from "./components/StepDetails";
 import { SizeZero } from "@/size";
 
 export interface PlotProps {
@@ -28,16 +26,6 @@ export interface PlotProps {
 const Root = styled("div")(({ theme }) => ({
   overflow: "hidden",
   position: "relative",
-  "& .plot-details": {
-    position: "absolute",
-    top: theme.spacing(2),
-    right: theme.spacing(2),
-  },
-  "& .inspect-source": {
-    position: "absolute",
-    top: theme.spacing(2),
-    left: theme.spacing(2),
-  },
   "& .plot-svg": {
     display: "block",
     position: "absolute",
@@ -105,10 +93,6 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
             </g>
           </g>
         </svg>
-        {inspectSource && (
-          <StepDetails className="inspect-source" step={inspectSource} />
-        )}
-        <PlotDetails className="plot-details" plot={plot} />
       </PlotViewModelContext.Provider>
     </Root>
   );
@@ -163,7 +147,7 @@ const PlotLine = ({
     <path
       d={path}
       stroke={color}
-      strokeWidth={(highlight ? 5 : 2) / scale}
+      strokeWidth={(highlight ? 6 : 3) / scale}
       fill="none"
       onMouseOver={onPathMouseOver}
       onMouseOut={onMouseOut}

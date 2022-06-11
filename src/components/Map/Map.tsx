@@ -5,18 +5,18 @@ import { PointZero } from "@/points";
 import { degreesToRadians } from "@/utils";
 import { SizeZero } from "@/size";
 
-import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
+import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
 import { useObservation } from "@/hooks/observe";
 
-import { PotionMap } from "@/services/potion-bases/PotionMap";
+import { PotionMap } from "@/services/potion-maps/PotionMap";
 import {
   DangerZonePartMapEntity,
   ExperienceBonusMapEntity,
   MapEntity,
   PotionEffectMapEntity,
   VortexMapEntity,
-} from "@/services/potion-bases/types";
+} from "@/services/potion-maps/types";
 
 import { IMapViewModel } from "./MapViewModel";
 
@@ -287,11 +287,6 @@ function renderExperienceBonusEntity(
 
   ctx.restore();
 }
-
-const VortexBackgroundImagesSrc: Record<string, string> = {
-  Large: require("./assets/vortexes/Vortex Background Large.png"),
-  Medium: require("./assets/vortexes/Vortex Background Medium.png"),
-};
 
 const VortexImagesSrc: Record<string, string> = {
   Large: require("./assets/vortexes/Vortex Large Idle.png"),

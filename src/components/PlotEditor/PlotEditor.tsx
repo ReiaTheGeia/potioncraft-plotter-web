@@ -12,12 +12,15 @@ import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
 import Plot from "../Plot";
 import PlotBuilderItemsList from "../PlotBuilderItemsList";
 import PotionMap from "../Map";
+import PanZoomViewport from "../PanZoomViewport";
 
 import { PlotEditorViewModel } from "./PlotEditorViewModel";
-import PanZoomViewport from "../PanZoomViewport";
-import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
-const Root = styled("div")({
+import StepDetails from "./components/StepDetails";
+import PlotDetails from "./components/PlotDetails";
+import EntityDetails from "./components/EntityDetails";
+
+const Root = styled("div")(({ theme }) => ({
   width: "100%",
   height: "100%",
   display: "flex",
@@ -41,10 +44,20 @@ const Root = styled("div")({
     width: "100%",
     height: "100%",
   },
+  "& .plot-details": {
+    position: "absolute",
+    top: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+  "& .inspect-source": {
+    position: "absolute",
+    top: theme.spacing(2),
+    left: theme.spacing(2),
+  },
   "& .mouse-coords": {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
   },
   "& .divider": {
     width: "2px",
@@ -55,12 +68,14 @@ const Root = styled("div")({
     width: "400px",
     height: "100%",
   },
-});
+}));
 
 const PlotEditor = () => {
   const viewModel = useDICreate(PlotEditorViewModel);
   const baseRegistry = useDIDependency(PotionBaseRegistry);
   const map = baseRegistry.getPotionBaseById("water" as any)?.map;
+  const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
+  const inspectEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
 
   const builder = viewModel.builder;
 
@@ -98,6 +113,13 @@ const PlotEditor = () => {
           plot={plot ?? EmptyPlotResult}
           viewModel={viewModel}
         />
+        {inspectSource && (
+          <StepDetails className="inspect-source" step={inspectSource} />
+        )}
+        {!inspectSource && inspectEntity && (
+          <EntityDetails className="inspect-source" entity={inspectEntity} />
+        )}
+        {plot && <PlotDetails className="plot-details" plot={plot} />}
         <Card className="mouse-coords">
           <CardContent>
             <Typography variant="overline">

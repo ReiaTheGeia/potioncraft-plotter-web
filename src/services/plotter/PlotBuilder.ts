@@ -15,18 +15,27 @@ import {
 
 import { IngredientId } from "../ingredients/types";
 
+import { PotionMap } from "../potion-maps/PotionMap";
+import { PotionBaseRegistry } from "../potion-bases/PotionBaseRegistry";
+
 import { Plotter } from "./Plotter";
 import { PlotItem, PlotResult } from "./types";
 
 @injectable()
 export class PlotBuilder {
+  private readonly _map$ = new BehaviorSubject<PotionMap | null>(null);
   private readonly _items$ = new BehaviorSubject<readonly PlotBuilderItem[]>(
     []
   );
   private _itemSubscription: Subscription | null = null;
   private readonly _plot$ = new BehaviorSubject<PlotResult | null>(null);
 
-  constructor(@inject(Plotter) plotter: Plotter) {
+  constructor(
+    @inject(PotionBaseRegistry) potionBaseRegistry: PotionBaseRegistry,
+    @inject(Plotter) plotter: Plotter
+  ) {
+    this._map$.next(potionBaseRegistry.getPotionBaseById("water" as any)!.map);
+
     // This is a little wonky, but subscribing to all observables in an observable array is something I could see wanting to do a lot.
     // Should make a utility function to handle this use case, if one doesnt already exist in rxjs.
     this._items$.subscribe((items) => {
@@ -45,6 +54,10 @@ export class PlotBuilder {
         this._plot$.next(plotter.plotItems(plotItems.filter(isNotNull)));
       });
     });
+  }
+
+  get map$() {
+    return this._map$;
   }
 
   get items$() {
