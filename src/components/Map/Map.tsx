@@ -198,6 +198,20 @@ function renderPotionEffectEntity(
   ctx: CanvasRenderingContext2D,
   entity: PotionEffectMapEntity
 ) {
+  // Line from effect to origin
+  ctx.save();
+  var grad = ctx.createLinearGradient(entity.x, entity.y, 0, 0);
+  grad.addColorStop(0, "#D2AA7B");
+  grad.addColorStop(1, "transparent");
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 0.05;
+  ctx.beginPath();
+  ctx.moveTo(entity.x, entity.y);
+  ctx.lineTo(0, 0);
+  ctx.stroke();
+  ctx.restore();
+
+  // Effect artwork
   ctx.save();
 
   ctx.translate(entity.x, entity.y);
