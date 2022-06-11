@@ -202,6 +202,10 @@ const AddIngredientPlotListItem = ({
   // transitions as the system is now fast enough to deal without it.
   const [localGrind, setLocalGrind] = React.useState<number | null>(null);
 
+  const [inputGrindPercent, setInputGrindPercent] = React.useState<
+    string | null
+  >(null);
+
   const ingredientId = useObservation(item.ingredientId$) ?? null;
   const grindPercent = useObservation(item.grindPercent$) ?? 0;
 
@@ -253,7 +257,20 @@ const AddIngredientPlotListItem = ({
         }}
       />
       <Grid paddingTop={1}>
-        <Typography id="grind-label">Grind Percent</Typography>
+        <TextField
+          label="Grind Percent"
+          value={inputGrindPercent ?? grindPercent * 100}
+          onChange={(e) => {
+            let asNumber: number | null = Number(e.target.value) / 100;
+            if (isNaN(asNumber) || asNumber < 0 || asNumber > 1) {
+              asNumber = null;
+            }
+
+            setInputGrindPercent(e.target.value);
+            item.setGrindPercent(asNumber ?? 0);
+          }}
+          onBlur={() => setInputGrindPercent(null)}
+        />
         <Slider
           value={localGrind ?? grindPercent}
           onChange={(_, value) => {
@@ -264,7 +281,6 @@ const AddIngredientPlotListItem = ({
             item.setGrindPercent(value as number);
             setLocalGrind(null);
           }}
-          aria-labelledby="grind-label"
           min={0}
           max={1}
           step={0.001}

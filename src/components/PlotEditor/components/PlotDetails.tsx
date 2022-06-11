@@ -1,11 +1,11 @@
 import React from "react";
-import { uniq, sum } from "lodash";
+import { uniq, sum, last } from "lodash";
 
 import { Card, CardContent, Typography } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { pointArrayLength } from "@/point-array";
-import { pointMagnitude, pointSubtract } from "@/points";
+import { pointMagnitude, pointSubtract, PointZero } from "@/points";
 
 import {
   AddIngredientPlotItem,
@@ -22,6 +22,8 @@ export interface PlotDetailsProps {
 
 const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
   const ingredientRegistry = useDIDependency(IngredientRegistry);
+
+  const endsAt = last(plot.committedPoints) ?? PointZero;
 
   const [
     baseCost,
@@ -97,7 +99,13 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
           <Typography variant="overline">{length.toFixed(2)}</Typography>
         </div>
         <div>
-          <Typography>Longest length in danger: </Typography>
+          <Typography>Ends at: </Typography>
+          <Typography variant="overline">
+            {endsAt.x.toFixed(2)}, {endsAt.y.toFixed(2)}
+          </Typography>
+        </div>
+        <div>
+          <Typography>Longest length in bones: </Typography>
           <Typography variant="overline">{longestDanger.toFixed(2)}</Typography>
         </div>
       </CardContent>
