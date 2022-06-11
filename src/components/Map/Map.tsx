@@ -31,6 +31,21 @@ const Root = styled("div")(({ theme }) => ({
   overflow: "hidden",
 }));
 
+const imgCache = new Map<string, HTMLImageElement>();
+function makeImg(src: string): HTMLImageElement {
+  if (imgCache.has(src)) {
+    return imgCache.get(src)!;
+  }
+
+  const img = new Image();
+  img.onerror = console.error.bind(console);
+  img.src = src;
+  imgCache.set(src, img);
+  return img;
+}
+
+const MapSlotSrc = require("./assets/MapSlot.png");
+
 const PotionMapComponent = ({ className, map, viewModel }: MapProps) => {
   const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
@@ -53,6 +68,7 @@ const PotionMapComponent = ({ className, map, viewModel }: MapProps) => {
       ctx.clearRect(0, 0, width, height);
 
       transformToMap(ctx, scale, offset.x, offset.y, () => {
+        // Map border
         ctx.beginPath();
         ctx.strokeStyle = "red";
         ctx.lineWidth = 0.2;
@@ -63,10 +79,19 @@ const PotionMapComponent = ({ className, map, viewModel }: MapProps) => {
         ctx.lineTo(-60, -60);
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.fillStyle = "blue";
-        ctx.arc(0, 0, POTION_RADIUS, 0, 2 * Math.PI);
-        ctx.fill();
+        // ctx.beginPath();
+        // ctx.fillStyle = "blue";
+        // ctx.arc(0, 0, POTION_RADIUS, 0, 2 * Math.PI);
+        // ctx.fill();
+
+        ctx.save();
+        const img = makeImg(MapSlotSrc);
+        const mapSlotW = img.width / 100;
+        const mapSlotH = img.height / 100;
+        ctx.scale(1, -1);
+        ctx.translate(-mapSlotW / 2, -mapSlotH / 2 - 0.19);
+        ctx.drawImage(img, 0, 0, mapSlotW, mapSlotH);
+        ctx.restore();
 
         for (const entity of entities) {
           renderEntity(ctx, entity);
@@ -122,19 +147,6 @@ function renderEntity(ctx: CanvasRenderingContext2D, entity: MapEntity) {
       renderVortexEntity(ctx, entity);
       return;
   }
-}
-
-const imgCache = new Map<string, HTMLImageElement>();
-function makeImg(src: string): HTMLImageElement {
-  if (imgCache.has(src)) {
-    return imgCache.get(src)!;
-  }
-
-  const img = new Image();
-  img.onerror = console.error.bind(console);
-  img.src = src;
-  imgCache.set(src, img);
-  return img;
 }
 
 const DangerZoneImageSrces: Record<string, string> = {
