@@ -54,7 +54,7 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
   );
 
   const onLineMouseOut = React.useCallback(() => {
-    () => viewModel.onMouseOverPlotItem(null);
+    viewModel.onMouseOverPlotItem(null);
   }, [viewModel]);
 
   const [committedLines, pendingLines] = resultToPlotLines(
@@ -136,15 +136,13 @@ const PlotLine = ({
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const { points, source, evenOdd } = line;
 
-  const lastPoint = last(points) ?? PointZero;
-
   const onPathMouseOver = React.useCallback(() => {
     onMouseOver(line);
   }, [line, onMouseOver]);
 
   const onPathMouseOut = React.useCallback(() => {
     onMouseOut();
-  }, []);
+  }, [onMouseOut]);
 
   if (points.length === 0) {
     return null;
