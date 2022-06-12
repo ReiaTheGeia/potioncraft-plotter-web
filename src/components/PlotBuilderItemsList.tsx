@@ -155,8 +155,8 @@ interface PlotListItemCardProps {
   item: PlotBuilderItem;
   highlight: boolean;
   children: React.ReactNode;
-  onMouseOver(item: PlotBuilderItem): void;
-  onMouseOut(): void;
+  onMouseOver?(item: PlotBuilderItem): void;
+  onMouseOut?(): void;
 }
 
 const PlotListItemCard = ({
@@ -167,6 +167,12 @@ const PlotListItemCard = ({
   onMouseOut,
 }: PlotListItemCardProps) => {
   const valid = useObservation(item.isValid$) ?? false;
+  const onCardMouseOver = React.useCallback(() => {
+    if (onMouseOver) {
+      onMouseOver(item);
+    }
+  }, [onMouseOver, item]);
+  const onDeleteClick = React.useCallback(() => item.delete(), [item]);
   return (
     <Card
       className="list-item"
@@ -174,13 +180,13 @@ const PlotListItemCard = ({
         backgroundColor:
           (!valid && "salmon") || (highlight && "lightblue") || undefined,
       }}
-      onMouseOver={() => onMouseOver(item)}
+      onMouseOver={onCardMouseOver}
       onMouseOut={onMouseOut}
     >
       <IconButton
         size="small"
         className="delete-button"
-        onClick={() => item.delete()}
+        onClick={onDeleteClick}
       >
         <DeleteIcon />
       </IconButton>
@@ -219,6 +225,73 @@ const AddIngredientPlotListItem = ({
   const ingredientId = useObservation(item.ingredientId$) ?? null;
   const grindPercent = useObservation(item.grindPercent$) ?? 0;
 
+  const onIngredientSelectorOpen = React.useCallback(() => {
+    savedIngredientRef.current = item.ingredientId;
+    setIsPreviewing(true);
+    isPreviewingRef.current = true;
+  }, []);
+
+  const onIngredientSelectorMouseOverItem = React.useCallback(
+    (value: IngredientId) => {
+      if (!isPreviewing) {
+        return;
+      }
+      item.setIngredient(value);
+    },
+    [item]
+  );
+
+  const onIngredientSelectorChange = React.useCallback(
+    (value: IngredientId | null) => {
+      setIsPreviewing(false);
+      isPreviewingRef.current = false;
+      item.setIngredient(value);
+    },
+    [item]
+  );
+
+  const onIngredientSelectorClose = React.useCallback(() => {
+    if (isPreviewingRef.current) {
+      item.setIngredient(savedIngredientRef.current);
+      setIsPreviewing(false);
+      isPreviewingRef.current = false;
+    }
+    savedIngredientRef.current = null;
+  }, [item]);
+
+  const onGrindPercentTextChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value) / 100;
+      if (isNaN(asNumber) || asNumber < 0 || asNumber > 1) {
+        asNumber = null;
+      }
+
+      setInputGrindPercent(e.target.value);
+      item.setGrindPercent(asNumber ?? 0);
+    },
+    [item]
+  );
+
+  const onGrindPercentBlur = React.useCallback(() => {
+    setInputGrindPercent(null);
+  }, []);
+
+  const onSliderChange = React.useCallback(
+    (_: any, value: number | number[]) => {
+      item.setGrindPercent(value as number);
+      setLocalGrind(value as number);
+    },
+    [item]
+  );
+
+  const onSliderChangeCommitted = React.useCallback(
+    (_: any, value: number | number[]) => {
+      item.setGrindPercent(value as number);
+      setLocalGrind(null);
+    },
+    [item]
+  );
+
   // We change the ingredientId during mouse over for live feedback, but this changes the ingredient id we wish to display.
   // We need to pin the previously selected id so that IngredientSelector works properly during the selection process.
   const displayIngredientId = isPreviewing
@@ -228,8 +301,8 @@ const AddIngredientPlotListItem = ({
     <PlotListItemCard
       item={item}
       highlight={highlight}
-      onMouseOver={localGrind != null ? () => {} : onMouseOver}
-      onMouseOut={localGrind != null ? () => {} : onMouseOut}
+      onMouseOver={localGrind != null ? undefined : onMouseOver}
+      onMouseOut={localGrind != null ? undefined : onMouseOut}
     >
       <div>
         <Typography variant="overline">Ingredient</Typography>
@@ -239,58 +312,24 @@ const AddIngredientPlotListItem = ({
         value={displayIngredientId}
         allowEmpty={displayIngredientId == null}
         // Store the last ingredient when we open, so we can return to it after closing without making a selection.
-        onOpen={() => {
-          savedIngredientRef.current = item.ingredientId;
-          setIsPreviewing(true);
-          isPreviewingRef.current = true;
-        }}
+        onOpen={onIngredientSelectorOpen}
         // Change the ingredient id with the mouse for a live preview.
-        onMouseOverItem={(id) => {
-          if (!isPreviewing) {
-            return;
-          }
-          item.setIngredient(id);
-        }}
+        onMouseOverItem={onIngredientSelectorMouseOverItem}
         // Change our saved ingredient when the input is committed.  We will restore it when the input closes after the change.
-        onChange={(id) => {
-          setIsPreviewing(false);
-          isPreviewingRef.current = false;
-          item.setIngredient(id);
-        }}
-        onClose={() => {
-          if (isPreviewingRef.current) {
-            item.setIngredient(savedIngredientRef.current);
-            setIsPreviewing(false);
-            isPreviewingRef.current = false;
-          }
-          savedIngredientRef.current = null;
-        }}
+        onChange={onIngredientSelectorChange}
+        onClose={onIngredientSelectorClose}
       />
       <Grid paddingTop={1}>
         <TextField
           label="Grind Percent"
           value={inputGrindPercent ?? grindPercent * 100}
-          onChange={(e) => {
-            let asNumber: number | null = Number(e.target.value) / 100;
-            if (isNaN(asNumber) || asNumber < 0 || asNumber > 1) {
-              asNumber = null;
-            }
-
-            setInputGrindPercent(e.target.value);
-            item.setGrindPercent(asNumber ?? 0);
-          }}
-          onBlur={() => setInputGrindPercent(null)}
+          onChange={onGrindPercentTextChange}
+          onBlur={onGrindPercentBlur}
         />
         <Slider
           value={localGrind ?? grindPercent}
-          onChange={(_, value) => {
-            item.setGrindPercent(value as number);
-            setLocalGrind(value as number);
-          }}
-          onChangeCommitted={(_, value) => {
-            item.setGrindPercent(value as number);
-            setLocalGrind(null);
-          }}
+          onChange={onSliderChange}
+          onChangeCommitted={onSliderChangeCommitted}
           min={0}
           max={1}
           step={0.001}
@@ -315,6 +354,29 @@ const StirCauldronPlotListItem = ({
 }: StirCauldronPlotListItemProps) => {
   const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
+
+  const onTextFieldChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+
+      setInputDistance(e.target.value);
+      item.setDistance(asNumber);
+    },
+    [item]
+  );
+  const onTextFieldBlur = React.useCallback(() => {
+    setInputDistance(null);
+  }, []);
+  const onDistanceChange = React.useCallback(
+    (value: number) => {
+      item.setDistance(Math.max(0, Number(value.toFixed(3))));
+    },
+    [item]
+  );
+
   return (
     <PlotListItemCard
       item={item}
@@ -328,23 +390,13 @@ const StirCauldronPlotListItem = ({
       <TextField
         label="Distance"
         value={inputDistance ?? distance ?? ""}
-        onChange={(e) => {
-          let asNumber: number | null = Number(e.target.value);
-          if (isNaN(asNumber)) {
-            asNumber = null;
-          }
-
-          setInputDistance(e.target.value);
-          item.setDistance(asNumber);
-        }}
-        onBlur={() => setInputDistance(null)}
+        onChange={onTextFieldChange}
+        onBlur={onTextFieldBlur}
       />
       <IncDecSlider
         value={distance ?? 0}
         rate={10}
-        onChange={(value) =>
-          item.setDistance(Math.max(0, Number(value.toFixed(3))))
-        }
+        onChange={onDistanceChange}
       />
     </PlotListItemCard>
   );
@@ -364,6 +416,29 @@ const PourSolventPlotListItem = ({
 }: PourSolventPlotListItemProps) => {
   const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
+
+  const onTextFieldChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+
+      setInputDistance(e.target.value);
+      item.setDistance(asNumber);
+    },
+    [item]
+  );
+  const onTextFieldBlur = React.useCallback(() => {
+    setInputDistance(null);
+  }, []);
+  const onDistanceChange = React.useCallback(
+    (value: number) => {
+      item.setDistance(Math.max(0, Number(value.toFixed(3))));
+    },
+    [item]
+  );
+
   return (
     <PlotListItemCard
       item={item}
@@ -377,23 +452,13 @@ const PourSolventPlotListItem = ({
       <TextField
         label="Distance"
         value={inputDistance ?? distance ?? ""}
-        onChange={(e) => {
-          let asNumber: number | null = Number(e.target.value);
-          if (isNaN(asNumber)) {
-            asNumber = null;
-          }
-
-          setInputDistance(e.target.value);
-          item.setDistance(asNumber);
-        }}
-        onBlur={() => setInputDistance(null)}
+        onChange={onTextFieldChange}
+        onBlur={onTextFieldBlur}
       />
       <IncDecSlider
         value={distance ?? 0}
         rate={10}
-        onChange={(value) =>
-          item.setDistance(Math.max(0, Number(value.toFixed(3))))
-        }
+        onChange={onDistanceChange}
       />
     </PlotListItemCard>
   );
@@ -413,6 +478,29 @@ const HeatVortexPlotListItem = ({
 }: HeatVortexPlotListItemProps) => {
   const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
+
+  const onTextFieldChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+
+      setInputDistance(e.target.value);
+      item.setDistance(asNumber);
+    },
+    [item]
+  );
+  const onTextFieldBlur = React.useCallback(() => {
+    setInputDistance(null);
+  }, []);
+  const onDistanceChange = React.useCallback(
+    (value: number) => {
+      item.setDistance(Math.max(0, Number(value.toFixed(3))));
+    },
+    [item]
+  );
+
   return (
     <PlotListItemCard
       item={item}
@@ -426,23 +514,13 @@ const HeatVortexPlotListItem = ({
       <TextField
         label="Distance"
         value={inputDistance ?? distance ?? ""}
-        onChange={(e) => {
-          let asNumber: number | null = Number(e.target.value);
-          if (isNaN(asNumber)) {
-            asNumber = null;
-          }
-
-          setInputDistance(e.target.value);
-          item.setDistance(asNumber);
-        }}
-        onBlur={() => setInputDistance(null)}
+        onChange={onTextFieldChange}
+        onBlur={onTextFieldBlur}
       />
       <IncDecSlider
         value={distance ?? 0}
         rate={10}
-        onChange={(value) =>
-          item.setDistance(Math.max(0, Number(value.toFixed(3))))
-        }
+        onChange={onDistanceChange}
       />
     </PlotListItemCard>
   );

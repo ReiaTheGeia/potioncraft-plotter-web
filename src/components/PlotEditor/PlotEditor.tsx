@@ -106,7 +106,7 @@ const PlotEditor = () => {
   const outputShareString =
     useObservation(viewModel.shareString$, { useTransition: true }) ?? null;
 
-  const mouseWorld = useObservation(viewModel.mouseWorldPosition$) ?? PointZero;
+  const mouseWorld = useObservation(viewModel.mouseWorldPosition$) ?? null;
 
   React.useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -155,13 +155,15 @@ const PlotEditor = () => {
           )}
         </div>
         {plot && <PlotDetails className="plot-details" plot={plot} />}
-        <Card className="mouse-coords">
-          <CardContent>
-            <Typography variant="overline">
-              ({mouseWorld.x.toFixed(2)}, {mouseWorld.y.toFixed(2)})
-            </Typography>
-          </CardContent>
-        </Card>
+        {mouseWorld && (
+          <Card className="mouse-coords">
+            <CardContent>
+              <Typography variant="overline">
+                ({mouseWorld.x.toFixed(2)}, {mouseWorld.y.toFixed(2)})
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
         <IncDecSlider
           className="zoom"
           value={scale}

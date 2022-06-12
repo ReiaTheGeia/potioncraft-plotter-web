@@ -53,6 +53,10 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
     [viewModel]
   );
 
+  const onLineMouseOut = React.useCallback(() => {
+    () => viewModel.onMouseOverPlotItem(null);
+  }, [viewModel]);
+
   const [committedLines, pendingLines] = resultToPlotLines(
     plot.committedPoints,
     plot.pendingPoints
@@ -81,7 +85,7 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
                       pending={false}
                       highlight={line.source === inspectSource}
                       onMouseOver={onLineMouseOver}
-                      onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
+                      onMouseOut={onLineMouseOut}
                     />
                   ))}
                   {pendingLines.map((line, i) => (
@@ -91,7 +95,7 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
                       pending={true}
                       highlight={line.source === inspectSource}
                       onMouseOver={onLineMouseOver}
-                      onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
+                      onMouseOut={onLineMouseOut}
                     />
                   ))}
                   {bottlePreviewPoint && (

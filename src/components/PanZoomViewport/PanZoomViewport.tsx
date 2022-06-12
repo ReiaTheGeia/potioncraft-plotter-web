@@ -105,6 +105,11 @@ const PanZoomViewport = ({
     [dragPointer]
   );
 
+  const onMouseOut = React.useCallback(
+    () => viewModel.onMouseOut(),
+    [viewModel]
+  );
+
   // React listens to the root listener for all events,
   //  and chrome assumes the root event listener for mouse events
   //  never wants to preventDefault.
@@ -120,6 +125,7 @@ const PanZoomViewport = ({
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
+      onMouseOut={onMouseOut}
     >
       {children}
     </Root>

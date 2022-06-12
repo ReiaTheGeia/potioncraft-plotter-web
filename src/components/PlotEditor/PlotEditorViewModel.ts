@@ -40,10 +40,10 @@ export class PlotEditorViewModel
 
   private readonly _shareString$: Observable<string>;
 
-  private readonly _mouseClientPosition$ = new BehaviorSubject<Point>(
-    PointZero
+  private readonly _mouseClientPosition$ = new BehaviorSubject<Point | null>(
+    null
   );
-  private readonly _mouseWorldPosition$: Observable<Point>;
+  private readonly _mouseWorldPosition$: Observable<Point | null>;
   private readonly _mouseOverPlotItem$ = new BehaviorSubject<PlotItem | null>(
     null
   );
@@ -62,14 +62,20 @@ export class PlotEditorViewModel
       this._mouseClientPosition$,
       this._viewOffset$,
       this._viewScale$,
-    ]).pipe(map(([clientPos]) => this._clientToWorld(clientPos)));
+    ]).pipe(
+      map(([clientPos]) => (clientPos ? this._clientToWorld(clientPos) : null))
+    );
 
     this._mouseOverEntity$ = combineLatest([
       this._mouseWorldPosition$,
       _builder.map$,
     ]).pipe(
       map(([worldPos, map]) => {
-        const entities = map?.hitTest(worldPos) ?? [];
+        if (!worldPos || !map) {
+          return null;
+        }
+
+        const entities = map.hitTest(worldPos) ?? [];
         const entity = first(entities);
         return entity ?? null;
       })
@@ -81,7 +87,7 @@ export class PlotEditorViewModel
       this._builder.plot$,
     ]).pipe(
       map(([worldPos, plotItem, plot]) => {
-        if (!plotItem || !plot) {
+        if (!worldPos || !plotItem || !plot) {
           return null;
         }
 
@@ -127,7 +133,7 @@ export class PlotEditorViewModel
     return this._viewScale$;
   }
 
-  get mouseWorldPosition$(): Observable<Point> {
+  get mouseWorldPosition$(): Observable<Point | null> {
     return this._mouseWorldPosition$;
   }
 
@@ -174,6 +180,10 @@ export class PlotEditorViewModel
 
   onMouseMove(clientX: number, clientY: number): void {
     this._mouseClientPosition$.next({ x: clientX, y: clientY });
+  }
+
+  onMouseOut() {
+    this._mouseClientPosition$.next(null);
   }
 
   onViewportResized(width: number, height: number): void {
