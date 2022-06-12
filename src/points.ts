@@ -28,6 +28,26 @@ export function pointAngleRadians(from: Point, to: Point): number {
   return Math.atan2(to.y - from.y, to.x - from.x);
 }
 
+export function pointMoveTowards(
+  current: Point,
+  target: Point,
+  maxDistanceDelta: number
+): Point {
+  const mt1 = target.x - current.x;
+  const mt2 = target.y - current.y;
+  const mt3 = mt1 * mt1 + mt2 * mt2;
+  if (
+    mt3 == 0.0 ||
+    (maxDistanceDelta >= 0.0 && mt3 <= maxDistanceDelta * maxDistanceDelta)
+  )
+    return target;
+  const mt4 = Math.sqrt(mt3);
+  return {
+    x: current.x + (mt1 / mt4) * maxDistanceDelta,
+    y: current.y + (mt2 / mt4) * maxDistanceDelta,
+  };
+}
+
 /**
  * Gets the smallest angle in degrees between two points.
  */

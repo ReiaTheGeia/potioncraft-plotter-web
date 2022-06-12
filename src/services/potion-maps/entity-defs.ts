@@ -1,6 +1,18 @@
 import { POTION_RADIUS } from "@/game-settings";
-import { Point, pointMagnitude, pointSubtract } from "@/points";
-import { Rectangle, rectFromCircle } from "@/rectangles";
+import {
+  Point,
+  pointAdd,
+  pointMagnitude,
+  pointRotate,
+  pointSubtract,
+} from "@/points";
+import {
+  rectangle,
+  Rectangle,
+  rectFromCircle,
+  rectOffset,
+  pointIntersectsRect,
+} from "@/rectangles";
 
 import { MapEntity } from "./types";
 
@@ -40,12 +52,77 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
       return "Bone";
     },
     getBounds(entity: MapEntity) {
+      const bone = assertEntity(entity, "DangerZonePart");
       // FIXME: hack.  Use the actual hitboxes
-      return rectFromCircle(entity, 0.24);
+      switch (bone.prefab) {
+        case "Fang1":
+          // Need to cover all rotations, so use the largest axis for both.
+          return rectOffset(rectangle(-0.06, -0.06, 0.12, 0.12), entity);
+        case "Fang2":
+          // Need to cover all rotations, so use the largest axis for both.
+          return rectOffset(rectangle(-0.12, -0.12, 0.24, 0.24), entity);
+        case "Bone1":
+          // Need to cover all rotations, so use the largest axis for both.
+          return rectOffset(rectangle(-0.345, -0.345, 0.69, 0.69), entity);
+        case "Bone2":
+          // Need to cover all rotations, so use the largest axis for both.
+          return rectOffset(rectangle(-0.32, -0.32, 0.72, 0.72), entity);
+        case "Skull1":
+        default:
+          return rectFromCircle(entity, 0.24);
+      }
     },
     hitTest(p: Point, entity: MapEntity, radius = 0) {
-      // FIXME: hack.  Use the actual hitboxes
-      return pointMagnitude(pointSubtract(p, entity)) - radius <= 0.24;
+      const bone = assertEntity(entity, "DangerZonePart");
+      if (bone.prefab === "Skull1") {
+        return false; //pointMagnitude(pointSubtract(p, entity)) - radius <= 0.24;
+      }
+
+      let r: Rectangle;
+      switch (bone.prefab) {
+        case "Fang1":
+          r = rectangle(-0.06, -0.02, 0.12, 0.4);
+          break;
+        case "Fang2":
+          r = rectangle(-0.065, -0.12, 0.13, 0.24);
+          break;
+        case "Bone1":
+          r = rectangle(-0.06, -0.345, 0.12, 0.69);
+          break;
+        case "Bone2":
+          r = rectangle(-0.07, -0.36, 0.14, 0.72);
+          break;
+        default:
+          return false;
+      }
+      r = rectOffset(r, entity);
+
+      // get it aligned with the hitbox
+      p = pointAdd(pointRotate(pointSubtract(p, entity), -bone.angle), entity);
+
+      // https://stackoverflow.com/questions/21089959/detecting-collision-of-rectangle-with-circle
+      const w = r.p2.x - r.p1.x;
+      const h = r.p2.y - r.p1.y;
+      const distX = Math.abs(p.x - r.p1.x - w / 2);
+      const distY = Math.abs(p.y - r.p1.y - w / 2);
+
+      if (distX > w / 2 + radius) {
+        return false;
+      }
+      if (distY > h / 2 + radius) {
+        return false;
+      }
+
+      if (distX <= w / 2) {
+        return true;
+      }
+      if (distY <= h / 2) {
+        return true;
+      }
+
+      var dx = distX - w / 2;
+      var dy = distY - h / 2;
+      return dx * dx + dy * dy <= radius * radius;
     },
   },
   ExperienceBonus: {

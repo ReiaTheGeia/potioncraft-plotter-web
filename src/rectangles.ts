@@ -1,4 +1,4 @@
-import { Point, PointZero } from "./points";
+import { Point, pointAdd, PointZero } from "./points";
 import { Size } from "./size";
 
 export interface Rectangle {
@@ -11,6 +11,13 @@ export const RectZero: Readonly<Rectangle> = Object.freeze({
   p2: PointZero,
 }) as any;
 
+export function rectangle(x: number, y: number, w: number, h: number) {
+  return {
+    p1: { x, y },
+    p2: { x: x + w, y: y + h },
+  };
+}
+
 export function rectFromCircle(p: Point, radius: number) {
   return {
     p1: {
@@ -21,6 +28,13 @@ export function rectFromCircle(p: Point, radius: number) {
       x: p.x + radius,
       y: p.y + radius,
     },
+  };
+}
+
+export function rectOffset(r: Rectangle, offset: Point) {
+  return {
+    p1: pointAdd(r.p1, offset),
+    p2: pointAdd(r.p2, offset),
   };
 }
 

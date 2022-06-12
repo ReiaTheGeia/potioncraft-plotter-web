@@ -16,6 +16,7 @@ import {
   pointDistance,
   pointEquals,
   pointMagnitude,
+  pointMoveTowards,
   pointNormalize,
   pointRotate,
   pointScale,
@@ -218,26 +219,6 @@ export class Plotter {
       vortexMovementSpeed *
       (1 / 60);
 
-    function moveTowards(
-      current: Point,
-      target: Point,
-      maxDistanceDelta: number
-    ): Point {
-      const mt1 = target.x - current.x;
-      const mt2 = target.y - current.y;
-      const mt3 = mt1 * mt1 + mt2 * mt2;
-      if (
-        mt3 == 0.0 ||
-        (maxDistanceDelta >= 0.0 && mt3 <= maxDistanceDelta * maxDistanceDelta)
-      )
-        return target;
-      const mt4 = Math.sqrt(mt3);
-      return {
-        x: current.x + (mt1 / mt4) * maxDistanceDelta,
-        y: current.y + (mt2 / mt4) * maxDistanceDelta,
-      };
-    }
-
     let remainingDistance = distance;
     let currentPosition = indicatorPosition;
     const pointsToAdd: Point[] = [indicatorPosition];
@@ -262,7 +243,7 @@ export class Plotter {
 
       const rotation = degreesToRadians(pointSignedAngleDegrees180(from, to));
       const vector2_2 = pointRotate(pointScale(vector2_1, num), rotation);
-      const vector2_3 = moveTowards(
+      const vector2_3 = pointMoveTowards(
         currentPosition,
         pointAdd(vortex, vector2_2),
         step
