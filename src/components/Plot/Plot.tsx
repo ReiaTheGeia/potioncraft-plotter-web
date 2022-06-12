@@ -46,6 +46,8 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
   const bottlePreviewPoint =
     useObservation(viewModel.bottlePreviewPoint$) ?? null;
 
+  const lastCommitPoint = last(plot.committedPoints) ?? null;
+
   const onLineMouseOver = React.useCallback(
     (line: PlotLine) => {
       viewModel.onMouseOverPlotItem(line.source);
@@ -98,6 +100,16 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
                       onMouseOut={onLineMouseOut}
                     />
                   ))}
+                  {lastCommitPoint && (
+                    <circle
+                      className="bottle-preview"
+                      cx={lastCommitPoint.x}
+                      cy={lastCommitPoint.y}
+                      r={POTION_RADIUS}
+                      fill="blue"
+                      opacity={0.2}
+                    />
+                  )}
                   {bottlePreviewPoint && (
                     <circle
                       className="bottle-preview"
@@ -162,7 +174,7 @@ const PlotLine = ({
   }
 
   if (pending) {
-    color = Color(color).lighten(0.4).hex();
+    color = Color(color).lighten(0.6).hex();
   }
 
   const path = line.points.reduce(
