@@ -16,6 +16,7 @@ import {
 } from "./PlotViewModel";
 
 import { SizeZero } from "@/size";
+import { last } from "lodash";
 
 export interface PlotProps {
   className?: string;
@@ -32,6 +33,9 @@ const Root = styled("div")(({ theme }) => ({
     left: 0,
     top: 0,
   },
+  "& .bottle-preview": {
+    pointerEvents: "none",
+  },
 }));
 
 const Plot = ({ className, plot, viewModel }: PlotProps) => {
@@ -39,6 +43,8 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
   const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
+  const bottlePreviewPoint =
+    useObservation(viewModel.bottlePreviewPoint$) ?? null;
 
   const onLineMouseOver = React.useCallback(
     (line: PlotLine) => {
@@ -88,6 +94,16 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
                       onMouseOut={() => viewModel.onMouseOverPlotItem(null)}
                     />
                   ))}
+                  {bottlePreviewPoint && (
+                    <circle
+                      className="bottle-preview"
+                      cx={bottlePreviewPoint.x}
+                      cy={bottlePreviewPoint.y}
+                      r={POTION_RADIUS}
+                      fill="blue"
+                      opacity={0.2}
+                    />
+                  )}
                 </g>
               </g>
             </g>
@@ -116,9 +132,15 @@ const PlotLine = ({
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const { points, source, evenOdd } = line;
 
+  const lastPoint = last(points) ?? PointZero;
+
   const onPathMouseOver = React.useCallback(() => {
     onMouseOver(line);
   }, [line, onMouseOver]);
+
+  const onPathMouseOut = React.useCallback(() => {
+    onMouseOut();
+  }, []);
 
   if (points.length === 0) {
     return null;
@@ -153,7 +175,7 @@ const PlotLine = ({
       strokeWidth={(highlight ? 6 : 3) / scale}
       fill="none"
       onMouseOver={onPathMouseOver}
-      onMouseOut={onMouseOut}
+      onMouseOut={onPathMouseOut}
     />
   );
 };
