@@ -81,6 +81,9 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
     ];
   }, [plot, IngredientRegistry]);
 
+  // PotionCraft subtract .4 health each unit of distance against a max of 1.
+  const dangerIsDeath = longestDanger >= 2.5;
+
   return (
     <Card className={className} variant="outlined">
       <CardContent>
@@ -89,7 +92,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
           <tbody>
             <tr>
               <td>
-                <Typography>Effects:</Typography>
+                <Typography>Possible Effects on Path:</Typography>
               </td>
               <td>
                 <Typography variant="overline">
@@ -148,7 +151,10 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
                 <Typography>Longest length in bones:</Typography>
               </td>
               <td>
-                <Typography variant="overline">
+                <Typography
+                  variant="overline"
+                  color={dangerIsDeath ? "error" : "textPrimary"}
+                >
                   {longestDanger.toFixed(2)}
                 </Typography>
               </td>
