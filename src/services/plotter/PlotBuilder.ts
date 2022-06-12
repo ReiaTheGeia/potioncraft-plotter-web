@@ -97,6 +97,10 @@ export class PlotBuilder {
             return PourSolventPlotBuilderItem.fromJSON(item, (item) =>
               this._deleteItem(item)
             );
+          case "heat-vortex":
+            return HeatVortexPlotBuilderItem.fromJSON(item, (item) =>
+              this._deleteItem(item)
+            );
           default:
             throw new Error(`Unknown item type: ${item.type}`);
         }
@@ -132,6 +136,14 @@ export class PlotBuilder {
 
   addPourSolvent(): PourSolventPlotBuilderItem {
     const item = new PourSolventPlotBuilderItem((item) =>
+      this._deleteItem(item)
+    );
+    this._items$.next([...this._items$.value, item]);
+    return item;
+  }
+
+  addHeatVortex(): HeatVortexPlotBuilderItem {
+    const item = new HeatVortexPlotBuilderItem((item) =>
       this._deleteItem(item)
     );
     this._items$.next([...this._items$.value, item]);
@@ -349,7 +361,7 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
       map(() => this.isValid)
     );
 
-    combineLatest([this._distance$]).subscribe(([stirDistance]) => {
+    combineLatest([this._distance$]).subscribe(([distance]) => {
       if (!this.isValid) {
         this._plotItem$.next(null);
         return;
@@ -357,7 +369,7 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
 
       this._plotItem$.next({
         type: "pour-solvent",
-        distance: stirDistance!,
+        distance: distance!,
       });
     });
   }
@@ -383,9 +395,79 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
   }
 
   get isValid() {
-    // TODO: Check if ingredientId is valid
-    const stirDistance = this._distance$.value;
-    return stirDistance != null && stirDistance >= 0;
+    const distance = this._distance$.value;
+    return distance != null && distance >= 0;
+  }
+
+  get plotItem$(): Observable<PlotItem | null> {
+    return this._plotItem$;
+  }
+
+  get plotItem(): PlotItem | null {
+    return this._plotItem$.value;
+  }
+
+  get distance$(): Observable<number | null> {
+    return this._distance$;
+  }
+
+  setDistance(distance: number | null) {
+    this._distance$.next(distance);
+  }
+
+  delete() {
+    this._delete(this);
+  }
+}
+
+export class HeatVortexPlotBuilderItem extends PlotBuilderItem {
+  private readonly _isValid$: Observable<boolean>;
+  private readonly _distance$ = new BehaviorSubject<number | null>(null);
+
+  private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
+
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
+    super();
+    this._isValid$ = combineLatest([this._distance$]).pipe(
+      map(() => this.isValid)
+    );
+
+    combineLatest([this._distance$]).subscribe(([distace]) => {
+      if (!this.isValid) {
+        this._plotItem$.next(null);
+        return;
+      }
+
+      this._plotItem$.next({
+        type: "heat-vortex",
+        distance: distace!,
+      });
+    });
+  }
+
+  static fromJSON(
+    json: any,
+    del: (item: PlotBuilderItem) => void
+  ): HeatVortexPlotBuilderItem {
+    const item = new HeatVortexPlotBuilderItem(del);
+    item.setDistance(json.distance);
+    return item;
+  }
+
+  toJSON() {
+    return {
+      type: "heat-vortex",
+      distance: this._distance$.value,
+    };
+  }
+
+  get isValid$() {
+    return this._isValid$;
+  }
+
+  get isValid() {
+    const distance = this._distance$.value;
+    return distance != null && distance >= 0;
   }
 
   get plotItem$(): Observable<PlotItem | null> {

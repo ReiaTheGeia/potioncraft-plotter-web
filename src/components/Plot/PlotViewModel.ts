@@ -9,7 +9,7 @@ import {
   PointZero,
 } from "@/points";
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
-import { PlotItem } from "@/services/plotter/types";
+import { PlotItem, PlotPoint } from "@/services/plotter/types";
 import { Size } from "@/size";
 
 export const PlotViewModelContext = React.createContext<IPlotViewModel | null>(
@@ -29,6 +29,7 @@ export interface IPlotViewModel {
   readonly viewOffset$: Observable<Point>;
   readonly viewScale$: Observable<number>;
   readonly mouseOverPlotItem$: Observable<PlotItem | null>;
+  readonly bottlePreviewPoint$: Observable<PlotPoint | null>;
 
   onMouseOverPlotItem(item: PlotItem | null): void;
 }

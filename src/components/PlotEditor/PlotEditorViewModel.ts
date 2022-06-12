@@ -9,17 +9,23 @@ import { first } from "lodash";
 
 import { inject } from "microinject";
 
-import { Point, pointAdd, pointSubtract, PointZero } from "@/points";
+import {
+  Point,
+  pointAdd,
+  pointDistance,
+  pointSubtract,
+  PointZero,
+} from "@/points";
 import { Size, SizeZero } from "@/size";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
 import { PlotBuilder, PlotBuilderItem } from "@/services/plotter/PlotBuilder";
-import { PlotItem } from "@/services/plotter/types";
+import { PlotItem, PlotPoint } from "@/services/plotter/types";
+import { MapEntity } from "@/services/potion-maps/types";
 
 import { IPlotViewModel } from "../Plot/PlotViewModel";
 import { IPanZoomViewportViewModel } from "../PanZoomViewport/PanZoomViewportViewModel";
-import { MapEntity } from "@/services/potion-maps/types";
 
 export class PlotEditorViewModel
   implements IPlotViewModel, IPanZoomViewportViewModel
@@ -45,6 +51,8 @@ export class PlotEditorViewModel
     new BehaviorSubject<PlotBuilderItem | null>(null);
   private readonly _mouseOverEntity$: Observable<MapEntity | null>;
 
+  private readonly _bottlePreviewPoint$: Observable<PlotPoint | null>;
+
   constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
     this._shareString$ = this._builder.plot$
       .pipe(debounceTime(1000))
@@ -64,6 +72,38 @@ export class PlotEditorViewModel
         const entities = map?.hitTest(worldPos) ?? [];
         const entity = first(entities);
         return entity ?? null;
+      })
+    );
+
+    this._bottlePreviewPoint$ = combineLatest([
+      this._mouseWorldPosition$,
+      this._mouseOverPlotItem$,
+      this._builder.plot$,
+    ]).pipe(
+      map(([worldPos, plotItem, plot]) => {
+        if (!plotItem || !plot) {
+          return null;
+        }
+
+        const plotPoints = plot.committedPoints.concat(plot.pendingPoints);
+        const plotItemPoints = plotPoints.filter((x) => x.source === plotItem);
+
+        let closestPlotItem = first(plotItemPoints);
+        if (!closestPlotItem) {
+          return null;
+        }
+
+        for (let i = 1; i < plotItemPoints.length; i++) {
+          const point = plotItemPoints[i];
+          if (
+            pointDistance(worldPos, point) <
+            pointDistance(worldPos, closestPlotItem)
+          ) {
+            closestPlotItem = point;
+          }
+        }
+
+        return closestPlotItem;
       })
     );
   }
@@ -101,6 +141,10 @@ export class PlotEditorViewModel
 
   get mouseOverEntity$(): Observable<MapEntity | null> {
     return this._mouseOverEntity$;
+  }
+
+  get bottlePreviewPoint$(): Observable<PlotPoint | null> {
+    return this._bottlePreviewPoint$;
   }
 
   zoom(delta: number, on: Point | null = null) {

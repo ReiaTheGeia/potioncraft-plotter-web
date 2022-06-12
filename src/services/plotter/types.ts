@@ -6,7 +6,8 @@ import { MapEntity } from "../potion-maps/types";
 export type PlotItem =
   | AddIngredientPlotItem
   | PourSolventPlotItem
-  | StirCauldronPlotItem;
+  | StirCauldronPlotItem
+  | HeatVortexPlotItem;
 
 export interface AddIngredientPlotItem {
   type: "add-ingredient";
@@ -21,6 +22,11 @@ export interface PourSolventPlotItem {
 
 export interface StirCauldronPlotItem {
   type: "stir-cauldron";
+  distance: number;
+}
+
+export interface HeatVortexPlotItem {
+  type: "heat-vortex";
   distance: number;
 }
 
