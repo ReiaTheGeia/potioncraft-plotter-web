@@ -21,6 +21,7 @@ import {
   PlotBuilderItem,
   PourSolventPlotBuilderItem,
   StirCauldronPlotBuilderItem,
+  HeatVortexPlotBuilderItem,
 } from "@/services/plotter/PlotBuilder";
 import { IngredientId } from "@/services/ingredients/types";
 
@@ -93,6 +94,9 @@ const PlotBuilderItemsList = ({
         <Button color="primary" onClick={() => builder.addPourSolvent()}>
           <AddIcon /> Pour Solvent
         </Button>
+        <Button color="primary" onClick={() => builder.addHeatVortex()}>
+          <AddIcon /> Heat Vortex
+        </Button>
       </div>
     </Root>
   );
@@ -131,6 +135,15 @@ const PlotListItem = ({
   } else if (item instanceof PourSolventPlotBuilderItem) {
     return (
       <PourSolventPlotListItem
+        item={item}
+        highlight={highlight}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
+      />
+    );
+  } else if (item instanceof HeatVortexPlotBuilderItem) {
+    return (
+      <HeatVortexPlotListItem
         item={item}
         highlight={highlight}
         onMouseOver={onMouseOver}
@@ -363,6 +376,55 @@ const PourSolventPlotListItem = ({
     >
       <div>
         <Typography variant="overline">Pour Solvent</Typography>
+      </div>
+      <TextField
+        label="Distance"
+        value={inputDistance ?? distance ?? ""}
+        onChange={(e) => {
+          let asNumber: number | null = Number(e.target.value);
+          if (isNaN(asNumber)) {
+            asNumber = null;
+          }
+
+          setInputDistance(e.target.value);
+          item.setDistance(asNumber);
+        }}
+        onBlur={() => setInputDistance(null)}
+      />
+      <IncDecSlider
+        value={distance ?? 0}
+        rate={10}
+        onChange={(value) =>
+          item.setDistance(Math.max(0, Number(value.toFixed(3))))
+        }
+      />
+    </PlotListItemCard>
+  );
+};
+
+interface HeatVortexPlotListItemProps {
+  item: HeatVortexPlotBuilderItem;
+  highlight: boolean;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
+}
+const HeatVortexPlotListItem = ({
+  item,
+  highlight,
+  onMouseOver,
+  onMouseOut,
+}: HeatVortexPlotListItemProps) => {
+  const distance = useObservation(item.distance$);
+  const [inputDistance, setInputDistance] = React.useState<string | null>(null);
+  return (
+    <PlotListItemCard
+      item={item}
+      highlight={highlight}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+    >
+      <div>
+        <Typography variant="overline">Heat Vortex</Typography>
       </div>
       <TextField
         label="Distance"

@@ -132,6 +132,9 @@ const PlotLine = ({
     case "pour-solvent":
       color = "blue";
       break;
+    case "heat-vortex":
+      color = "purple";
+      break;
   }
 
   if (pending) {

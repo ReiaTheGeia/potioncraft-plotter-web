@@ -1,3 +1,5 @@
+import { clamp } from "lodash";
+
 export interface Point {
   x: number;
   y: number;
@@ -20,6 +22,43 @@ export function pointScale(p: Point, factor: number): Point {
 
 export function pointMagnitude(p: Point): number {
   return Math.sqrt(p.x * p.x + p.y * p.y);
+}
+
+export function pointAngleRadians(from: Point, to: Point): number {
+  return Math.atan2(to.y - from.y, to.x - from.x);
+}
+
+/**
+ * Gets the smallest angle in degrees between two points.
+ */
+export function pointAngleDegrees180(from: Point, to: Point) {
+  const num = Math.sqrt(
+    (from.x * from.x + from.y * from.y) * (to.x * to.x + to.y * to.y)
+  );
+  if (num < Number.EPSILON) {
+    return 0;
+  }
+  return Math.acos(clamp(pointDot(from, to) / num, -1, 1)) * 57.29578;
+}
+
+/**
+ * Gets the smallest angle between to points.  Value will be negative if the angle if to is counterclockwise of from.
+ */
+export function pointSignedAngleDegrees180(from: Point, to: Point) {
+  const a = pointAngleDegrees180(from, to);
+  const sign = Math.sign(from.x * to.y - from.y * to.x);
+  const sa = sign * a;
+  return sa;
+}
+
+export function pointRotate(p: Point, angleInRadians: number): Point {
+  const x = p.x * Math.cos(angleInRadians) - p.y * Math.sin(angleInRadians);
+  const y = p.x * Math.sin(angleInRadians) + p.y * Math.cos(angleInRadians);
+  return { x, y };
+}
+
+export function pointDot(a: Point, b: Point): number {
+  return a.x * b.x + a.y * b.y;
 }
 
 export function pointDistance(p1: Point, p2: Point) {
