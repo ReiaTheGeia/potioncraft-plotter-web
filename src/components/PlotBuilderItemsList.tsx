@@ -108,51 +108,48 @@ interface PlotListItemProps {
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
-const PlotListItem = ({
-  item,
-  highlight = false,
-  onMouseOver,
-  onMouseOut,
-}: PlotListItemProps) => {
-  if (item instanceof AddIngredientPlotBuilderItem) {
-    return (
-      <AddIngredientPlotListItem
-        item={item}
-        highlight={highlight}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
-      />
-    );
-  } else if (item instanceof StirCauldronPlotBuilderItem) {
-    return (
-      <StirCauldronPlotListItem
-        item={item}
-        highlight={highlight}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
-      />
-    );
-  } else if (item instanceof PourSolventPlotBuilderItem) {
-    return (
-      <PourSolventPlotListItem
-        item={item}
-        highlight={highlight}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
-      />
-    );
-  } else if (item instanceof HeatVortexPlotBuilderItem) {
-    return (
-      <HeatVortexPlotListItem
-        item={item}
-        highlight={highlight}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
-      />
-    );
+const PlotListItem = React.memo(
+  ({ item, highlight = false, onMouseOver, onMouseOut }: PlotListItemProps) => {
+    if (item instanceof AddIngredientPlotBuilderItem) {
+      return (
+        <AddIngredientPlotListItem
+          item={item}
+          highlight={highlight}
+          onMouseOver={onMouseOver}
+          onMouseOut={onMouseOut}
+        />
+      );
+    } else if (item instanceof StirCauldronPlotBuilderItem) {
+      return (
+        <StirCauldronPlotListItem
+          item={item}
+          highlight={highlight}
+          onMouseOver={onMouseOver}
+          onMouseOut={onMouseOut}
+        />
+      );
+    } else if (item instanceof PourSolventPlotBuilderItem) {
+      return (
+        <PourSolventPlotListItem
+          item={item}
+          highlight={highlight}
+          onMouseOver={onMouseOver}
+          onMouseOut={onMouseOut}
+        />
+      );
+    } else if (item instanceof HeatVortexPlotBuilderItem) {
+      return (
+        <HeatVortexPlotListItem
+          item={item}
+          highlight={highlight}
+          onMouseOver={onMouseOver}
+          onMouseOut={onMouseOut}
+        />
+      );
+    }
+    return <div>Unknown PlotItem {item.constructor.name}</div>;
   }
-  return <div>Unknown PlotItem {item.constructor.name}</div>;
-};
+);
 
 interface PlotListItemCardProps {
   item: PlotBuilderItem;

@@ -21,6 +21,7 @@ import PointDetails from "./components/PointDetails";
 import StepDetails from "./components/StepDetails";
 import PlotDetails from "./components/PlotDetails";
 import EntityDetails from "./components/EntityDetails";
+import { PlotBuilderItem } from "@/services/plotter/PlotBuilder";
 
 const Root = styled("div")(({ theme }) => ({
   width: "100%",
@@ -124,6 +125,17 @@ const PlotEditor = () => {
     window.history.replaceState({}, "", `?${query.toString()}`);
   }, [outputShareString]);
 
+  const onBuildItemMouseOver = React.useCallback(
+    (item: PlotBuilderItem) => {
+      viewModel.onMouseOverBuilderItem(item);
+    },
+    [viewModel]
+  );
+
+  const onBuildItemMouseOut = React.useCallback(() => {
+    viewModel.onMouseOverBuilderItem(null);
+  }, [viewModel]);
+
   return (
     <Root>
       <div className="outer-container">
@@ -162,8 +174,8 @@ const PlotEditor = () => {
         className="plot-items"
         builder={builder}
         highlightItem={highlightItem}
-        onMouseOver={(item) => viewModel.onMouseOverBuilderItem(item)}
-        onMouseOut={() => viewModel.onMouseOverBuilderItem(null)}
+        onMouseOver={onBuildItemMouseOver}
+        onMouseOut={onBuildItemMouseOut}
       />
     </Root>
   );

@@ -63,6 +63,7 @@ export function pointArrayLineFromDistance(
   }
 
   let previousPoint = start;
+  pointArray.push(previousPoint);
   let remainingDistance = distance;
   while (remainingDistance >= spacing) {
     const point = pointAdd(previousPoint, pointScale(direction, spacing));

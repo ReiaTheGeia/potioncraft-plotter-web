@@ -64,7 +64,7 @@ export class Plotter {
       point.entities = entities as any;
     }
 
-    // console.log("plotting took", Date.now() - now);
+    console.log("plotting took", Date.now() - now);
 
     return result;
   }
