@@ -17,6 +17,7 @@ import IncDecSlider from "../IncDecSlider";
 
 import { PlotEditorViewModel } from "./PlotEditorViewModel";
 
+import PointDetails from "./components/PointDetails";
 import StepDetails from "./components/StepDetails";
 import PlotDetails from "./components/PlotDetails";
 import EntityDetails from "./components/EntityDetails";
@@ -55,10 +56,15 @@ const Root = styled("div")(({ theme }) => ({
     top: theme.spacing(2),
     right: theme.spacing(2),
   },
-  "& .inspect-source": {
+  "& .inspect-stack": {
     position: "absolute",
     top: theme.spacing(2),
     left: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+  },
+  "& .inspect-stack > *": {
+    marginBottom: theme.spacing(2),
   },
   "& .mouse-coords": {
     position: "absolute",
@@ -86,6 +92,7 @@ const PlotEditor = () => {
   const viewModel = useDICreate(PlotEditorViewModel);
   const baseRegistry = useDIDependency(PotionBaseRegistry);
   const map = baseRegistry.getPotionBaseById("water" as any)?.map;
+  const inspectPoint = useObservation(viewModel.bottlePreviewPoint$) ?? null;
   const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
   const inspectEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
@@ -128,12 +135,13 @@ const PlotEditor = () => {
             viewModel={viewModel}
           />
         </PanZoomViewport>
-        {inspectSource && (
-          <StepDetails className="inspect-source" step={inspectSource} />
-        )}
-        {!inspectSource && inspectEntity && (
-          <EntityDetails className="inspect-source" entity={inspectEntity} />
-        )}
+        <div className="inspect-stack">
+          {inspectPoint && <PointDetails point={inspectPoint} />}
+          {inspectSource && <StepDetails step={inspectSource} />}
+          {!inspectSource && inspectEntity && (
+            <EntityDetails entity={inspectEntity} />
+          )}
+        </div>
         {plot && <PlotDetails className="plot-details" plot={plot} />}
         <Card className="mouse-coords">
           <CardContent>

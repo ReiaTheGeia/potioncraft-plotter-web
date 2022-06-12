@@ -6,27 +6,9 @@ import { MapEntity } from "./types";
 
 export interface EntityDefinition {
   readonly entityType: MapEntity["entityType"];
+  getFriendlyName(entity: MapEntity): string;
   getBounds(entity: MapEntity): Rectangle;
   hitTest(p: Point, entity: MapEntity, radius?: number): boolean;
-}
-
-class RadiusEntity implements EntityDefinition {
-  constructor(
-    private readonly _entityType: MapEntity["entityType"],
-    private readonly _radius: number
-  ) {}
-
-  get entityType() {
-    return this._entityType;
-  }
-
-  getBounds(entity: MapEntity): Rectangle {
-    return rectFromCircle(entity, this._radius);
-  }
-
-  hitTest(p: Point, entity: MapEntity, radius = 0): boolean {
-    return pointMagnitude(pointSubtract(p, entity)) - radius <= this._radius;
-  }
 }
 
 const VortexRadii = {
@@ -35,12 +17,43 @@ const VortexRadii = {
 } as const;
 
 export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
-  PotionEffect: new RadiusEntity("PotionEffect" as const, POTION_RADIUS),
+  PotionEffect: {
+    entityType: "PotionEffect",
+    getFriendlyName(entity: MapEntity) {
+      const effectEntity = assertEntity(entity, "PotionEffect");
+      return effectEntity.effect;
+    },
+    getBounds(entity: MapEntity) {
+      return rectFromCircle(entity, POTION_RADIUS);
+    },
+    hitTest(p: Point, entity: MapEntity, radius = 0) {
+      return pointMagnitude(pointSubtract(p, entity)) - radius <= POTION_RADIUS;
+    },
+  },
   // NOTE: This should be replaced by something that knows the different hitboxes of each type.
   // This would be complicated, as many of them are rects and rotation needs to be taken into account.
-  DangerZonePart: new RadiusEntity("DangerZonePart" as const, 0.24),
+  DangerZonePart: {
+    entityType: "DangerZonePart",
+    getFriendlyName(entity: MapEntity) {
+      const boneEntity = assertEntity(entity, "DangerZonePart");
+      // return boneEntity.prefab;
+      return "Bone";
+    },
+    getBounds(entity: MapEntity) {
+      // FIXME: hack.  Use the actual hitboxes
+      return rectFromCircle(entity, 0.24);
+    },
+    hitTest(p: Point, entity: MapEntity, radius = 0) {
+      // FIXME: hack.  Use the actual hitboxes
+      return pointMagnitude(pointSubtract(p, entity)) - radius <= 0.24;
+    },
+  },
   ExperienceBonus: {
     entityType: "ExperienceBonus",
+    getFriendlyName(entity: MapEntity) {
+      const expEntity = assertEntity(entity, "ExperienceBonus");
+      return `${expEntity.prefab} XP Bonus`;
+    },
     getBounds: (entity: MapEntity): Rectangle => {
       // FIXME: Arent these different sizes?
       return rectFromCircle(entity, 0.3);
@@ -51,6 +64,9 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
   },
   Vortex: {
     entityType: "Vortex",
+    getFriendlyName(entity: MapEntity) {
+      return "Vortex";
+    },
     getBounds: (entity: MapEntity): Rectangle => {
       const vortex = assertEntity(entity, "Vortex");
       const radius = VortexRadii[vortex.prefab];
