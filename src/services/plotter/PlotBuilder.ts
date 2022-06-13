@@ -109,6 +109,25 @@ export class PlotBuilder {
     }
   }
 
+  reposition(item: PlotBuilderItem, index: number) {
+    if (index < 0 || index > this.items.length) {
+      return;
+    }
+
+    const sourceIndex = this.items$.value.indexOf(item);
+    if (sourceIndex === -1) {
+      return;
+    }
+
+    const items = [...this.items$.value];
+    items.splice(sourceIndex, 1);
+    if (sourceIndex < index) {
+      index--;
+    }
+    items.splice(index, 0, item);
+    this._items$.next(items);
+  }
+
   getShareString() {
     const items = this._items$.value.map((x) => x.toJSON());
     const encoded = pako.deflate(JSON.stringify(items));
