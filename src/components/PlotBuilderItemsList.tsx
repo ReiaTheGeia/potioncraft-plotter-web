@@ -86,7 +86,7 @@ const PlotBuilderItemsList = ({
       </ul>
       <div className="buttons">
         <Button color="primary" onClick={() => builder.addIngredient()}>
-          <AddIcon /> Ingredient
+          <AddIcon /> Add Ingredient
         </Button>
         <Button color="primary" onClick={() => builder.addStirCauldron()}>
           <AddIcon /> Stir Cauldron

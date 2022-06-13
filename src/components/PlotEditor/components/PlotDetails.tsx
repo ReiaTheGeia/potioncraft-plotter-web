@@ -155,7 +155,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
                   variant="overline"
                   color={dangerIsDeath ? "error" : "textPrimary"}
                 >
-                  {longestDanger.toFixed(2)}
+                  {longestDanger.toFixed(2)} / 2.5
                 </Typography>
               </td>
             </tr>

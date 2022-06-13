@@ -1,0 +1,9 @@
+[
+  {
+    "prefab": "Bone1",
+    "angle": 105,
+    "x": 1.5,
+    "y": 3,
+    "entityType": "DangerZonePart"
+  }
+]

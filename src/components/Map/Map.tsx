@@ -166,6 +166,31 @@ function renderDangerZonePart(
   ctx.translate(entity.x, entity.y);
   ctx.rotate(degreesToRadians(entity.angle));
 
+  // switch (entity.prefab) {
+  //   case "Fang1":
+  //     // 0.1226418, 0.400135
+  //     ctx.fillRect(-0.06, -0.02, 0.12, 0.4);
+  //     break;
+  //   case "Fang2":
+  //     // 0.1371522, 0.2445218
+  //     ctx.fillRect(-0.065, -0.12, 0.13, 0.24);
+  //     break;
+  //   case "Bone1":
+  //     // 0.1287996, 0.6983229
+  //     ctx.fillRect(-0.06, -0.345, 0.12, 0.69);
+  //     break;
+  //   case "Bone2":
+  //     // 0.1529365, 0.7249526
+  //     ctx.fillRect(-0.07, -0.36, 0.14, 0.72);
+  //     break;
+  //   case "Skull1":
+  //   default:
+  //     ctx.beginPath();
+  //     ctx.arc(0, 0, 0.24, 0, 2 * Math.PI);
+  //     ctx.fill();
+  //     break;
+  // }
+
   const src = DangerZoneImageSrces[entity.prefab];
   if (src) {
     const img = makeImg(src);

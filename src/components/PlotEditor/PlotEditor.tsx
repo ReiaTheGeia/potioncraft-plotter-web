@@ -167,7 +167,7 @@ const PlotEditor = () => {
         <IncDecSlider
           className="zoom"
           value={scale}
-          rate={4}
+          rate={14}
           onChange={(value) => viewModel.setZoom(value)}
         />
       </div>

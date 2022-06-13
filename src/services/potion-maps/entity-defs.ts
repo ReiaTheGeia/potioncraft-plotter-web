@@ -95,10 +95,10 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
         default:
           return false;
       }
-      r = rectOffset(r, entity);
 
-      // get it aligned with the hitbox
-      p = pointAdd(pointRotate(pointSubtract(p, entity), -bone.angle), entity);
+      // get it aligned with the axis aligned hitbox of the bone
+      p = pointSubtract(p, entity);
+      p = pointRotate(p, -bone.angle);
 
       // https://stackoverflow.com/questions/21089959/detecting-collision-of-rectangle-with-circle
       const w = r.p2.x - r.p1.x;
