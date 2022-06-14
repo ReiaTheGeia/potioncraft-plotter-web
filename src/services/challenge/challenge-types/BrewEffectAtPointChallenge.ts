@@ -29,7 +29,7 @@ export function brewEffectAtPointChallengeFactoryFactory(
 ) {
   return (options: BrewEffectAtPointChallengeOptions) => {
     const plotter = serviceLocator.get(Plotter);
-    new BrewEffectAtPointChallenge(
+    return new BrewEffectAtPointChallenge(
       options.baseMap,
       options.targetPosition,
       plotter
@@ -71,6 +71,7 @@ class BrewEffectAtPointChallenge implements IChallenge {
     // Return a score based on how much distance they took to get there compared to the 'perfect' distance of a straight line.
     const pathDistance = pointArrayLength(committedPoints);
     const linearDistance = vec2Distance(Vec2Zero, this._targetPosition);
-    return 1 - pathDistance / linearDistance;
+    // TODO: Bone Penalty
+    return 1 - linearDistance / pathDistance;
   }
 }

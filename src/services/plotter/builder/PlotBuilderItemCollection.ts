@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
 import {
   AddIngredientPlotItem,
   HeatVortexPlotItem,
@@ -13,6 +13,7 @@ import { AddIngredientPlotBuilderItem } from "./AddIngredientPlotBuilderItem";
 import { HeatVortexPlotBuilderItem } from "./HeatVortexPlotBuilderItem";
 import { PourSolventPlotBuilderItem } from "./PourSolventPlotBuilderItem";
 import { StirCauldronPlotBuilderItem } from "./StirCauldronPlotBuilderItem";
+import { isNotNull } from "@/utils";
 
 export interface IPlotBuilderItemCollection {
   readonly items$: Observable<readonly PlotBuilderItem[]>;
@@ -34,16 +35,39 @@ export class PlotBuilderItemCollection extends Observable<
     []
   );
 
+  private _itemSubscription: Subscription | null = null;
+  private readonly _plotItems$ = new BehaviorSubject<readonly PlotItem[]>([]);
+
   constructor() {
     super((observer) => this._items$.subscribe(observer));
+    this.plotBuilderItems$.subscribe((builderItems) => {
+      if (this._itemSubscription) {
+        this._itemSubscription.unsubscribe();
+      }
+
+      if (builderItems.length === 0) {
+        this._plotItems$.next([]);
+        return;
+      }
+
+      this._itemSubscription = combineLatest(
+        builderItems.map((x) => x.plotItem$)
+      ).subscribe((plotItems) => {
+        this._plotItems$.next(plotItems.filter(isNotNull));
+      });
+    });
   }
 
-  get items$(): Observable<readonly PlotBuilderItem[]> {
+  get plotBuilderItems$(): Observable<readonly PlotBuilderItem[]> {
     return this._items$;
   }
 
-  get items(): readonly PlotBuilderItem[] {
+  get plotBuilderItems(): readonly PlotBuilderItem[] {
     return this._items$.value;
+  }
+
+  get plotItems$(): Observable<readonly PlotItem[]> {
+    return this._plotItems$;
   }
 
   clear(): void {

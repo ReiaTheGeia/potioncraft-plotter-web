@@ -59,7 +59,7 @@ export class ChallengeFactory {
     minRadius: number,
     random: RandomSeed
   ): Vector2 {
-    while (true) {
+    for (let i = 0; i < 50; i++) {
       // We need to extend the radius out to reach the corners, so we do not cut them out of the map.
       const radius = random.floatBetween(
         minRadius,
@@ -71,22 +71,29 @@ export class ChallengeFactory {
         y: radius * Math.sin(angle),
       };
 
+      console.log("Checking free pos", p);
+
       if (
         p.x - POTION_RADIUS < -MAP_EXTENT_RADIUS ||
         p.x + POTION_RADIUS > MAP_EXTENT_RADIUS ||
         p.y - POTION_RADIUS < -MAP_EXTENT_RADIUS ||
         p.y + POTION_RADIUS > MAP_EXTENT_RADIUS
       ) {
+        console.log("Out of map");
         // Make sure its within the rectangular map.
         continue;
       }
 
       // Area must be free.  This means we also cant stomp on top of vortexes.
-      if (map.hitTest(p, POTION_RADIUS)) {
+      const hit = map.hitTest(p, POTION_RADIUS);
+      if (hit.length > 0) {
+        console.log("Hits something", hit);
         continue;
       }
 
+      console.log("It's all good");
       return p;
     }
+    throw new Error("Failed to find effect position after 50 tries");
   }
 }

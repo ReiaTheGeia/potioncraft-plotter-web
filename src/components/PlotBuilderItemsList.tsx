@@ -90,7 +90,8 @@ const PlotBuilderItemsList = ({
   onMouseOver,
   onMouseOut,
 }: PlotBuilderItemsListProps) => {
-  const items = useObservation(plotBuilderItemCollection.items$) ?? [];
+  const items =
+    useObservation(plotBuilderItemCollection.plotBuilderItems$) ?? [];
   return (
     <Root className={className}>
       <ul className="list">
