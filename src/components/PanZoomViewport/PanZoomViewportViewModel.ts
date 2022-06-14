@@ -7,6 +7,7 @@ export interface IPanZoomViewportViewModel {
   readonly viewScale$: Observable<number>;
 
   zoom(delta: number, on: Vector2 | null | undefined): void;
+  setZoom(scale: number): void;
   pan(dx: number, dy: number, applyZoom?: boolean): void;
 
   onViewportResized(width: number, height: number): void;

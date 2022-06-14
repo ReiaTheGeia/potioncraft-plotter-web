@@ -19,11 +19,11 @@ import { useObservation } from "@/hooks/observe";
 
 import {
   AddIngredientPlotBuilderItem,
-  PlotBuilder,
   PlotBuilderItem,
   PourSolventPlotBuilderItem,
   StirCauldronPlotBuilderItem,
   HeatVortexPlotBuilderItem,
+  PlotBuilderItemCollection,
 } from "@/services/plotter/builder";
 import { IngredientId } from "@/services/ingredients/types";
 
@@ -33,7 +33,7 @@ import IncDecSlider from "./IncDecSlider";
 
 export interface PlotBuilderItemsListProps {
   className?: string;
-  builder: PlotBuilder;
+  plotBuilderItemCollection: PlotBuilderItemCollection;
   highlightItem?: PlotBuilderItem | null;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
@@ -85,12 +85,12 @@ const Root = styled("div")(({ theme }) => ({
 
 const PlotBuilderItemsList = ({
   className,
-  builder,
+  plotBuilderItemCollection,
   highlightItem,
   onMouseOver,
   onMouseOut,
 }: PlotBuilderItemsListProps) => {
-  const items = useObservation(builder.items$) ?? [];
+  const items = useObservation(plotBuilderItemCollection.items$) ?? [];
   return (
     <Root className={className}>
       <ul className="list">
@@ -99,7 +99,7 @@ const PlotBuilderItemsList = ({
           primaryAxis="top-to-bottom"
           dropIndicator={<div className="drop-indicator" />}
           onReorder={(_, p) => {
-            builder.moveItem(items[p.fromIndex], p.toIndex);
+            plotBuilderItemCollection.moveItem(items[p.fromIndex], p.toIndex);
           }}
         >
           {(value, params, getRootProps, getDragHandleProps) => (
@@ -118,16 +118,28 @@ const PlotBuilderItemsList = ({
         </DragReoderable>
       </ul>
       <div className="buttons">
-        <Button color="primary" onClick={() => builder.addIngredient()}>
+        <Button
+          color="primary"
+          onClick={() => plotBuilderItemCollection.addIngredient()}
+        >
           <AddIcon /> Add Ingredient
         </Button>
-        <Button color="primary" onClick={() => builder.addStirCauldron()}>
+        <Button
+          color="primary"
+          onClick={() => plotBuilderItemCollection.addStirCauldron()}
+        >
           <AddIcon /> Stir Cauldron
         </Button>
-        <Button color="primary" onClick={() => builder.addPourSolvent()}>
+        <Button
+          color="primary"
+          onClick={() => plotBuilderItemCollection.addPourSolvent()}
+        >
           <AddIcon /> Pour Solvent
         </Button>
-        <Button color="primary" onClick={() => builder.addHeatVortex()}>
+        <Button
+          color="primary"
+          onClick={() => plotBuilderItemCollection.addHeatVortex()}
+        >
           <AddIcon /> Heat Vortex
         </Button>
       </div>
