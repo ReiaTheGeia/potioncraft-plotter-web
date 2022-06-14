@@ -1,6 +1,6 @@
 import { uniq } from "lodash";
 
-import { Point } from "@/points";
+import { Vector2 } from "@/points";
 import { rectFromCircle } from "@/rectangles";
 
 import {
@@ -20,7 +20,7 @@ export class PotionMap {
     return this._entities;
   }
 
-  hitTest(p: Point, radius = 0): readonly Readonly<MapEntity>[] {
+  hitTest(p: Vector2, radius = 0): readonly Readonly<MapEntity>[] {
     const regions = this._getEntityRegions();
 
     const indexes =

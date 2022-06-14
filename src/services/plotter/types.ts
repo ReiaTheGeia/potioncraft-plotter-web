@@ -1,4 +1,4 @@
-import { Point } from "@/points";
+import { Vector2 } from "@/points";
 
 import { IngredientId } from "../ingredients/types";
 import { MapEntity } from "../potion-maps/types";
@@ -30,7 +30,7 @@ export interface HeatVortexPlotItem {
   distance: number;
 }
 
-export interface PlotPoint extends Point {
+export interface PlotPoint extends Vector2 {
   source: PlotItem;
   entities: Readonly<MapEntity>[];
 }

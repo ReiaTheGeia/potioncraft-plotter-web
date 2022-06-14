@@ -5,7 +5,7 @@ import { Card, CardContent, Typography } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { pointArrayLength } from "@/point-array";
-import { pointMagnitude, pointSubtract, PointZero } from "@/points";
+import { vec2Magnitude, vec2Subtract, Vec2Zero } from "@/points";
 
 import {
   AddIngredientPlotItem,
@@ -24,7 +24,7 @@ export interface PlotDetailsProps {
 const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
   const ingredientRegistry = useDIDependency(IngredientRegistry);
 
-  const endsAt = last(plot.committedPoints) ?? PointZero;
+  const endsAt = last(plot.committedPoints) ?? Vec2Zero;
 
   const [
     effects,
@@ -181,7 +181,7 @@ function longestDangerLength(items: PlotPoint[]): number {
   for (let i = 1; i < items.length; i++) {
     const item = items[i];
     if (item.entities.some((x) => x.entityType === "DangerZonePart")) {
-      currentLength += pointMagnitude(pointSubtract(item, prevItem));
+      currentLength += vec2Magnitude(vec2Subtract(item, prevItem));
     } else {
       longestLength = Math.max(longestLength, currentLength);
       currentLength = 0;
@@ -200,7 +200,7 @@ function getEffects(items: PlotPoint[]): Record<string, number> {
       continue;
     }
 
-    const distance = pointMagnitude(pointSubtract(item, effect));
+    const distance = vec2Magnitude(vec2Subtract(item, effect));
     const tier = getEffectTier(distance, 0);
     result[effect.effect] = Math.max(result[effect.effect] ?? 0, tier);
   }

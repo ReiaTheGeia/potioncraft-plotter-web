@@ -7,7 +7,7 @@ import { useComponentBounds } from "@/hooks/component-bounds";
 import { useNativeEvent } from "@/hooks/native-event";
 
 import { IPanZoomViewportViewModel } from "./PanZoomViewportViewModel";
-import { Point, pointSubtract, PointZero } from "@/points";
+import { Vector2, vec2Subtract, Vec2Zero } from "@/points";
 
 export interface PanZoomHandlerProps {
   className?: string;
@@ -31,7 +31,7 @@ const PanZoomViewport = ({
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const containerBounds = useComponentBounds(containerRef);
   const [dragPointer, setDragPointer] = React.useState<number | null>(null);
-  const [mouseLastPos, setMouseLastPos] = React.useState<Point>(PointZero);
+  const [mouseLastPos, setMouseLastPos] = React.useState<Vector2>(Vec2Zero);
 
   React.useLayoutEffect(() => {
     viewModel.onViewportResized(containerBounds.width, containerBounds.height);
@@ -85,7 +85,7 @@ const PanZoomViewport = ({
         return;
       }
       const p = { x: e.clientX, y: e.clientY };
-      const delta = pointSubtract(p, mouseLastPos);
+      const delta = vec2Subtract(p, mouseLastPos);
       setMouseLastPos(p);
       // FIXME: Panning is miscalculated.  Mouse drifts from grab position.
       viewModel.pan(delta.x, -delta.y, true);
@@ -99,7 +99,7 @@ const PanZoomViewport = ({
         return;
       }
       setDragPointer(null);
-      setMouseLastPos(PointZero);
+      setMouseLastPos(Vec2Zero);
       e.currentTarget.releasePointerCapture(e.pointerId);
     },
     [dragPointer]

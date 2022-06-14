@@ -1,4 +1,4 @@
-import { Point } from "@/points";
+import { Vector2 } from "@/points";
 import { Rectangle } from "@/rectangles";
 
 export type MapEntity =

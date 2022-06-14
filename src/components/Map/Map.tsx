@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material";
 
-import { PointZero } from "@/points";
+import { Vec2Zero } from "@/points";
 import { degreesToRadians } from "@/utils";
 import { SizeZero } from "@/size";
 
@@ -48,7 +48,7 @@ const MapSlotSrc = require("@/assets/MapSlot.png");
 
 const PotionMapComponent = ({ className, map, viewModel }: MapProps) => {
   const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
-  const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
+  const offset = useObservation(viewModel.viewOffset$) ?? Vec2Zero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
 
   const [canvasRef, setCanvasRef] = React.useState<HTMLCanvasElement | null>(

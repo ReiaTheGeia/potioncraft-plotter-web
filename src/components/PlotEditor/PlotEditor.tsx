@@ -2,7 +2,7 @@ import React from "react";
 import { styled, Card, CardContent, Typography } from "@mui/material";
 
 import { useDICreate, useDIDependency } from "@/container";
-import { PointZero } from "@/points";
+import { Vec2Zero } from "@/points";
 
 import { useObservation } from "@/hooks/observe";
 
@@ -22,6 +22,8 @@ import StepDetails from "./components/StepDetails";
 import PlotDetails from "./components/PlotDetails";
 import EntityDetails from "./components/EntityDetails";
 import { PlotBuilderItem } from "@/services/plotter/PlotBuilder";
+import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
+import { SizeZero } from "@/size";
 
 const Root = styled("div")(({ theme }) => ({
   width: "100%",
@@ -98,6 +100,9 @@ const PlotEditor = () => {
   const inspectEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
 
+  const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
+  const offset = useObservation(viewModel.viewOffset$) ?? Vec2Zero;
+
   const builder = viewModel.builder;
 
   const plot = useObservation(builder.plot$, { useTransition: false }) ?? null;
@@ -146,6 +151,33 @@ const PlotEditor = () => {
             plot={plot ?? EmptyPlotResult}
             viewModel={viewModel}
           />
+          {/* <svg
+            className="plot"
+            width={width}
+            height={height}
+            viewBox={`0 0 ${width} ${height}`}
+          >
+            <g transform={`scale(${scale})`}>
+              <g
+                transform={`translate(${MAP_EXTENT_RADIUS}, ${MAP_EXTENT_RADIUS})`}
+              >
+                <g transform="scale(1, -1)">
+                  <g transform={`translate(${offset.x}, ${offset.y})`}>
+                    {mouseWorld && (
+                      <circle
+                        style={{ pointerEvents: "none" }}
+                        cx={mouseWorld.x}
+                        cy={mouseWorld.y}
+                        r={POTION_RADIUS}
+                        color="blue"
+                        opacity={0.2}
+                      />
+                    )}
+                  </g>
+                </g>
+              </g>
+            </g>
+          </svg> */}
         </PanZoomViewport>
         <div className="inspect-stack">
           {inspectPoint && <PointDetails point={inspectPoint} />}
@@ -161,6 +193,12 @@ const PlotEditor = () => {
               <Typography variant="overline">
                 ({mouseWorld.x.toFixed(2)}, {mouseWorld.y.toFixed(2)})
               </Typography>
+              {/* <Typography variant="overline">
+                {map
+                  ?.hitTest(mouseWorld, POTION_RADIUS)
+                  .map((hit) => hit.entityType)
+                  .join(", ")}
+              </Typography> */}
             </CardContent>
           </Card>
         )}

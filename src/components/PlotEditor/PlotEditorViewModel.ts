@@ -10,11 +10,11 @@ import { first } from "lodash";
 import { inject } from "microinject";
 
 import {
-  Point,
-  pointAdd,
-  pointDistance,
-  pointSubtract,
-  PointZero,
+  Vector2,
+  vec2Add,
+  vec2Distance,
+  vec2Subtract,
+  Vec2Zero,
 } from "@/points";
 import { Size, SizeZero } from "@/size";
 
@@ -35,15 +35,15 @@ export class PlotEditorViewModel
   /**
    * The offset of the map on the viewport, in map units, unscaled.
    */
-  private readonly _viewOffset$ = new BehaviorSubject<Point>(PointZero);
+  private readonly _viewOffset$ = new BehaviorSubject<Vector2>(Vec2Zero);
   private readonly _viewScale$ = new BehaviorSubject<number>(1);
 
   private readonly _shareString$: Observable<string>;
 
-  private readonly _mouseClientPosition$ = new BehaviorSubject<Point | null>(
+  private readonly _mouseClientPosition$ = new BehaviorSubject<Vector2 | null>(
     null
   );
-  private readonly _mouseWorldPosition$: Observable<Point | null>;
+  private readonly _mouseWorldPosition$: Observable<Vector2 | null>;
   private readonly _mouseOverPlotItem$ = new BehaviorSubject<PlotItem | null>(
     null
   );
@@ -102,8 +102,8 @@ export class PlotEditorViewModel
         for (let i = 1; i < plotItemPoints.length; i++) {
           const point = plotItemPoints[i];
           if (
-            pointDistance(worldPos, point) <
-            pointDistance(worldPos, closestPlotItem)
+            vec2Distance(worldPos, point) <
+            vec2Distance(worldPos, closestPlotItem)
           ) {
             closestPlotItem = point;
           }
@@ -126,14 +126,14 @@ export class PlotEditorViewModel
     return this._viewportSize$;
   }
 
-  get viewOffset$(): Observable<Point> {
+  get viewOffset$(): Observable<Vector2> {
     return this._viewOffset$;
   }
   get viewScale$(): Observable<number> {
     return this._viewScale$;
   }
 
-  get mouseWorldPosition$(): Observable<Point | null> {
+  get mouseWorldPosition$(): Observable<Vector2 | null> {
     return this._mouseWorldPosition$;
   }
 
@@ -153,15 +153,15 @@ export class PlotEditorViewModel
     return this._bottlePreviewPoint$;
   }
 
-  zoom(delta: number, on: Point | null = null) {
-    const prevWorld = on ? this._clientToWorld(on) : PointZero;
+  zoom(delta: number, on: Vector2 | null = null) {
+    const prevWorld = on ? this._clientToWorld(on) : Vec2Zero;
     const pzoom = this._viewScale$.value;
     const zoom = pzoom * delta;
     this._viewScale$.next(zoom);
     if (on) {
       const world = this._clientToWorld(on);
-      const delta = pointSubtract(world, prevWorld);
-      this._viewOffset$.next(pointAdd(this._viewOffset$.value, delta));
+      const delta = vec2Subtract(world, prevWorld);
+      this._viewOffset$.next(vec2Add(this._viewOffset$.value, delta));
     }
   }
 
@@ -174,7 +174,7 @@ export class PlotEditorViewModel
   pan(dx: number, dy: number, applyZoom = false) {
     const z = applyZoom ? 1 / this._viewScale$.value : 1;
     this._viewOffset$.next(
-      pointAdd(this._viewOffset$.value, { x: dx * z, y: dy * z })
+      vec2Add(this._viewOffset$.value, { x: dx * z, y: dy * z })
     );
   }
 
@@ -229,7 +229,7 @@ export class PlotEditorViewModel
     this._mouseOverPlotItem$.next(item ? item.plotItem : null);
   }
 
-  private _clientToWorld(p: Point): Point {
+  private _clientToWorld(p: Vector2): Vector2 {
     const zoomFactor = this._viewScale$.value;
     const { x: offsetX, y: offsetY } = this._viewOffset$.value;
 
@@ -241,7 +241,7 @@ export class PlotEditorViewModel
     };
   }
 
-  private _worldToClient(p: Point): Point {
+  private _worldToClient(p: Vector2): Vector2 {
     const zoomFactor = this._viewScale$.value;
     const { x: offsetX, y: offsetY } = this._viewOffset$.value;
 

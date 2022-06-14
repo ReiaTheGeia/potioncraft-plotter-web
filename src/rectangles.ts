@@ -1,14 +1,20 @@
-import { Point, pointAdd, PointZero } from "./points";
+import {
+  Vector2,
+  vec2Add,
+  Vec2Zero,
+  vec2Magnitude,
+  vec2Subtract,
+} from "./points";
 import { Size } from "./size";
 
 export interface Rectangle {
-  p1: Point;
-  p2: Point;
+  p1: Vector2;
+  p2: Vector2;
 }
 
 export const RectZero: Readonly<Rectangle> = Object.freeze({
-  p1: PointZero,
-  p2: PointZero,
+  p1: Vec2Zero,
+  p2: Vec2Zero,
 }) as any;
 
 export function rectangle(x: number, y: number, w: number, h: number) {
@@ -18,7 +24,7 @@ export function rectangle(x: number, y: number, w: number, h: number) {
   };
 }
 
-export function rectFromCircle(p: Point, radius: number) {
+export function rectFromCircle(p: Vector2, radius: number) {
   return {
     p1: {
       x: p.x - radius,
@@ -31,25 +37,25 @@ export function rectFromCircle(p: Point, radius: number) {
   };
 }
 
-export function rectOffset(r: Rectangle, offset: Point) {
+export function rectOffset(r: Rectangle, offset: Vector2) {
   return {
-    p1: pointAdd(r.p1, offset),
-    p2: pointAdd(r.p2, offset),
+    p1: vec2Add(r.p1, offset),
+    p2: vec2Add(r.p2, offset),
   };
 }
 
-export function normalizeRectangle(p1: Point, p2: Point): Rectangle;
+export function normalizeRectangle(p1: Vector2, p2: Vector2): Rectangle;
 export function normalizeRectangle(r: Rectangle): Rectangle;
 export function normalizeRectangle(...args: any[]): Rectangle {
-  let p1: Point;
-  let p2: Point;
+  let p1: Vector2;
+  let p2: Vector2;
   if (args.length === 1) {
     const r = args[0] as Rectangle;
     p1 = r.p1;
     p2 = r.p2;
   } else {
-    p1 = args[0] as Point;
-    p2 = args[1] as Point;
+    p1 = args[0] as Vector2;
+    p2 = args[1] as Vector2;
   }
   return {
     p1: {
@@ -63,7 +69,7 @@ export function normalizeRectangle(...args: any[]): Rectangle {
   };
 }
 
-export function addPointToRect(r: Rectangle, p: Point): Rectangle {
+export function addPointToRect(r: Rectangle, p: Vector2): Rectangle {
   return {
     p1: {
       x: Math.min(r.p1.x, p.x),
@@ -76,7 +82,7 @@ export function addPointToRect(r: Rectangle, p: Point): Rectangle {
   };
 }
 
-export function pointIntersectsRect(p: Point, r: Rectangle): boolean {
+export function pointIntersectsRect(p: Vector2, r: Rectangle): boolean {
   r = normalizeRectangle(r);
 
   if (r.p1.x > p.x || r.p2.x < p.x) {

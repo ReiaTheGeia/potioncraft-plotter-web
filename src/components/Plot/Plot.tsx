@@ -3,7 +3,7 @@ import Color from "color";
 import { styled } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
-import { PointZero } from "@/points";
+import { Vec2Zero } from "@/points";
 import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
 import { PointArray } from "@/point-array";
 import { keepEveryK } from "@/utils";
@@ -40,7 +40,7 @@ const Root = styled("div")(({ theme }) => ({
 
 const Plot = ({ className, plot, viewModel }: PlotProps) => {
   const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
-  const offset = useObservation(viewModel.viewOffset$) ?? PointZero;
+  const offset = useObservation(viewModel.viewOffset$) ?? Vec2Zero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
   const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
   const bottlePreviewPoint =

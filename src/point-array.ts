@@ -2,18 +2,18 @@ import { sum } from "lodash";
 import { PATH_SPACING_PHYSICS } from "./game-settings";
 
 import {
-  linearInterpolate,
-  Point,
-  pointAdd,
-  pointDistance,
-  pointMagnitude,
-  pointScale,
-  pointSubtract,
-  PointZero,
+  vec2Lerp,
+  Vector2,
+  vec2Add,
+  vec2Distance,
+  vec2Magnitude,
+  vec2Scale,
+  vec2Subtract,
+  Vec2Zero,
 } from "./points";
 
-export type PointArray = Point[];
-export type ReadOnlyPointArray = readonly Point[];
+export type PointArray = Vector2[];
+export type ReadOnlyPointArray = readonly Vector2[];
 
 export function pointArrayLength(pointArray: ReadOnlyPointArray): number {
   if (pointArray.length <= 1) {
@@ -23,7 +23,7 @@ export function pointArrayLength(pointArray: ReadOnlyPointArray): number {
   let length = 0;
   let previousPoint = pointArray[0];
   for (let i = 1; i < pointArray.length; i++) {
-    length += pointDistance(previousPoint, pointArray[i]);
+    length += vec2Distance(previousPoint, pointArray[i]);
     previousPoint = pointArray[i];
   }
 
@@ -48,13 +48,13 @@ export function pointArrayLengthCached(pointArray: ReadOnlyPointArray): number {
 }
 
 export function pointArrayLineFromDistance(
-  start: Point,
-  direction: Point,
+  start: Vector2,
+  direction: Vector2,
   distance: number,
   spacing: number = PATH_SPACING_PHYSICS
 ) {
   const pointArray: PointArray = [];
-  if (pointMagnitude(direction) === 0) {
+  if (vec2Magnitude(direction) === 0) {
     throw new Error("direction must be valid.");
   }
 
@@ -66,7 +66,7 @@ export function pointArrayLineFromDistance(
   pointArray.push(previousPoint);
   let remainingDistance = distance;
   while (remainingDistance >= spacing) {
-    const point = pointAdd(previousPoint, pointScale(direction, spacing));
+    const point = vec2Add(previousPoint, vec2Scale(direction, spacing));
     pointArray.push(point);
     remainingDistance -= spacing;
     previousPoint = point;
@@ -74,7 +74,7 @@ export function pointArrayLineFromDistance(
 
   if (remainingDistance > 0) {
     pointArray.push(
-      pointAdd(previousPoint, pointScale(direction, remainingDistance))
+      vec2Add(previousPoint, vec2Scale(direction, remainingDistance))
     );
   }
 
@@ -83,12 +83,12 @@ export function pointArrayLineFromDistance(
 
 export function pointArrayOffset(
   pointArray: PointArray,
-  offset: Point
+  offset: Vector2
 ): PointArray {
-  return pointArray.map((point) => pointAdd(point, offset));
+  return pointArray.map((point) => vec2Add(point, offset));
 }
 
-export function takePointArrayByDistance<T extends Point>(
+export function takePointArrayByDistance<T extends Vector2>(
   array: T[],
   takeLength: number
 ): [taken: T[], remainder: T[]] {
@@ -105,14 +105,10 @@ export function takePointArrayByDistance<T extends Point>(
   let previousPoint = array[0];
   for (let i = 1; i < array.length; i++) {
     const p = array[i];
-    const length = pointDistance(p, previousPoint);
+    const length = vec2Distance(p, previousPoint);
     if (takenLength + length >= takeLength) {
       const remainingLength = takeLength - takenLength;
-      const splitPoint = linearInterpolate(
-        previousPoint,
-        p,
-        remainingLength / length
-      );
+      const splitPoint = vec2Lerp(previousPoint, p, remainingLength / length);
       taken.push(
         Object.assign({}, previousPoint, { x: splitPoint.x, y: splitPoint.y })
       );

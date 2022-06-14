@@ -4,21 +4,21 @@ import {
 } from "./game-settings";
 
 import {
-  Point,
-  pointAdd,
-  pointDistance,
-  pointMagnitude,
-  pointNormalize,
-  pointScale,
-  pointSubtract,
-  PointZero,
+  Vector2,
+  vec2Add,
+  vec2Distance,
+  vec2Magnitude,
+  vec2Normalize,
+  vec2Scale,
+  vec2Subtract,
+  Vec2Zero,
 } from "./points";
 
 export interface CubicBezierCurve {
-  start: Point;
-  p1: Point;
-  p2: Point;
-  end: Point;
+  start: Vector2;
+  p1: Vector2;
+  p2: Vector2;
+  end: Vector2;
 }
 
 export function cubicBezierCurve(
@@ -39,7 +39,7 @@ export function cubicBezierCurve(
   };
 }
 
-export function getCurvePoint(curve: CubicBezierCurve, t: number): Point {
+export function getCurvePoint(curve: CubicBezierCurve, t: number): Vector2 {
   if (t < 0 || t > 1) {
     throw new Error("getPoint: t must be between 0 and 1");
   }
@@ -74,8 +74,8 @@ export function getCurveLength(
 
   for (let index = 1; index <= resolution; index++) {
     const point = getCurvePoint(curve, index / resolution);
-    const vector2_2 = pointSubtract(point, previousPoint);
-    length += pointMagnitude(vector2_2);
+    const vector2_2 = vec2Subtract(point, previousPoint);
+    length += vec2Magnitude(vector2_2);
     previousPoint = point;
   }
 
@@ -84,12 +84,12 @@ export function getCurveLength(
   return length;
 }
 
-const curvePointsCache = new Map<CubicBezierCurve, readonly Point[]>();
+const curvePointsCache = new Map<CubicBezierCurve, readonly Vector2[]>();
 export function curveToPoints(
   curve: CubicBezierCurve
   // spacing: number = PATH_SPACING_PHYSICS,
   // resolution: number = 1
-): readonly Point[] {
+): readonly Vector2[] {
   const spacing: number = PATH_SPACING_PHYSICS;
   const resolution: number = 1;
 
@@ -105,10 +105,10 @@ export function curveToPoints(
     return cached;
   }
 
-  const points: Point[] = [];
+  const points: Vector2[] = [];
 
   let remainingDistance = 0;
-  let previousPoint: Point = curve.start;
+  let previousPoint: Vector2 = curve.start;
 
   points.push(previousPoint);
 
@@ -116,13 +116,13 @@ export function curveToPoints(
   for (let index = 0; index <= samplePointCount; index++) {
     const t = index / samplePointCount;
     const point = getCurvePoint(curve, t);
-    remainingDistance += pointDistance(previousPoint, point);
+    remainingDistance += vec2Distance(previousPoint, point);
     while (remainingDistance >= spacing) {
       remainingDistance = remainingDistance - spacing;
-      const splitPoint = pointAdd(
+      const splitPoint = vec2Add(
         point,
-        pointScale(
-          pointNormalize(pointSubtract(previousPoint, point)),
+        vec2Scale(
+          vec2Normalize(vec2Subtract(previousPoint, point)),
           remainingDistance
         )
       );

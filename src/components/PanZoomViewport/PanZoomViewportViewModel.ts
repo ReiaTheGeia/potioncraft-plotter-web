@@ -1,12 +1,12 @@
 import { Observable } from "rxjs";
 
-import { Point } from "@/points";
+import { Vector2 } from "@/points";
 
 export interface IPanZoomViewportViewModel {
-  readonly viewOffset$: Observable<Point>;
+  readonly viewOffset$: Observable<Vector2>;
   readonly viewScale$: Observable<number>;
 
-  zoom(delta: number, on: Point | null | undefined): void;
+  zoom(delta: number, on: Vector2 | null | undefined): void;
   pan(dx: number, dy: number, applyZoom?: boolean): void;
 
   onViewportResized(width: number, height: number): void;

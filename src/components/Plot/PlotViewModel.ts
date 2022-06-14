@@ -1,13 +1,7 @@
 import React from "react";
 import { BehaviorSubject, Observable } from "rxjs";
 
-import {
-  Point,
-  pointAdd,
-  pointScale,
-  pointSubtract,
-  PointZero,
-} from "@/points";
+import { Vector2, vec2Add, vec2Scale, vec2Subtract, Vec2Zero } from "@/points";
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 import { PlotItem, PlotPoint } from "@/services/plotter/types";
 import { Size } from "@/size";
@@ -26,7 +20,7 @@ export function usePlotViewModel(): IPlotViewModel {
 
 export interface IPlotViewModel {
   readonly viewportSize$: Observable<Size>;
-  readonly viewOffset$: Observable<Point>;
+  readonly viewOffset$: Observable<Vector2>;
   readonly viewScale$: Observable<number>;
   readonly mouseOverPlotItem$: Observable<PlotItem | null>;
   readonly bottlePreviewPoint$: Observable<PlotPoint | null>;

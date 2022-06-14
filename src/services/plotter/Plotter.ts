@@ -10,19 +10,19 @@ import {
   takePointArrayByDistance,
 } from "@/point-array";
 import {
-  Point,
-  pointAdd,
-  pointAngleRadians,
-  pointDistance,
-  pointEquals,
-  pointMagnitude,
-  pointMoveTowards,
-  pointNormalize,
-  pointRotate,
-  pointScale,
+  Vector2,
+  vec2Add,
+  vec2AngleRadians,
+  vec2Distance,
+  vec2Equals,
+  vec2Magnitude,
+  vec2MoveTowards,
+  vec2Normalize,
+  vec2Rotate,
+  vec2Scale,
   pointSignedAngleDegrees180,
-  pointSubtract,
-  PointZero,
+  vec2Subtract,
+  Vec2Zero,
 } from "@/points";
 
 import { IngredientRegistry } from "../ingredients/IngredientRegistry";
@@ -95,7 +95,7 @@ export class Plotter {
     const { ingredientId, grindPercent } = item;
 
     const addPosition =
-      last(result.pendingPoints) ?? last(result.committedPoints) ?? PointZero;
+      last(result.pendingPoints) ?? last(result.committedPoints) ?? Vec2Zero;
 
     const ingredient = this.ingredientRegistry.getIngredientById(ingredientId);
     if (!ingredient) {
@@ -123,7 +123,7 @@ export class Plotter {
     );
 
     const appendPendingPoints = addedPoints.map((point) =>
-      pointAdd(addPosition, point)
+      vec2Add(addPosition, point)
     );
 
     return appendPendingPlotPoints(appendPendingPoints, item, result);
@@ -134,21 +134,21 @@ export class Plotter {
     result: PlotResult
   ): PlotResult {
     const currentPoint =
-      result.committedPoints[result.committedPoints.length - 1] ?? PointZero;
-    if (pointEquals(currentPoint, PointZero)) {
+      result.committedPoints[result.committedPoints.length - 1] ?? Vec2Zero;
+    if (vec2Equals(currentPoint, Vec2Zero)) {
       return result;
     }
 
     let { distance } = item;
 
-    const distanceToOrigin = pointDistance(currentPoint, PointZero);
+    const distanceToOrigin = vec2Distance(currentPoint, Vec2Zero);
     if (distance > distanceToOrigin) {
       distance = distanceToOrigin;
     }
 
     const newPoints = pointArrayLineFromDistance(
       currentPoint,
-      pointNormalize(pointSubtract(PointZero, currentPoint)),
+      vec2Normalize(vec2Subtract(Vec2Zero, currentPoint)),
       distance
     );
 
@@ -177,7 +177,7 @@ export class Plotter {
     result: PlotResult,
     map: PotionMap
   ): PlotResult {
-    const indicatorPosition = last(result.committedPoints) ?? PointZero;
+    const indicatorPosition = last(result.committedPoints) ?? Vec2Zero;
     const vortex = map
       .hitTest(indicatorPosition, POTION_RADIUS)
       .find((x) => x.entityType === "Vortex");
@@ -221,10 +221,10 @@ export class Plotter {
 
     let remainingDistance = distance;
     let currentPosition = indicatorPosition;
-    const pointsToAdd: Point[] = [indicatorPosition];
+    const pointsToAdd: Vector2[] = [indicatorPosition];
     while (remainingDistance > 0) {
-      const to = pointSubtract(currentPosition, vortex);
-      const magnitude = pointMagnitude(to);
+      const to = vec2Subtract(currentPosition, vortex);
+      const magnitude = vec2Magnitude(to);
       const f1 = Math.sign(vortexSpiralThetaPower) * vortexSpiralStep;
       const f2 = Math.pow(
         (magnitude * 2.0 * Math.PI) / f1,
@@ -238,14 +238,14 @@ export class Plotter {
           ? Math.min(0.0, b)
           : Math.max(0.0, b);
       const num = ((f1 * 0.5) / Math.PI) * Math.pow(f3, vortexSpiralThetaPower);
-      const from = pointScale({ x: Math.cos(f2), y: Math.sin(f2) }, magnitude);
+      const from = vec2Scale({ x: Math.cos(f2), y: Math.sin(f2) }, magnitude);
       const vector2_1 = { x: Math.cos(f3), y: Math.sin(f3) };
 
       const rotation = degreesToRadians(pointSignedAngleDegrees180(from, to));
-      const vector2_2 = pointRotate(pointScale(vector2_1, num), rotation);
-      const vector2_3 = pointMoveTowards(
+      const vector2_2 = vec2Rotate(vec2Scale(vector2_1, num), rotation);
+      const vector2_3 = vec2MoveTowards(
         currentPosition,
-        pointAdd(vortex, vector2_2),
+        vec2Add(vortex, vector2_2),
         step
       );
 
@@ -260,7 +260,7 @@ export class Plotter {
 }
 
 function appendPendingPlotPoints(
-  points: Point[],
+  points: Vector2[],
   source: PlotItem,
   result: PlotResult
 ): PlotResult {
@@ -285,7 +285,7 @@ function appendPendingPlotPoints(
 }
 
 function commitPlotPoints(
-  points: Point[],
+  points: Vector2[],
   source: PlotItem,
   result: PlotResult
 ): PlotResult {
@@ -297,9 +297,9 @@ function commitPlotPoints(
     return result;
   }
 
-  const difference = pointSubtract(
+  const difference = vec2Subtract(
     last(points)!,
-    last(result.committedPoints) ?? PointZero
+    last(result.committedPoints) ?? Vec2Zero
   );
 
   return Object.assign({}, result, {

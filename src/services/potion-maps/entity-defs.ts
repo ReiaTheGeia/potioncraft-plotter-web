@@ -1,18 +1,13 @@
 import { POTION_RADIUS } from "@/game-settings";
-import {
-  Point,
-  pointAdd,
-  pointMagnitude,
-  pointRotate,
-  pointSubtract,
-} from "@/points";
+import { Vector2, vec2Magnitude, vec2Rotate, vec2Subtract } from "@/points";
 import {
   rectangle,
   Rectangle,
   rectFromCircle,
   rectOffset,
-  pointIntersectsRect,
+  rectSize,
 } from "@/rectangles";
+import { degreesToRadians } from "@/utils";
 
 import { MapEntity } from "./types";
 
@@ -20,7 +15,7 @@ export interface EntityDefinition {
   readonly entityType: MapEntity["entityType"];
   getFriendlyName(entity: MapEntity): string;
   getBounds(entity: MapEntity): Rectangle;
-  hitTest(p: Point, entity: MapEntity, radius?: number): boolean;
+  hitTest(p: Vector2, entity: MapEntity, radius?: number): boolean;
 }
 
 const VortexRadii = {
@@ -38,8 +33,8 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
     getBounds(entity: MapEntity) {
       return rectFromCircle(entity, POTION_RADIUS);
     },
-    hitTest(p: Point, entity: MapEntity, radius = 0) {
-      return pointMagnitude(pointSubtract(p, entity)) - radius <= POTION_RADIUS;
+    hitTest(p: Vector2, entity: MapEntity, radius = 0) {
+      return vec2Magnitude(vec2Subtract(p, entity)) - radius <= POTION_RADIUS;
     },
   },
   // NOTE: This should be replaced by something that knows the different hitboxes of each type.
@@ -53,7 +48,6 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
     },
     getBounds(entity: MapEntity) {
       const bone = assertEntity(entity, "DangerZonePart");
-      // FIXME: hack.  Use the actual hitboxes
       switch (bone.prefab) {
         case "Fang1":
           // Need to cover all rotations, so use the largest axis for both.
@@ -72,10 +66,10 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
           return rectFromCircle(entity, 0.24);
       }
     },
-    hitTest(p: Point, entity: MapEntity, radius = 0) {
+    hitTest(p: Vector2, entity: MapEntity, radius = 0) {
       const bone = assertEntity(entity, "DangerZonePart");
       if (bone.prefab === "Skull1") {
-        return false; //pointMagnitude(pointSubtract(p, entity)) - radius <= 0.24;
+        return vec2Magnitude(vec2Subtract(p, entity)) - radius <= 0.24;
       }
 
       let r: Rectangle;
@@ -96,33 +90,39 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
           return false;
       }
 
+      const boneAngle = degreesToRadians(bone.angle);
+
       // get it aligned with the axis aligned hitbox of the bone
-      p = pointSubtract(p, entity);
-      p = pointRotate(p, -bone.angle);
+      p = vec2Subtract(p, entity);
+      p = vec2Rotate(p, -boneAngle);
 
-      // https://stackoverflow.com/questions/21089959/detecting-collision-of-rectangle-with-circle
-      const w = r.p2.x - r.p1.x;
-      const h = r.p2.y - r.p1.y;
-      const distX = Math.abs(p.x - r.p1.x - w / 2);
-      const distY = Math.abs(p.y - r.p1.y - w / 2);
+      const rc = {
+        x: r.p1.x + (r.p2.x - r.p1.x) / 2,
+        y: r.p1.y + (r.p2.y - r.p1.y) / 2,
+      };
+      const rsize = rectSize(r);
 
-      if (distX > w / 2 + radius) {
+      const distx = Math.abs(p.x - rc.x);
+      const disty = Math.abs(p.y - rc.y);
+
+      const dx = distx - rsize.width / 2;
+      const dy = disty - rsize.height / 2;
+      if (
+        distx > rsize.width / 2 + radius ||
+        disty > rsize.height / 2 + radius
+      ) {
         return false;
       }
-      if (distY > h / 2 + radius) {
+
+      if (
+        dx * dx + dy * dy > radius * radius &&
+        distx > rsize.width / 2 &&
+        disty > rsize.height / 2
+      ) {
         return false;
       }
 
-      if (distX <= w / 2) {
-        return true;
-      }
-      if (distY <= h / 2) {
-        return true;
-      }
-
-      var dx = distX - w / 2;
-      var dy = distY - h / 2;
-      return dx * dx + dy * dy <= radius * radius;
+      return true;
     },
   },
   ExperienceBonus: {
@@ -135,8 +135,8 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
       // FIXME: Arent these different sizes?
       return rectFromCircle(entity, 0.3);
     },
-    hitTest: (p: Point, entity: MapEntity, radius = 0): boolean => {
-      return pointMagnitude(pointSubtract(p, entity)) - radius <= 0.3;
+    hitTest: (p: Vector2, entity: MapEntity, radius = 0): boolean => {
+      return vec2Magnitude(vec2Subtract(p, entity)) - radius <= 0.3;
     },
   },
   Vortex: {
@@ -149,10 +149,10 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
       const radius = VortexRadii[vortex.prefab];
       return rectFromCircle(entity, radius);
     },
-    hitTest: (p: Point, entity: MapEntity, radius = 0): boolean => {
+    hitTest: (p: Vector2, entity: MapEntity, radius = 0): boolean => {
       const vortex = assertEntity(entity, "Vortex");
       const vortexRadius = VortexRadii[vortex.prefab];
-      return pointMagnitude(pointSubtract(p, entity)) - radius <= vortexRadius;
+      return vec2Magnitude(vec2Subtract(p, entity)) - radius <= vortexRadius;
     },
   },
 };
