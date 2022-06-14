@@ -281,7 +281,7 @@ const AddIngredientPlotListItem = React.forwardRef<
       }
       item.setIngredient(value);
     },
-    [item]
+    [item, isPreviewing]
   );
 
   const onIngredientSelectorChange = React.useCallback(
