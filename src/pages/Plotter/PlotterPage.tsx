@@ -7,7 +7,7 @@ import { useObservation } from "@/hooks/observe";
 
 import { EmptyPlotResult } from "@/services/plotter/types";
 import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
-import { PlotBuilderItem } from "@/services/plotter/PlotBuilder";
+import { PlotBuilderItem } from "@/services/plotter/builder";
 import { History } from "@/services/history/History";
 
 import Plot from "@/components/Plot";
@@ -20,7 +20,7 @@ import StepDetails from "@/components/StepDetails";
 import PlotDetails from "@/components/PlotDetails";
 import EntityDetails from "@/components/EntityDetails";
 
-import { PlotterPageViewModel } from "./PlotEditorViewModel";
+import { PlotterPageViewModel } from "./PlotterPageViewModel";
 
 const Root = styled("div")(({ theme }) => ({
   width: "100%",

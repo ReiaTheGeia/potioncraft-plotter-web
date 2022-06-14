@@ -24,7 +24,7 @@ import {
   PourSolventPlotBuilderItem,
   StirCauldronPlotBuilderItem,
   HeatVortexPlotBuilderItem,
-} from "@/services/plotter/PlotBuilder";
+} from "@/services/plotter/builder";
 import { IngredientId } from "@/services/ingredients/types";
 
 import DragReoderable from "./DragReorderable";
@@ -99,7 +99,7 @@ const PlotBuilderItemsList = ({
           primaryAxis="top-to-bottom"
           dropIndicator={<div className="drop-indicator" />}
           onReorder={(_, p) => {
-            builder.reposition(items[p.fromIndex], p.toIndex);
+            builder.moveItem(items[p.fromIndex], p.toIndex);
           }}
         >
           {(value, params, getRootProps, getDragHandleProps) => (

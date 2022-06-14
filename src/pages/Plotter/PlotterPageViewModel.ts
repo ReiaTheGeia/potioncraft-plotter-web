@@ -20,9 +20,12 @@ import { Size, SizeZero } from "@/size";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
-import { PlotBuilder, PlotBuilderItem } from "@/services/plotter/PlotBuilder";
+import { PlotBuilder } from "@/services/plotter/builder/PlotBuilder";
+import { PlotBuilderItem } from "@/services/plotter/builder/PlotBuilderItem";
 import { PlotItem, PlotPoint } from "@/services/plotter/types";
 import { MapEntity } from "@/services/potion-maps/types";
+import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
+import { PotionBaseId } from "@/services/potion-bases/types";
 
 import { IPlotViewModel } from "@/components/Plot/PlotViewModel";
 import { IPanZoomViewportViewModel } from "@/components/PanZoomViewport/PanZoomViewportViewModel";
@@ -53,10 +56,18 @@ export class PlotterPageViewModel
 
   private readonly _mouseOverPlotPoint$: Observable<PlotPoint | null>;
 
-  constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
+  constructor(
+    @inject(PlotBuilder) private readonly _builder: PlotBuilder,
+    @inject(PotionBaseRegistry) potionBaseRegistry: PotionBaseRegistry
+  ) {
+    const waterMap = potionBaseRegistry.getPotionBaseById(
+      "water" as PotionBaseId
+    )!.map;
+    _builder.setMap(waterMap);
+
     this._shareString$ = this._builder.plot$
       .pipe(debounceTime(1000))
-      .pipe(map((x) => _builder.getShareString()));
+      .pipe(map((x) => this._builder.getShareString()));
 
     this._mouseWorldPosition$ = combineLatest([
       this._mouseClientPosition$,

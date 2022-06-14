@@ -1,6 +1,6 @@
 import { ContainerModule } from "microinject";
 
-import { PlotBuilder } from "./PlotBuilder";
+import { PlotBuilder } from "./builder/PlotBuilder";
 import { Plotter } from "./Plotter";
 
 export default new ContainerModule((bind) => {

@@ -2,6 +2,7 @@ import { last } from "lodash";
 import { inject, injectable, singleton } from "microinject";
 
 import { POTION_RADIUS } from "@/game-settings";
+import { degreesToRadians } from "@/utils";
 import { curveToPoints } from "@/curves";
 import {
   PointArray,
@@ -12,7 +13,6 @@ import {
 import {
   Vector2,
   vec2Add,
-  vec2AngleRadians,
   vec2Distance,
   vec2Equals,
   vec2Magnitude,
@@ -36,7 +36,6 @@ import {
   PourSolventPlotItem,
   StirCauldronPlotItem,
 } from "./types";
-import { degreesToRadians } from "@/utils";
 
 @injectable()
 @singleton()
