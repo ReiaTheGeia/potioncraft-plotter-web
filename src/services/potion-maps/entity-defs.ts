@@ -1,5 +1,5 @@
 import { POTION_RADIUS } from "@/game-settings";
-import { Vector2, vec2Magnitude, vec2Rotate, vec2Subtract } from "@/points";
+import { Vector2, vec2Magnitude, vec2Rotate, vec2Subtract } from "@/vector2";
 import {
   rectangle,
   Rectangle,

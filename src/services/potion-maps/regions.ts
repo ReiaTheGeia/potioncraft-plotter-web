@@ -1,7 +1,7 @@
 import { first } from "lodash";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
-import { Vector2, vec2Add } from "@/points";
+import { Vector2, vec2Add } from "@/vector2";
 import { Rectangle } from "@/rectangles";
 
 const MAP_WIDTH = MAP_EXTENT_RADIUS * 2;

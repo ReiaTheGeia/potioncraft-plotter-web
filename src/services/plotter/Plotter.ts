@@ -23,7 +23,7 @@ import {
   pointSignedAngleDegrees180,
   vec2Subtract,
   Vec2Zero,
-} from "@/points";
+} from "@/vector2";
 
 import { IngredientRegistry } from "../ingredients/IngredientRegistry";
 import { PotionMap } from "../potion-maps/PotionMap";

@@ -5,7 +5,7 @@ import { Card, CardContent, Typography } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { pointArrayLength } from "@/point-array";
-import { vec2Magnitude, vec2Subtract, Vec2Zero } from "@/points";
+import { vec2Magnitude, vec2Subtract, Vec2Zero } from "@/vector2";
 
 import {
   AddIngredientPlotItem,

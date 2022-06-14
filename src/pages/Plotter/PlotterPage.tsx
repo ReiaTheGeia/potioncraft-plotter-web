@@ -2,28 +2,25 @@ import React from "react";
 import { styled, Card, CardContent, Typography } from "@mui/material";
 
 import { useDICreate, useDIDependency } from "@/container";
-import { Vec2Zero } from "@/points";
 
 import { useObservation } from "@/hooks/observe";
 
 import { EmptyPlotResult } from "@/services/plotter/types";
 import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
-
-import Plot from "../Plot";
-import PlotBuilderItemsList from "../PlotBuilderItemsList";
-import PotionMap from "../Map";
-import PanZoomViewport from "../PanZoomViewport";
-import IncDecSlider from "../IncDecSlider";
-
-import { PlotEditorViewModel } from "./PlotEditorViewModel";
-
-import PointDetails from "./components/PointDetails";
-import StepDetails from "./components/StepDetails";
-import PlotDetails from "./components/PlotDetails";
-import EntityDetails from "./components/EntityDetails";
 import { PlotBuilderItem } from "@/services/plotter/PlotBuilder";
-import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
-import { SizeZero } from "@/size";
+import { History } from "@/services/history/History";
+
+import Plot from "@/components/Plot";
+import PlotBuilderItemsList from "@/components/PlotBuilderItemsList";
+import PotionMap from "@/components/Map";
+import PanZoomViewport from "@/components/PanZoomViewport";
+import IncDecSlider from "@/components/IncDecSlider";
+import PointDetails from "@/components/PointDetails";
+import StepDetails from "@/components/StepDetails";
+import PlotDetails from "@/components/PlotDetails";
+import EntityDetails from "@/components/EntityDetails";
+
+import { PlotterPageViewModel } from "./PlotEditorViewModel";
 
 const Root = styled("div")(({ theme }) => ({
   width: "100%",
@@ -91,17 +88,15 @@ const Root = styled("div")(({ theme }) => ({
   },
 }));
 
-const PlotEditor = () => {
-  const viewModel = useDICreate(PlotEditorViewModel);
+const PlotterPage = () => {
+  const history = useDIDependency(History);
+  const viewModel = useDICreate(PlotterPageViewModel);
   const baseRegistry = useDIDependency(PotionBaseRegistry);
   const map = baseRegistry.getPotionBaseById("water" as any)?.map;
   const inspectPoint = useObservation(viewModel.bottlePreviewPoint$) ?? null;
   const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
   const inspectEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
-
-  const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
-  const offset = useObservation(viewModel.viewOffset$) ?? Vec2Zero;
 
   const builder = viewModel.builder;
 
@@ -114,21 +109,23 @@ const PlotEditor = () => {
   const mouseWorld = useObservation(viewModel.mouseWorldPosition$) ?? null;
 
   React.useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
+    const query = new URLSearchParams(history.location.search);
     if (query.has("data")) {
       const data = query.get("data")!;
       builder.loadFromShareString(data);
     }
-  }, []);
+  }, [history]);
 
   React.useEffect(() => {
     if (!outputShareString) {
       return;
     }
-    const query = new URLSearchParams(window.location.search);
+    const query = new URLSearchParams(history.location.search);
     query.set("data", outputShareString);
-    window.history.replaceState({}, "", `?${query.toString()}`);
-  }, [outputShareString]);
+    history.replace({
+      search: query.toString(),
+    });
+  }, [history, outputShareString]);
 
   const onBuildItemMouseOver = React.useCallback(
     (item: PlotBuilderItem) => {
@@ -151,33 +148,6 @@ const PlotEditor = () => {
             plot={plot ?? EmptyPlotResult}
             viewModel={viewModel}
           />
-          {/* <svg
-            className="plot"
-            width={width}
-            height={height}
-            viewBox={`0 0 ${width} ${height}`}
-          >
-            <g transform={`scale(${scale})`}>
-              <g
-                transform={`translate(${MAP_EXTENT_RADIUS}, ${MAP_EXTENT_RADIUS})`}
-              >
-                <g transform="scale(1, -1)">
-                  <g transform={`translate(${offset.x}, ${offset.y})`}>
-                    {mouseWorld && (
-                      <circle
-                        style={{ pointerEvents: "none" }}
-                        cx={mouseWorld.x}
-                        cy={mouseWorld.y}
-                        r={POTION_RADIUS}
-                        color="blue"
-                        opacity={0.2}
-                      />
-                    )}
-                  </g>
-                </g>
-              </g>
-            </g>
-          </svg> */}
         </PanZoomViewport>
         <div className="inspect-stack">
           {inspectPoint && <PointDetails point={inspectPoint} />}
@@ -193,12 +163,6 @@ const PlotEditor = () => {
               <Typography variant="overline">
                 ({mouseWorld.x.toFixed(2)}, {mouseWorld.y.toFixed(2)})
               </Typography>
-              {/* <Typography variant="overline">
-                {map
-                  ?.hitTest(mouseWorld, POTION_RADIUS)
-                  .map((hit) => hit.entityType)
-                  .join(", ")}
-              </Typography> */}
             </CardContent>
           </Card>
         )}
@@ -221,4 +185,4 @@ const PlotEditor = () => {
   );
 };
 
-export default PlotEditor;
+export default PlotterPage;

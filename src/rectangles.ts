@@ -4,7 +4,7 @@ import {
   Vec2Zero,
   vec2Magnitude,
   vec2Subtract,
-} from "./points";
+} from "./vector2";
 import { Size } from "./size";
 
 export interface Rectangle {

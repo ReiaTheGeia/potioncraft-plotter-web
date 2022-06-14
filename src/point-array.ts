@@ -10,7 +10,7 @@ import {
   vec2Scale,
   vec2Subtract,
   Vec2Zero,
-} from "./points";
+} from "./vector2";
 
 export type PointArray = Vector2[];
 export type ReadOnlyPointArray = readonly Vector2[];

@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material";
 
-import { Vec2Zero } from "@/points";
+import { Vec2Zero } from "@/vector2";
 import { degreesToRadians } from "@/utils";
 import { SizeZero } from "@/size";
 

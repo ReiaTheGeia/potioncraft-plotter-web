@@ -1,6 +1,6 @@
 import { uniq } from "lodash";
 
-import { Vector2 } from "@/points";
+import { Vector2 } from "@/vector2";
 import { rectFromCircle } from "@/rectangles";
 
 import {

@@ -7,7 +7,7 @@ import { useComponentBounds } from "@/hooks/component-bounds";
 import { useNativeEvent } from "@/hooks/native-event";
 
 import { IPanZoomViewportViewModel } from "./PanZoomViewportViewModel";
-import { Vector2, vec2Subtract, Vec2Zero } from "@/points";
+import { Vector2, vec2Subtract, Vec2Zero } from "@/vector2";
 
 export interface PanZoomHandlerProps {
   className?: string;

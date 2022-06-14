@@ -1,4 +1,4 @@
-import { Vector2 } from "@/points";
+import { Vector2 } from "@/vector2";
 
 import { IngredientId } from "../ingredients/types";
 import { MapEntity } from "../potion-maps/types";

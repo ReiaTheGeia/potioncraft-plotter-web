@@ -1,7 +1,7 @@
 import React from "react";
 import { BehaviorSubject, Observable } from "rxjs";
 
-import { Vector2, vec2Add, vec2Scale, vec2Subtract, Vec2Zero } from "@/points";
+import { Vector2, vec2Add, vec2Scale, vec2Subtract, Vec2Zero } from "@/vector2";
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 import { PlotItem, PlotPoint } from "@/services/plotter/types";
 import { Size } from "@/size";

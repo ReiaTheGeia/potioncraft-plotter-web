@@ -12,7 +12,7 @@ import {
   vec2Scale,
   vec2Subtract,
   Vec2Zero,
-} from "./points";
+} from "./vector2";
 
 export interface CubicBezierCurve {
   start: Vector2;

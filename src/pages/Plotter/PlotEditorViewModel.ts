@@ -15,7 +15,7 @@ import {
   vec2Distance,
   vec2Subtract,
   Vec2Zero,
-} from "@/points";
+} from "@/vector2";
 import { Size, SizeZero } from "@/size";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
@@ -24,10 +24,10 @@ import { PlotBuilder, PlotBuilderItem } from "@/services/plotter/PlotBuilder";
 import { PlotItem, PlotPoint } from "@/services/plotter/types";
 import { MapEntity } from "@/services/potion-maps/types";
 
-import { IPlotViewModel } from "../Plot/PlotViewModel";
-import { IPanZoomViewportViewModel } from "../PanZoomViewport/PanZoomViewportViewModel";
+import { IPlotViewModel } from "@/components/Plot/PlotViewModel";
+import { IPanZoomViewportViewModel } from "@/components/PanZoomViewport/PanZoomViewportViewModel";
 
-export class PlotEditorViewModel
+export class PlotterPageViewModel
   implements IPlotViewModel, IPanZoomViewportViewModel
 {
   private readonly _viewportSize$ = new BehaviorSubject<Size>(SizeZero);

@@ -1,21 +1,27 @@
 import "@/style.css";
 
-import * as React from "react";
-import * as ReactDOM from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+import CssBaseline from "@mui/material/CssBaseline";
 
 import { ContainerProvider } from "./container";
 import ThemeProvider from "./theme";
 
-import App from "./components/App";
+import AppRouter from "@/services/history/AppRouter";
+import AppRoutes from "./routes";
 
 const rootEl = document.getElementById("root");
 const root = ReactDOM.createRoot(rootEl!);
 root.render(
   <React.StrictMode>
     <ContainerProvider>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <AppRouter>
+        <ThemeProvider>
+          <CssBaseline />
+          <AppRoutes />
+        </ThemeProvider>
+      </AppRouter>
     </ContainerProvider>
   </React.StrictMode>
 );
