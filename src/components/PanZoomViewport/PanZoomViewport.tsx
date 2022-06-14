@@ -2,12 +2,12 @@ import * as React from "react";
 import { styled } from "@mui/material";
 
 import { getModifiers } from "@/modifier-keys";
+import { Vector2, vec2Subtract, Vec2Zero } from "@/vector2";
 
 import { useComponentBounds } from "@/hooks/component-bounds";
 import { useNativeEvent } from "@/hooks/native-event";
 
 import { IPanZoomViewportViewModel } from "./PanZoomViewportViewModel";
-import { Vector2, vec2Subtract, Vec2Zero } from "@/vector2";
 
 export interface PanZoomHandlerProps {
   className?: string;

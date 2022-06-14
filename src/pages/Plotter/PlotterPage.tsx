@@ -93,9 +93,11 @@ const PlotterPage = () => {
   const viewModel = useDICreate(PlotterPageViewModel);
   const baseRegistry = useDIDependency(PotionBaseRegistry);
   const map = baseRegistry.getPotionBaseById("water" as any)?.map;
-  const inspectPoint = useObservation(viewModel.bottlePreviewPoint$) ?? null;
-  const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
-  const inspectEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
+  const mouseOverPlotPoint =
+    useObservation(viewModel.mouseOverPlotPoint) ?? null;
+  const mouseOverPlotItem =
+    useObservation(viewModel.mouseOverPlotItem$) ?? null;
+  const mouseOverEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
 
   const builder = viewModel.builder;
@@ -150,10 +152,10 @@ const PlotterPage = () => {
           />
         </PanZoomViewport>
         <div className="inspect-stack">
-          {inspectPoint && <PointDetails point={inspectPoint} />}
-          {inspectSource && <StepDetails step={inspectSource} />}
-          {!inspectSource && inspectEntity && (
-            <EntityDetails entity={inspectEntity} />
+          {mouseOverPlotPoint && <PointDetails point={mouseOverPlotPoint} />}
+          {mouseOverPlotItem && <StepDetails step={mouseOverPlotItem} />}
+          {!mouseOverPlotItem && mouseOverEntity && (
+            <EntityDetails entity={mouseOverEntity} />
           )}
         </div>
         {plot && <PlotDetails className="plot-details" plot={plot} />}

@@ -2,20 +2,20 @@ import React from "react";
 import Color from "color";
 import { styled } from "@mui/material";
 
-import { useObservation } from "@/hooks/observe";
 import { Vec2Zero } from "@/vector2";
-import { MAP_EXTENT_RADIUS, POTION_RADIUS } from "@/game-settings";
+import { SizeZero } from "@/size";
+import { POTION_RADIUS } from "@/game-settings";
 import { PointArray } from "@/point-array";
 import { keepEveryK } from "@/utils";
 
-import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
-import {
-  IPlotViewModel,
-  PlotViewModelContext,
-  usePlotViewModel,
-} from "./PlotViewModel";
+import { useObservation } from "@/hooks/observe";
 
-import { SizeZero } from "@/size";
+import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
+
+import PlotSvg from "../PlotSvg";
+
+import { IPlotViewModel } from "./PlotViewModel";
+
 import { last } from "lodash";
 
 export interface PlotProps {
@@ -42,9 +42,8 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
   const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
   const offset = useObservation(viewModel.viewOffset$) ?? Vec2Zero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
-  const inspectSource = useObservation(viewModel.mouseOverPlotItem$) ?? null;
-  const bottlePreviewPoint =
-    useObservation(viewModel.bottlePreviewPoint$) ?? null;
+  const mouseOverItem = useObservation(viewModel.mouseOverPlotItem$) ?? null;
+  const mouseOverPoint = useObservation(viewModel.mouseOverPlotPoint) ?? null;
 
   const lastCommitPoint = last(plot.committedPoints) ?? null;
 
@@ -66,71 +65,62 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
 
   return (
     <Root className={className}>
-      <PlotViewModelContext.Provider value={viewModel}>
-        <svg
-          className="plot-svg"
-          width={width}
-          height={height}
-          viewBox={`0 0 ${width} ${height}`}
-        >
-          {/* In theory all these transforms can be done in one go, but neither order seems to work when combining them */}
-          <g transform={`scale(${scale})`}>
-            <g
-              transform={`translate(${MAP_EXTENT_RADIUS}, ${MAP_EXTENT_RADIUS})`}
-            >
-              <g transform="scale(1, -1)">
-                <g transform={`translate(${offset.x}, ${offset.y})`}>
-                  {committedLines.map((line, i) => (
-                    <PlotLine
-                      key={i}
-                      line={line}
-                      pending={false}
-                      highlight={line.source === inspectSource}
-                      onMouseOver={onLineMouseOver}
-                      onMouseOut={onLineMouseOut}
-                    />
-                  ))}
-                  {pendingLines.map((line, i) => (
-                    <PlotLine
-                      key={i}
-                      line={line}
-                      pending={true}
-                      highlight={line.source === inspectSource}
-                      onMouseOver={onLineMouseOver}
-                      onMouseOut={onLineMouseOut}
-                    />
-                  ))}
-                  {lastCommitPoint && (
-                    <circle
-                      className="bottle-preview"
-                      cx={lastCommitPoint.x}
-                      cy={lastCommitPoint.y}
-                      r={POTION_RADIUS}
-                      fill="blue"
-                      opacity={0.2}
-                    />
-                  )}
-                  {bottlePreviewPoint && (
-                    <circle
-                      className="bottle-preview"
-                      cx={bottlePreviewPoint.x}
-                      cy={bottlePreviewPoint.y}
-                      r={POTION_RADIUS}
-                      fill="blue"
-                      opacity={0.2}
-                    />
-                  )}
-                </g>
-              </g>
-            </g>
-          </g>
-        </svg>
-      </PlotViewModelContext.Provider>
+      <PlotSvg
+        className="plot-svg"
+        width={width}
+        height={height}
+        offset={offset}
+        scale={scale}
+      >
+        {committedLines.map((line, i) => (
+          <PlotLine
+            key={i}
+            line={line}
+            pending={false}
+            scale={scale}
+            highlight={line.source === mouseOverItem}
+            onMouseOver={onLineMouseOver}
+            onMouseOut={onLineMouseOut}
+          />
+        ))}
+        {pendingLines.map((line, i) => (
+          <PlotLine
+            key={i}
+            line={line}
+            pending={true}
+            scale={scale}
+            highlight={line.source === mouseOverItem}
+            onMouseOver={onLineMouseOver}
+            onMouseOut={onLineMouseOut}
+          />
+        ))}
+        {lastCommitPoint && (
+          <circle
+            className="bottle-preview"
+            cx={lastCommitPoint.x}
+            cy={lastCommitPoint.y}
+            r={POTION_RADIUS}
+            fill="blue"
+            opacity={0.2}
+          />
+        )}
+        {mouseOverPoint && (
+          <circle
+            className="bottle-preview"
+            cx={mouseOverPoint.x}
+            cy={mouseOverPoint.y}
+            r={POTION_RADIUS}
+            fill="blue"
+            opacity={0.2}
+          />
+        )}
+      </PlotSvg>
     </Root>
   );
 };
 
 interface PlotLineProps {
+  scale: number;
   line: PlotLine;
   pending: boolean;
   highlight: boolean;
@@ -138,14 +128,13 @@ interface PlotLineProps {
   onMouseOut(): void;
 }
 const PlotLine = ({
+  scale,
   line,
   pending,
   highlight,
   onMouseOver,
   onMouseOut,
 }: PlotLineProps) => {
-  const viewModel = usePlotViewModel();
-  const scale = useObservation(viewModel.viewScale$) ?? 1;
   const { points, source, evenOdd } = line;
 
   const onPathMouseOver = React.useCallback(() => {

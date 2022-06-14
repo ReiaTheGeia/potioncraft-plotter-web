@@ -51,7 +51,7 @@ export class PlotterPageViewModel
     new BehaviorSubject<PlotBuilderItem | null>(null);
   private readonly _mouseOverEntity$: Observable<MapEntity | null>;
 
-  private readonly _bottlePreviewPoint$: Observable<PlotPoint | null>;
+  private readonly _mouseOverPlotPoint$: Observable<PlotPoint | null>;
 
   constructor(@inject(PlotBuilder) private readonly _builder: PlotBuilder) {
     this._shareString$ = this._builder.plot$
@@ -81,7 +81,7 @@ export class PlotterPageViewModel
       })
     );
 
-    this._bottlePreviewPoint$ = combineLatest([
+    this._mouseOverPlotPoint$ = combineLatest([
       this._mouseWorldPosition$,
       this._mouseOverPlotItem$,
       this._builder.plot$,
@@ -149,8 +149,8 @@ export class PlotterPageViewModel
     return this._mouseOverEntity$;
   }
 
-  get bottlePreviewPoint$(): Observable<PlotPoint | null> {
-    return this._bottlePreviewPoint$;
+  get mouseOverPlotPoint(): Observable<PlotPoint | null> {
+    return this._mouseOverPlotPoint$;
   }
 
   zoom(delta: number, on: Vector2 | null = null) {
