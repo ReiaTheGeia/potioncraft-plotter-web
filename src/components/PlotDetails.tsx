@@ -15,7 +15,8 @@ import {
 } from "@/services/plotter/types";
 import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 import { MapEntity, PotionEffectMapEntity } from "@/services/potion-maps/types";
-import { getEffectTier } from "@/services/plotter/utils";
+import { getEffectTier, longestDangerLength } from "@/services/plotter/utils";
+import { DANGER_LENGTH_LETHAL } from "@/game-settings";
 
 export interface PlotDetailsProps {
   className?: string;
@@ -83,7 +84,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
   }, [plot, IngredientRegistry]);
 
   // PotionCraft subtract .4 health each unit of distance against a max of 1.
-  const dangerIsDeath = longestDanger >= 2.5;
+  const dangerIsDeath = longestDanger >= DANGER_LENGTH_LETHAL;
 
   return (
     <Card className={className} variant="outlined">
@@ -156,7 +157,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
                   variant="overline"
                   color={dangerIsDeath ? "error" : "textPrimary"}
                 >
-                  {longestDanger.toFixed(2)} / 2.5
+                  {longestDanger.toFixed(2)} / {DANGER_LENGTH_LETHAL}
                 </Typography>
               </td>
             </tr>
@@ -173,24 +174,6 @@ export function isIngredientPoint(
   point: PlotItem
 ): point is AddIngredientPlotItem {
   return point.type === "add-ingredient";
-}
-
-function longestDangerLength(items: PlotPoint[]): number {
-  let longestLength = 0;
-  let currentLength = 0;
-  let prevItem = items[0];
-  for (let i = 1; i < items.length; i++) {
-    const item = items[i];
-    if (item.entities.some((x) => x.entityType === "DangerZonePart")) {
-      currentLength += vec2Magnitude(vec2Subtract(item, prevItem));
-    } else {
-      longestLength = Math.max(longestLength, currentLength);
-      currentLength = 0;
-    }
-    prevItem = item;
-  }
-
-  return Math.max(longestLength, currentLength);
 }
 
 function getEffects(items: PlotPoint[]): Record<string, number> {

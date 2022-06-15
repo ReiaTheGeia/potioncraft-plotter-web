@@ -3,3 +3,4 @@ export const BEZIER_CURVE_LENGTH_RESOLUTION = 200;
 export const MAP_EXTENT_RADIUS = 60;
 export const POTION_RADIUS = 0.79;
 export const MAX_INGREDIENT_EXTENT = 10;
+export const DANGER_LENGTH_LETHAL = 2.5;

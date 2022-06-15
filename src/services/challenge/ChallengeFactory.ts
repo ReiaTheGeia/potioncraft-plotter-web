@@ -67,11 +67,9 @@ export class ChallengeFactory {
       );
       const angle = random.floatBetween(0, 2 * Math.PI);
       const p: Vector2 = {
-        x: radius * Math.cos(angle),
-        y: radius * Math.sin(angle),
+        x: Number((radius * Math.cos(angle)).toFixed(2)),
+        y: Number((radius * Math.sin(angle)).toFixed(2)),
       };
-
-      console.log("Checking free pos", p);
 
       if (
         p.x - POTION_RADIUS < -MAP_EXTENT_RADIUS ||
@@ -79,7 +77,6 @@ export class ChallengeFactory {
         p.y - POTION_RADIUS < -MAP_EXTENT_RADIUS ||
         p.y + POTION_RADIUS > MAP_EXTENT_RADIUS
       ) {
-        console.log("Out of map");
         // Make sure its within the rectangular map.
         continue;
       }
@@ -87,11 +84,9 @@ export class ChallengeFactory {
       // Area must be free.  This means we also cant stomp on top of vortexes.
       const hit = map.hitTest(p, POTION_RADIUS);
       if (hit.length > 0) {
-        console.log("Hits something", hit);
         continue;
       }
 
-      console.log("It's all good");
       return p;
     }
     throw new Error("Failed to find effect position after 50 tries");

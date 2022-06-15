@@ -1,17 +1,19 @@
 import { Identifier, ServiceLocator } from "microinject";
-import { last } from "lodash";
+import { clamp, last, sum, uniq } from "lodash";
 
 import { vec2Distance, Vec2Zero, Vector2 } from "@/vector2";
 import { pointArrayLength } from "@/point-array";
 
-import { PlotItem } from "@/services/plotter/types";
+import { AddIngredientPlotItem, PlotItem } from "@/services/plotter/types";
 
 import { Plotter } from "../../plotter/Plotter";
-import { getEffectTier } from "../../plotter/utils";
+import { getEffectTier, longestDangerLength } from "../../plotter/utils";
 
 import { PotionMap } from "../../potion-maps/PotionMap";
 
-import { IChallenge } from "../Challenge";
+import { ChallengeResults, ChallengeScoreItem, IChallenge } from "../Challenge";
+import { DANGER_LENGTH_LETHAL } from "@/game-settings";
+import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 
 export interface BrewEffectAtPointChallengeOptions {
   baseMap: PotionMap;
@@ -29,10 +31,12 @@ export function brewEffectAtPointChallengeFactoryFactory(
 ) {
   return (options: BrewEffectAtPointChallengeOptions) => {
     const plotter = serviceLocator.get(Plotter);
+    const ingredientRegistry = serviceLocator.get(IngredientRegistry);
     return new BrewEffectAtPointChallenge(
       options.baseMap,
       options.targetPosition,
-      plotter
+      plotter,
+      ingredientRegistry
     );
   };
 }
@@ -42,7 +46,8 @@ class BrewEffectAtPointChallenge implements IChallenge {
   constructor(
     baseMap: PotionMap,
     private readonly _targetPosition: Vector2,
-    private readonly _plotter: Plotter
+    private readonly _plotter: Plotter,
+    private readonly _ingredientRegistry: IngredientRegistry
   ) {
     this._map = new PotionMap([
       ...baseMap.entities.filter((x) => x.entityType !== "PotionEffect"),
@@ -59,19 +64,112 @@ class BrewEffectAtPointChallenge implements IChallenge {
     return this._map;
   }
 
-  getScore(plotItems: readonly PlotItem[]): number | null {
+  get description(): string {
+    return `Brew the effect at (${this._targetPosition.x}, ${this._targetPosition.y})`;
+  }
+
+  getScore(plotItems: readonly PlotItem[]): ChallengeResults | null {
+    const results: ChallengeResults = {};
+
+    // Penalty for distance scaled by the actual distance divided by linear distance.  Twice as long will subtract 100 points.
+    const DISTANCE_PENALTY = -100;
+
+    // Penalty for stress.  Penalty applies to any stress value over 1.
+    const STRESS_PENALTY = -50;
+
+    // Reward multiplied by the teir of the effect.
+    const TIER_REWARD = 1000;
+
+    // Each unit of cost subtracts this from the score.
+    const COST_PENALTY = -5;
+
     const { committedPoints } = this._plotter.plotItems(plotItems, this._map);
     const lastPoint = last(committedPoints) ?? Vec2Zero;
-    const isComplete =
-      getEffectTier(vec2Distance(lastPoint, this._targetPosition), 0) >= 3;
+    const tier = getEffectTier(
+      vec2Distance(lastPoint, this._targetPosition),
+      0
+    );
+
+    const isComplete = tier > 0;
     if (!isComplete) {
       return null;
     }
 
-    // Return a score based on how much distance they took to get there compared to the 'perfect' distance of a straight line.
+    let totalScore = 0;
+
+    const tierScore = TIER_REWARD * tier;
+    totalScore += tierScore;
+    results["tier"] = {
+      value: `Potion Effect Tier ${tier}`,
+      score: tierScore,
+    };
+
+    // Grade based on the distance they took to get there compared to the 'perfect' distance of a straight line.
     const pathDistance = pointArrayLength(committedPoints);
     const linearDistance = vec2Distance(Vec2Zero, this._targetPosition);
-    // TODO: Bone Penalty
-    return 1 - linearDistance / pathDistance;
+    const distanceFraction = pathDistance / linearDistance;
+    const distanceScore = Math.round(DISTANCE_PENALTY * distanceFraction);
+    totalScore += distanceScore;
+    results["distance"] = {
+      value: `${pathDistance.toFixed(2)} / ${linearDistance}`,
+      score: distanceScore,
+    };
+
+    const ingredients = plotItems
+      .filter(isAddIngredientPlotItem)
+      .map((x) => x.ingredientId);
+
+    let baseCost = 0;
+    let ingredientTypeCounts: Record<string, number> = {};
+    for (const ingredientId of ingredients) {
+      const ingredient =
+        this._ingredientRegistry.getIngredientById(ingredientId);
+      if (!ingredient) {
+        continue;
+      }
+      baseCost += ingredient.price;
+      ingredientTypeCounts[ingredient.id] =
+        (ingredientTypeCounts[ingredient.id] ?? 0) + 1;
+    }
+
+    const stress = Math.sqrt(
+      sum(
+        Object.keys(ingredientTypeCounts).map((key) =>
+          Math.pow(ingredientTypeCounts[key], 2)
+        )
+      )
+    );
+
+    const stressScore = Math.round(STRESS_PENALTY * Math.max(stress, 0));
+    if (stressScore < 0) {
+      totalScore += stressScore;
+      results["stress"] = {
+        value: stress.toFixed(2),
+        score: stressScore,
+      };
+    }
+
+    const costScore = Math.round(COST_PENALTY * baseCost);
+    totalScore += costScore;
+    results["cost"] = {
+      value: baseCost.toFixed(2),
+      score: costScore,
+    };
+
+    const dangerLength = longestDangerLength(committedPoints);
+    if (dangerLength > DANGER_LENGTH_LETHAL) {
+      results["bones"] = {
+        value: "Bone penalty (-25%)",
+        score: -Math.round(totalScore * 0.25),
+      };
+    }
+
+    return results;
   }
+}
+
+function isAddIngredientPlotItem(
+  item: PlotItem
+): item is AddIngredientPlotItem {
+  return item.type === "add-ingredient";
 }
