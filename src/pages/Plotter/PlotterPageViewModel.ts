@@ -55,13 +55,17 @@ export class PlotterPageViewModel extends PlotBuilderViewModel {
       for (const item of decoded) {
         switch (item.type) {
           case "add-ingredient":
-            return this.builder.addIngredient(item);
+            this.builder.addIngredient(item);
+            break;
           case "stir-cauldron":
-            return this.builder.addStirCauldron(item);
+            this.builder.addStirCauldron(item);
+            break;
           case "pour-solvent":
-            return this.builder.addPourSolvent(item);
+            this.builder.addPourSolvent(item);
+            break;
           case "heat-vortex":
-            return this.builder.addHeatVortex(item);
+            this.builder.addHeatVortex(item);
+            break;
           default:
             throw new Error(`Unknown item type: ${item.type}`);
         }
