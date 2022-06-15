@@ -71,14 +71,17 @@ class BrewEffectAtPointChallenge implements IChallenge {
   getScore(plotItems: readonly PlotItem[]): ChallengeResults | null {
     const results: ChallengeResults = {};
 
+    // Reward multiplied by the teir of the effect.
+    const TIER_REWARD = 1000;
+
+    const WATERLESS_REWARD = 500;
+    const VORTEXLESS_REWARD = 200;
+
     // Penalty for distance scaled by the actual distance divided by linear distance.  Twice as long will subtract 100 points.
     const DISTANCE_PENALTY = -100;
 
     // Penalty for stress.  Penalty applies to any stress value over 1.
-    const STRESS_PENALTY = -50;
-
-    // Reward multiplied by the teir of the effect.
-    const TIER_REWARD = 1000;
+    const STRESS_PENALTY = -100;
 
     // Each unit of cost subtracts this from the score.
     const COST_PENALTY = -5;
@@ -100,9 +103,25 @@ class BrewEffectAtPointChallenge implements IChallenge {
     const tierScore = TIER_REWARD * tier;
     totalScore += tierScore;
     results["tier"] = {
-      value: `Potion Effect Tier ${tier}`,
+      value: `Tier ${tier}`,
       score: tierScore,
     };
+
+    if (plotItems.every((x) => x.type !== "pour-solvent")) {
+      totalScore += WATERLESS_REWARD;
+      results["waterless"] = {
+        value: "Waterless",
+        score: WATERLESS_REWARD,
+      };
+    }
+
+    if (plotItems.every((x) => x.type !== "heat-vortex")) {
+      totalScore += VORTEXLESS_REWARD;
+      results["vortexless"] = {
+        value: "Vortexless",
+        score: VORTEXLESS_REWARD,
+      };
+    }
 
     // Grade based on the distance they took to get there compared to the 'perfect' distance of a straight line.
     const pathDistance = pointArrayLength(committedPoints);
@@ -111,7 +130,7 @@ class BrewEffectAtPointChallenge implements IChallenge {
     const distanceScore = Math.round(DISTANCE_PENALTY * distanceFraction);
     totalScore += distanceScore;
     results["distance"] = {
-      value: `${pathDistance.toFixed(2)} / ${linearDistance}`,
+      value: `${pathDistance.toFixed(2)} / ${linearDistance.toFixed(2)}`,
       score: distanceScore,
     };
 
@@ -140,11 +159,16 @@ class BrewEffectAtPointChallenge implements IChallenge {
       )
     );
 
-    const stressScore = Math.round(STRESS_PENALTY * Math.max(stress, 0));
+    const potentialHighlanderStress = Math.sqrt(
+      Object.keys(ingredientTypeCounts).length
+    );
+    const stressScore = Math.round(
+      STRESS_PENALTY * Math.max(stress - potentialHighlanderStress, 0)
+    );
     if (stressScore < 0) {
       totalScore += stressScore;
       results["stress"] = {
-        value: stress.toFixed(2),
+        value: `${stress.toFixed(2)} / ${potentialHighlanderStress.toFixed(2)}`,
         score: stressScore,
       };
     }
@@ -152,7 +176,7 @@ class BrewEffectAtPointChallenge implements IChallenge {
     const costScore = Math.round(COST_PENALTY * baseCost);
     totalScore += costScore;
     results["cost"] = {
-      value: baseCost.toFixed(2),
+      value: `${baseCost.toFixed(2)}`,
       score: costScore,
     };
 

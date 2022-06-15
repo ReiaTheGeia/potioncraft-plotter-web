@@ -1,4 +1,5 @@
 import React from "react";
+import { sortBy } from "lodash";
 
 import {
   MenuItem,
@@ -43,6 +44,11 @@ const IngredientSelector = ({
   ...props
 }: IngredientSelectorProps) => {
   const registry = useDIDependency(IngredientRegistry);
+  const ingredients = registry.getIngredients();
+  const sortedIngredients = sortBy(
+    ingredients,
+    (ingredient) => ingredient.name
+  );
 
   const onSelectChange = React.useCallback(
     (e: SelectChangeEvent<IngredientId | "">) => {
@@ -63,7 +69,7 @@ const IngredientSelector = ({
       onChange={onSelectChange}
     >
       {allowEmpty && <MenuItem value=""></MenuItem>}
-      {registry.getIngredients().map((ingredient) => (
+      {sortedIngredients.map((ingredient) => (
         <MenuItem
           key={ingredient.id}
           value={ingredient.id}
