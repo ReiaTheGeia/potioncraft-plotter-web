@@ -82,8 +82,13 @@ const ChallengePage = () => {
               )}
               {results && (
                 <Typography variant="overline">
-                  Final score:{" "}
+                  Total Score:{" "}
                   {sum(Object.keys(results).map((k) => results[k].score))}
+                </Typography>
+              )}
+              {results && (
+                <Typography>
+                  Keep tweaking your path to increase your score!
                 </Typography>
               )}
             </CardContent>
