@@ -11,7 +11,14 @@ const IndexPage = () => {
     const hLoc = history.location;
     const wLoc = window.location;
     const search = hLoc.search.length > 0 ? hLoc.search : wLoc.search;
-    window.location.search = "";
+
+    // Clear out the root search query.
+    // Use replaceState to avoid refreshing the page
+    if (window.location.search != "") {
+      const url = new URL(window.location.href);
+      url.search = "";
+      window.history.replaceState({}, "", url.toString());
+    }
     history.replace({ pathname: "/plotter", search });
   }, []);
 
