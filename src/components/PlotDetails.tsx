@@ -124,7 +124,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
             </tr>
             <tr>
               <td>
-                <Typography>Base Cost:</Typography>
+                <Typography>Cost:</Typography>
               </td>
               <td>
                 <Typography variant="overline">{baseCost}</Typography>

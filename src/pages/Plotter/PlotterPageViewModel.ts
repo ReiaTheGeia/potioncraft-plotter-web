@@ -26,18 +26,15 @@ export class PlotterPageViewModel extends PlotBuilderViewModel {
     )!.map;
     builder.setMap(waterMap);
 
-    this._shareString$ = builder.plotBuilderItems$
-      .pipe(debounceTime(1000))
-      .pipe(
-        map((builderItems) => {
-          const items = builderItems.map((x) => x.plotItem);
-          const encoded = pako.deflate(JSON.stringify(items));
-          const data = new Uint8Array(1 + encoded.length);
-          data.set(encoded, 1);
-          new DataView(data.buffer).setUint8(0, 0);
-          return encodeBase64(data);
-        })
-      );
+    this._shareString$ = builder.plotItems$.pipe(debounceTime(1000)).pipe(
+      map((items) => {
+        const encoded = pako.deflate(JSON.stringify(items));
+        const data = new Uint8Array(1 + encoded.length);
+        data.set(encoded, 1);
+        new DataView(data.buffer).setUint8(0, 0);
+        return encodeBase64(data);
+      })
+    );
   }
 
   get shareString$(): Observable<string> {

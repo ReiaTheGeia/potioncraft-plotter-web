@@ -13,4 +13,5 @@ export interface IngredientDescriptor {
   readonly price: number;
   readonly path: CubicBezierCurve[];
   readonly preGrindPercent: number;
+  readonly teleports: boolean;
 }

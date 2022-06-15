@@ -17,6 +17,8 @@ import PlotSvg from "../PlotSvg";
 import { IPlotViewModel } from "./PlotViewModel";
 
 import { last } from "lodash";
+import { useDIDependency } from "@/container";
+import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 
 export interface PlotProps {
   className?: string;
@@ -135,7 +137,15 @@ const PlotLine = ({
   onMouseOver,
   onMouseOut,
 }: PlotLineProps) => {
+  const registry = useDIDependency(IngredientRegistry);
   const { points, source, evenOdd } = line;
+
+  const ingredient = React.useMemo(() => {
+    if (source.type !== "add-ingredient") {
+      return null;
+    }
+    return registry.getIngredientById(source.ingredientId) ?? null;
+  }, [source, registry]);
 
   const onPathMouseOver = React.useCallback(() => {
     onMouseOver(line);
@@ -171,11 +181,17 @@ const PlotLine = ({
     `M ${points[0].x} ${points[0].y} `
   );
 
+  let strokeDashArray: string | undefined = undefined;
+  if (ingredient && ingredient.teleports) {
+    strokeDashArray = [8 / scale, 8 / scale].join(" ");
+  }
+
   return (
     <path
       d={path}
       stroke={color}
       strokeWidth={(highlight ? 6 : 3) / scale}
+      strokeDasharray={strokeDashArray}
       fill="none"
       onMouseOver={onPathMouseOver}
       onMouseOut={onPathMouseOut}
