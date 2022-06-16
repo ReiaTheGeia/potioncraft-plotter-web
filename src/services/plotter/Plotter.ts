@@ -266,8 +266,8 @@ export class Plotter {
     result: PlotResult
   ): PlotResult {
     const { grains } = item;
-    // FIXME: The game's real value is 0.1, but in practice the game moves far less per grain than the documented value.
-    // Study the code more closely and figure out what is going on.
+    // SaltVoid.OnCauldronDissolve
+    // Note: While the assembly sets this value to 0.1, the actual prefab deserializes it to 0.01, and the difference can be seen in gameplay.
     const DISTANCE_PER_GRAIN = 0.01;
 
     const points = removePointArrayDistanceFromEnd(
