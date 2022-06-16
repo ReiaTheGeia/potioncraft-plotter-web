@@ -30,6 +30,7 @@ import { IngredientId } from "@/services/ingredients/types";
 import DragReoderable from "./DragReorderable";
 import IngredientSelector from "./IngredientSelector";
 import IncDecSlider from "./IncDecSlider";
+import { VoidSaltPlotBuilderItem } from "@/services/plotter/builder/VoidSaltPlotBuilderItem";
 
 export interface PlotBuilderItemsListProps {
   className?: string;
@@ -143,10 +144,19 @@ const PlotBuilderItemsList = ({
         >
           <AddIcon /> Heat Vortex
         </Button>
+        <Button
+          color="primary"
+          onClick={() => plotBuilderItemCollection.addVoidSalt()}
+        >
+          <AddIcon />
+          Add Void Salt
+        </Button>
       </div>
     </Root>
   );
 };
+
+export default PlotBuilderItemsList;
 
 interface PlotListItemProps {
   item: PlotBuilderItem;
@@ -194,6 +204,17 @@ const PlotListItem = React.memo(
       } else if (item instanceof HeatVortexPlotBuilderItem) {
         return (
           <HeatVortexPlotListItem
+            ref={ref}
+            item={item}
+            cardProps={cardProps}
+            highlight={highlight}
+            onMouseOver={onMouseOver}
+            onMouseOut={onMouseOut}
+          />
+        );
+      } else if (item instanceof VoidSaltPlotBuilderItem) {
+        return (
+          <AddVoidSaltPlotListItem
             ref={ref}
             item={item}
             cardProps={cardProps}
@@ -585,4 +606,60 @@ const HeatVortexPlotListItem = React.forwardRef<
   );
 });
 
-export default PlotBuilderItemsList;
+interface AddVoidSaltPlotListItemProps {
+  item: VoidSaltPlotBuilderItem;
+  highlight: boolean;
+  cardProps?: CardProps;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
+}
+const AddVoidSaltPlotListItem = React.forwardRef<
+  HTMLDivElement,
+  AddVoidSaltPlotListItemProps
+>(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
+  const grains = useObservation(item.grains$);
+  const [inputGrains, setInputGrains] = React.useState<string | null>(null);
+
+  const onTextFieldChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+
+      setInputGrains(e.target.value);
+      item.setGrains(asNumber);
+    },
+    [item]
+  );
+  const onTextFieldBlur = React.useCallback(() => {
+    setInputGrains(null);
+  }, []);
+  const onGrainsChange = React.useCallback(
+    (value: number) => {
+      item.setGrains(Math.max(0, Math.round(value)));
+    },
+    [item]
+  );
+
+  return (
+    <PlotListItemCard
+      item={item}
+      highlight={highlight}
+      cardProps={cardProps}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+    >
+      <div>
+        <Typography variant="overline">Add Void Salt</Typography>
+      </div>
+      <TextField
+        label="Grains"
+        value={inputGrains ?? grains ?? ""}
+        onChange={onTextFieldChange}
+        onBlur={onTextFieldBlur}
+      />
+      <IncDecSlider value={grains ?? 0} rate={10} onChange={onGrainsChange} />
+    </PlotListItemCard>
+  );
+});

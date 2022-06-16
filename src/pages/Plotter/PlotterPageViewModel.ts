@@ -63,6 +63,9 @@ export class PlotterPageViewModel extends PlotBuilderViewModel {
           case "heat-vortex":
             this.builder.addHeatVortex(item);
             break;
+          case "void-salt":
+            this.builder.addVoidSalt(item);
+            break;
           default:
             throw new Error(`Unknown item type: ${item.type}`);
         }

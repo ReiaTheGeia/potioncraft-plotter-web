@@ -126,3 +126,17 @@ export function takePointArrayByDistance<T extends Vector2>(
 
   return [taken, remainder];
 }
+
+export function removePointArrayDistanceFromEnd<T extends Vector2>(
+  array: T[],
+  takeLength: number
+): T[] {
+  // Do it the simple way for now.
+  // This should be made more efficient
+  const length = pointArrayLength(array);
+  if (length <= takeLength) {
+    return [];
+  }
+  const [taken] = takePointArrayByDistance(array, length - takeLength);
+  return taken;
+}

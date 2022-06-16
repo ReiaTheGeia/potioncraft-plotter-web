@@ -8,6 +8,7 @@ import {
   PointArray,
   pointArrayLengthCached,
   pointArrayLineFromDistance,
+  removePointArrayDistanceFromEnd,
   takePointArrayByDistance,
 } from "@/point-array";
 import {
@@ -35,6 +36,7 @@ import {
   PlotResult,
   PourSolventPlotItem,
   StirCauldronPlotItem,
+  VoidSaltPlotItem,
 } from "./types";
 
 @injectable()
@@ -82,6 +84,8 @@ export class Plotter {
         return this._plotStirCauldron(item, result);
       case "heat-vortex":
         return this._plotHeatVortex(item, result, map);
+      case "void-salt":
+        return this._plotVoidSalt(item, result);
       default:
         throw new Error(`Unknown plot item type: ${(item as any).type}`);
     }
@@ -255,6 +259,24 @@ export class Plotter {
     }
 
     return commitPlotPoints(pointsToAdd, item, result);
+  }
+
+  private _plotVoidSalt(
+    item: VoidSaltPlotItem,
+    result: PlotResult
+  ): PlotResult {
+    const { grains } = item;
+    const DISTANCE_PER_GRAIN = 0.1;
+
+    const points = removePointArrayDistanceFromEnd(
+      result.pendingPoints,
+      grains * DISTANCE_PER_GRAIN
+    );
+
+    return {
+      committedPoints: result.committedPoints,
+      pendingPoints: points,
+    };
   }
 }
 

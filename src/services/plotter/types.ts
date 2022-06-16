@@ -7,7 +7,8 @@ export type PlotItem =
   | AddIngredientPlotItem
   | PourSolventPlotItem
   | StirCauldronPlotItem
-  | HeatVortexPlotItem;
+  | HeatVortexPlotItem
+  | VoidSaltPlotItem;
 
 export interface AddIngredientPlotItem {
   type: "add-ingredient";
@@ -28,6 +29,11 @@ export interface StirCauldronPlotItem {
 export interface HeatVortexPlotItem {
   type: "heat-vortex";
   distance: number;
+}
+
+export interface VoidSaltPlotItem {
+  type: "void-salt";
+  grains: number;
 }
 
 export interface PlotPoint extends Vector2 {

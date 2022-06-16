@@ -1,10 +1,14 @@
 import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
+
+import { isNotNull } from "@/utils";
+
 import {
   AddIngredientPlotItem,
   HeatVortexPlotItem,
   PlotItem,
   PourSolventPlotItem,
   StirCauldronPlotItem,
+  VoidSaltPlotItem,
 } from "../types";
 
 import { PlotBuilderItem } from "./PlotBuilderItem";
@@ -13,7 +17,7 @@ import { AddIngredientPlotBuilderItem } from "./AddIngredientPlotBuilderItem";
 import { HeatVortexPlotBuilderItem } from "./HeatVortexPlotBuilderItem";
 import { PourSolventPlotBuilderItem } from "./PourSolventPlotBuilderItem";
 import { StirCauldronPlotBuilderItem } from "./StirCauldronPlotBuilderItem";
-import { isNotNull } from "@/utils";
+import { VoidSaltPlotBuilderItem } from "./VoidSaltPlotBuilderItem";
 
 export interface IPlotBuilderItemCollection {
   readonly items$: Observable<readonly PlotBuilderItem[]>;
@@ -26,6 +30,7 @@ export interface IPlotBuilderItemCollection {
   addStirCauldron(plotItem?: StirCauldronPlotItem): StirCauldronPlotBuilderItem;
   addPourSolvent(plotItem?: PourSolventPlotItem): PourSolventPlotBuilderItem;
   addHeatVortex(plotItem?: HeatVortexPlotItem): HeatVortexPlotBuilderItem;
+  addVoidSalt(plotItem?: VoidSaltPlotItem): VoidSaltPlotBuilderItem;
 }
 
 export class PlotBuilderItemCollection extends Observable<
@@ -137,6 +142,15 @@ export class PlotBuilderItemCollection extends Observable<
     );
     if (plotItem) {
       item.setDistance(plotItem.distance);
+    }
+    this._items$.next([...this._items$.value, item]);
+    return item;
+  }
+
+  addVoidSalt(plotItem?: VoidSaltPlotItem): VoidSaltPlotBuilderItem {
+    const item = new VoidSaltPlotBuilderItem((item) => this._deleteItem(item));
+    if (plotItem) {
+      item.setGrains(plotItem.grains);
     }
     this._items$.next([...this._items$.value, item]);
     return item;
