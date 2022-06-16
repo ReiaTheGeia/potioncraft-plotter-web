@@ -49,27 +49,7 @@ export class PlotterPageViewModel extends PlotBuilderViewModel {
     if (version === 0) {
       const decoded = JSON.parse(pako.inflate(data, { to: "string" })) as any[];
       this.builder.clear();
-      for (const item of decoded) {
-        switch (item.type) {
-          case "add-ingredient":
-            this.builder.addIngredient(item);
-            break;
-          case "stir-cauldron":
-            this.builder.addStirCauldron(item);
-            break;
-          case "pour-solvent":
-            this.builder.addPourSolvent(item);
-            break;
-          case "heat-vortex":
-            this.builder.addHeatVortex(item);
-            break;
-          case "void-salt":
-            this.builder.addVoidSalt(item);
-            break;
-          default:
-            throw new Error(`Unknown item type: ${item.type}`);
-        }
-      }
+      this.builder.loadPlotItems(decoded);
     }
   }
 }

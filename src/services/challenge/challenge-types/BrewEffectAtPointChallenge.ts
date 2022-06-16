@@ -69,6 +69,11 @@ class BrewEffectAtPointChallenge implements IChallenge {
   }
 
   getScore(plotItems: readonly PlotItem[]): ChallengeResults | null {
+    // Disallow cheats/utilities.
+    if (plotItems.some((x) => x.type === "set-position")) {
+      return null;
+    }
+
     const results: ChallengeResults = {};
 
     // Reward multiplied by the teir of the effect.

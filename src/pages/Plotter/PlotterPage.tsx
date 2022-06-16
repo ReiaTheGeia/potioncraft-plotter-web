@@ -78,6 +78,7 @@ const PlotterPage = () => {
         className="plot-items"
         plotBuilderItemCollection={builder}
         highlightItem={highlightItem}
+        enableCheats
         onMouseOver={onBuildItemMouseOver}
         onMouseOut={onBuildItemMouseOut}
       />

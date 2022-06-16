@@ -35,6 +35,7 @@ import {
   PlotItem,
   PlotResult,
   PourSolventPlotItem,
+  SetPositionPlotItem,
   StirCauldronPlotItem,
   VoidSaltPlotItem,
 } from "./types";
@@ -51,8 +52,6 @@ export class Plotter {
       committedPoints: [],
       pendingPoints: [],
     };
-
-    // return result;
 
     const now = Date.now();
 
@@ -76,6 +75,8 @@ export class Plotter {
     map: PotionMap
   ): PlotResult {
     switch (item.type) {
+      case "set-position":
+        return this._plotSetPosition(item, result);
       case "add-ingredient":
         return this._plotAddIngredient(item, result);
       case "pour-solvent":
@@ -89,6 +90,15 @@ export class Plotter {
       default:
         throw new Error(`Unknown plot item type: ${(item as any).type}`);
     }
+  }
+
+  private _plotSetPosition(
+    item: SetPositionPlotItem,
+    result: PlotResult
+  ): PlotResult {
+    const { position } = item;
+
+    return commitPlotPoints([position], item, result);
   }
 
   private _plotAddIngredient(

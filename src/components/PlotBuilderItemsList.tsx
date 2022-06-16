@@ -10,7 +10,6 @@ import {
   Button,
   IconButton,
   TextField,
-  CardProps,
 } from "@mui/material";
 import { DragHandle } from "@mui/icons-material";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
@@ -18,24 +17,26 @@ import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { useObservation } from "@/hooks/observe";
 
 import {
-  AddIngredientPlotBuilderItem,
   PlotBuilderItem,
+  SetPositionPlotBuilderItem,
+  AddIngredientPlotBuilderItem,
   PourSolventPlotBuilderItem,
   StirCauldronPlotBuilderItem,
   HeatVortexPlotBuilderItem,
   PlotBuilderItemCollection,
+  VoidSaltPlotBuilderItem,
 } from "@/services/plotter/builder";
 import { IngredientId } from "@/services/ingredients/types";
 
 import DragReoderable from "./DragReorderable";
 import IngredientSelector from "./IngredientSelector";
 import IncDecSlider from "./IncDecSlider";
-import { VoidSaltPlotBuilderItem } from "@/services/plotter/builder/VoidSaltPlotBuilderItem";
 
 export interface PlotBuilderItemsListProps {
   className?: string;
   plotBuilderItemCollection: PlotBuilderItemCollection;
   highlightItem?: PlotBuilderItem | null;
+  enableCheats?: boolean;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
@@ -88,6 +89,7 @@ const PlotBuilderItemsList = ({
   className,
   plotBuilderItemCollection,
   highlightItem,
+  enableCheats,
   onMouseOver,
   onMouseOut,
 }: PlotBuilderItemsListProps) => {
@@ -148,9 +150,16 @@ const PlotBuilderItemsList = ({
           color="primary"
           onClick={() => plotBuilderItemCollection.addVoidSalt()}
         >
-          <AddIcon />
-          Add Void Salt
+          <AddIcon /> Add Void Salt
         </Button>
+        {enableCheats && (
+          <Button
+            color="secondary"
+            onClick={() => plotBuilderItemCollection.addSetPosition()}
+          >
+            <AddIcon /> Add Teleport
+          </Button>
+        )}
       </div>
     </Root>
   );
@@ -160,20 +169,18 @@ export default PlotBuilderItemsList;
 
 interface PlotListItemProps {
   item: PlotBuilderItem;
-  cardProps?: CardProps;
   highlight?: boolean;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
 const PlotListItem = React.memo(
   React.forwardRef<HTMLDivElement, PlotListItemProps>(
-    ({ item, cardProps, highlight = false, onMouseOver, onMouseOut }, ref) => {
+    ({ item, highlight = false, onMouseOver, onMouseOut }, ref) => {
       if (item instanceof AddIngredientPlotBuilderItem) {
         return (
           <AddIngredientPlotListItem
             ref={ref}
             item={item}
-            cardProps={cardProps}
             highlight={highlight}
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
@@ -184,7 +191,6 @@ const PlotListItem = React.memo(
           <StirCauldronPlotListItem
             ref={ref}
             item={item}
-            cardProps={cardProps}
             highlight={highlight}
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
@@ -195,7 +201,6 @@ const PlotListItem = React.memo(
           <PourSolventPlotListItem
             ref={ref}
             item={item}
-            cardProps={cardProps}
             highlight={highlight}
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
@@ -206,7 +211,6 @@ const PlotListItem = React.memo(
           <HeatVortexPlotListItem
             ref={ref}
             item={item}
-            cardProps={cardProps}
             highlight={highlight}
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
@@ -217,7 +221,16 @@ const PlotListItem = React.memo(
           <AddVoidSaltPlotListItem
             ref={ref}
             item={item}
-            cardProps={cardProps}
+            highlight={highlight}
+            onMouseOver={onMouseOver}
+            onMouseOut={onMouseOut}
+          />
+        );
+      } else if (item instanceof SetPositionPlotBuilderItem) {
+        return (
+          <SetPositionPlotListItem
+            ref={ref}
+            item={item}
             highlight={highlight}
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
@@ -232,7 +245,6 @@ const PlotListItem = React.memo(
 interface PlotListItemCardProps {
   item: PlotBuilderItem;
   highlight: boolean;
-  cardProps?: CardProps;
   children: React.ReactNode;
   onMouseOver?(item: PlotBuilderItem): void;
   onMouseOut?(): void;
@@ -241,7 +253,7 @@ interface PlotListItemCardProps {
 const PlotListItemCard = React.forwardRef<
   HTMLDivElement,
   PlotListItemCardProps
->(({ item, highlight, cardProps, children, onMouseOver, onMouseOut }, ref) => {
+>(({ item, highlight, children, onMouseOver, onMouseOut }, ref) => {
   const valid = useObservation(item.isValid$) ?? false;
   const onCardMouseOver = React.useCallback(() => {
     if (onMouseOver) {
@@ -259,7 +271,6 @@ const PlotListItemCard = React.forwardRef<
       }}
       onMouseOver={onCardMouseOver}
       onMouseOut={onMouseOut}
-      {...cardProps}
     >
       <IconButton
         size="small"
@@ -276,14 +287,13 @@ const PlotListItemCard = React.forwardRef<
 interface AddIngredientPlotListItemProps {
   item: AddIngredientPlotBuilderItem;
   highlight: boolean;
-  cardProps?: CardProps;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
 const AddIngredientPlotListItem = React.forwardRef<
   HTMLDivElement,
   AddIngredientPlotListItemProps
->(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
+>(({ item, highlight, onMouseOver, onMouseOut }, ref) => {
   const savedIngredientRef = React.useRef<IngredientId | null>(null);
 
   // Need both state (for rerender on change) and ref (to check it in a callback)
@@ -378,7 +388,6 @@ const AddIngredientPlotListItem = React.forwardRef<
     <PlotListItemCard
       ref={ref}
       item={item}
-      cardProps={cardProps}
       highlight={highlight}
       onMouseOver={localGrind != null ? undefined : onMouseOver}
       onMouseOut={localGrind != null ? undefined : onMouseOut}
@@ -421,7 +430,6 @@ const AddIngredientPlotListItem = React.forwardRef<
 interface StirCauldronPlotListItemProps {
   item: StirCauldronPlotBuilderItem;
   highlight: boolean;
-  cardProps?: CardProps;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
@@ -429,7 +437,7 @@ interface StirCauldronPlotListItemProps {
 const StirCauldronPlotListItem = React.forwardRef<
   HTMLDivElement,
   StirCauldronPlotListItemProps
->(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
+>(({ item, highlight, onMouseOver, onMouseOut }, ref) => {
   const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
 
@@ -459,7 +467,6 @@ const StirCauldronPlotListItem = React.forwardRef<
     <PlotListItemCard
       item={item}
       highlight={highlight}
-      cardProps={cardProps}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
     >
@@ -484,14 +491,13 @@ const StirCauldronPlotListItem = React.forwardRef<
 interface PourSolventPlotListItemProps {
   item: PourSolventPlotBuilderItem;
   highlight: boolean;
-  cardProps?: CardProps;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
 const PourSolventPlotListItem = React.forwardRef<
   HTMLDivElement,
   PourSolventPlotListItemProps
->(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
+>(({ item, highlight, onMouseOver, onMouseOut }, ref) => {
   const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
 
@@ -521,7 +527,6 @@ const PourSolventPlotListItem = React.forwardRef<
     <PlotListItemCard
       ref={ref}
       item={item}
-      cardProps={cardProps}
       highlight={highlight}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
@@ -547,14 +552,13 @@ const PourSolventPlotListItem = React.forwardRef<
 interface HeatVortexPlotListItemProps {
   item: HeatVortexPlotBuilderItem;
   highlight: boolean;
-  cardProps?: CardProps;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
 const HeatVortexPlotListItem = React.forwardRef<
   HTMLDivElement,
   HeatVortexPlotListItemProps
->(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
+>(({ item, highlight, onMouseOver, onMouseOut }, ref) => {
   const distance = useObservation(item.distance$);
   const [inputDistance, setInputDistance] = React.useState<string | null>(null);
 
@@ -582,9 +586,9 @@ const HeatVortexPlotListItem = React.forwardRef<
 
   return (
     <PlotListItemCard
+      ref={ref}
       item={item}
       highlight={highlight}
-      cardProps={cardProps}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
     >
@@ -609,14 +613,13 @@ const HeatVortexPlotListItem = React.forwardRef<
 interface AddVoidSaltPlotListItemProps {
   item: VoidSaltPlotBuilderItem;
   highlight: boolean;
-  cardProps?: CardProps;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
 const AddVoidSaltPlotListItem = React.forwardRef<
   HTMLDivElement,
   AddVoidSaltPlotListItemProps
->(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
+>(({ item, highlight, onMouseOver, onMouseOut }, ref) => {
   const grains = useObservation(item.grains$);
   const [inputGrains, setInputGrains] = React.useState<string | null>(null);
   const [sliderGrains, setSliderGrains] = React.useState<number | null>(null);
@@ -647,9 +650,9 @@ const AddVoidSaltPlotListItem = React.forwardRef<
 
   return (
     <PlotListItemCard
+      ref={ref}
       item={item}
       highlight={highlight}
-      cardProps={cardProps}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
     >
@@ -667,6 +670,78 @@ const AddVoidSaltPlotListItem = React.forwardRef<
         rate={100}
         onChange={onGrainsChange}
         onChangeCommitted={() => setSliderGrains(null)}
+      />
+    </PlotListItemCard>
+  );
+});
+
+interface SetPositionPlotListItemProps {
+  item: SetPositionPlotBuilderItem;
+  highlight: boolean;
+  onMouseOver(item: PlotBuilderItem): void;
+  onMouseOut(): void;
+}
+const SetPositionPlotListItem = React.forwardRef<
+  HTMLDivElement,
+  SetPositionPlotListItemProps
+>(({ item, highlight, onMouseOver, onMouseOut }, ref) => {
+  const [xInput, setXInput] = React.useState<string | null>(null);
+  const [yInput, setYInput] = React.useState<string | null>(null);
+
+  const x = useObservation(item.x$);
+  const y = useObservation(item.y$);
+
+  const onXChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+
+      setXInput(e.target.value);
+      item.setX(asNumber);
+    },
+    [item]
+  );
+
+  const onYChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let asNumber: number | null = Number(e.target.value);
+      if (isNaN(asNumber)) {
+        asNumber = null;
+      }
+
+      setYInput(e.target.value);
+      item.setY(asNumber);
+    },
+    [item]
+  );
+
+  const onXBlur = React.useCallback(() => setXInput(null), []);
+  const onYBlur = React.useCallback(() => setYInput(null), []);
+
+  return (
+    <PlotListItemCard
+      ref={ref}
+      item={item}
+      highlight={highlight}
+      onMouseOver={onMouseOver}
+      onMouseOut={onMouseOut}
+    >
+      <div>
+        <Typography variant="overline">Teleport</Typography>
+      </div>
+      <TextField
+        label="X"
+        value={xInput ?? x ?? ""}
+        onChange={onXChange}
+        onBlur={onXBlur}
+      />
+      <TextField
+        label="Y"
+        value={yInput ?? y ?? ""}
+        onChange={onYChange}
+        onBlur={onYBlur}
       />
     </PlotListItemCard>
   );

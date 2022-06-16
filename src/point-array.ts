@@ -1,4 +1,4 @@
-import { sum } from "lodash";
+import { first, sum } from "lodash";
 import { PATH_SPACING_PHYSICS } from "./game-settings";
 
 import {
@@ -135,7 +135,8 @@ export function removePointArrayDistanceFromEnd<T extends Vector2>(
   // This should be made more efficient
   const length = pointArrayLength(array);
   if (length <= takeLength) {
-    return [];
+    const pFirst = first(array);
+    return pFirst ? [pFirst] : [];
   }
   const [taken] = takePointArrayByDistance(array, length - takeLength);
   return taken;

@@ -7,6 +7,7 @@ import {
   HeatVortexPlotItem,
   PlotItem,
   PourSolventPlotItem,
+  SetPositionPlotItem,
   StirCauldronPlotItem,
   VoidSaltPlotItem,
 } from "../types";
@@ -18,6 +19,7 @@ import { HeatVortexPlotBuilderItem } from "./HeatVortexPlotBuilderItem";
 import { PourSolventPlotBuilderItem } from "./PourSolventPlotBuilderItem";
 import { StirCauldronPlotBuilderItem } from "./StirCauldronPlotBuilderItem";
 import { VoidSaltPlotBuilderItem } from "./VoidSaltPlotBuilderItem";
+import { SetPositionPlotBuilderItem } from "./SetPositionPlotBuilderItem";
 
 export interface IPlotBuilderItemCollection {
   readonly items$: Observable<readonly PlotBuilderItem[]>;
@@ -79,6 +81,33 @@ export class PlotBuilderItemCollection extends Observable<
     this._items$.next([]);
   }
 
+  loadPlotItems(items: PlotItem[]) {
+    for (const item of items) {
+      switch (item.type) {
+        case "set-position":
+          this.addSetPosition(item);
+          break;
+        case "add-ingredient":
+          this.addIngredient(item);
+          break;
+        case "stir-cauldron":
+          this.addStirCauldron(item);
+          break;
+        case "pour-solvent":
+          this.addPourSolvent(item);
+          break;
+        case "heat-vortex":
+          this.addHeatVortex(item);
+          break;
+        case "void-salt":
+          this.addVoidSalt(item);
+          break;
+        default:
+          throw new Error(`Unknown item type: ${(item as any).type}`);
+      }
+    }
+  }
+
   moveItem(item: PlotBuilderItem, index: number) {
     if (index < 0 || index > this._items$.value.length) {
       return;
@@ -96,6 +125,18 @@ export class PlotBuilderItemCollection extends Observable<
     }
     items.splice(index, 0, item);
     this._items$.next(items);
+  }
+
+  addSetPosition(plotItem?: SetPositionPlotItem): SetPositionPlotBuilderItem {
+    const item = new SetPositionPlotBuilderItem((item) =>
+      this._deleteItem(item)
+    );
+    if (plotItem) {
+      item.setX(plotItem.position.x);
+      item.setY(plotItem.position.y);
+    }
+    this._items$.next([...this._items$.value, item]);
+    return item;
   }
 
   addIngredient(
@@ -136,7 +177,7 @@ export class PlotBuilderItemCollection extends Observable<
     return item;
   }
 
-  addHeatVortex(plotItem?: PourSolventPlotItem): HeatVortexPlotBuilderItem {
+  addHeatVortex(plotItem?: HeatVortexPlotItem): HeatVortexPlotBuilderItem {
     const item = new HeatVortexPlotBuilderItem((item) =>
       this._deleteItem(item)
     );

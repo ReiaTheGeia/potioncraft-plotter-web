@@ -4,11 +4,17 @@ import { IngredientId } from "../ingredients/types";
 import { MapEntity } from "../potion-maps/types";
 
 export type PlotItem =
+  | SetPositionPlotItem
   | AddIngredientPlotItem
   | PourSolventPlotItem
   | StirCauldronPlotItem
   | HeatVortexPlotItem
   | VoidSaltPlotItem;
+
+export interface SetPositionPlotItem {
+  type: "set-position";
+  position: Vector2;
+}
 
 export interface AddIngredientPlotItem {
   type: "add-ingredient";
