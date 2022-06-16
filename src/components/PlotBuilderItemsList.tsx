@@ -619,7 +619,7 @@ const AddVoidSaltPlotListItem = React.forwardRef<
 >(({ item, highlight, cardProps, onMouseOver, onMouseOut }, ref) => {
   const grains = useObservation(item.grains$);
   const [inputGrains, setInputGrains] = React.useState<string | null>(null);
-
+  const [sliderGrains, setSliderGrains] = React.useState<number | null>(null);
   const onTextFieldChange = React.useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       let asNumber: number | null = Number(e.target.value);
@@ -637,6 +637,9 @@ const AddVoidSaltPlotListItem = React.forwardRef<
   }, []);
   const onGrainsChange = React.useCallback(
     (value: number) => {
+      // Because grains can only be whole numbers, we track the slider value seperately so decimalled values can still increase and decrease
+      // appropriately with the rate, making the whole length of the slider useful.
+      setSliderGrains(Math.max(0, value));
       item.setGrains(Math.max(0, Math.round(value)));
     },
     [item]
@@ -659,7 +662,12 @@ const AddVoidSaltPlotListItem = React.forwardRef<
         onChange={onTextFieldChange}
         onBlur={onTextFieldBlur}
       />
-      <IncDecSlider value={grains ?? 0} rate={10} onChange={onGrainsChange} />
+      <IncDecSlider
+        value={sliderGrains ?? grains ?? 0}
+        rate={100}
+        onChange={onGrainsChange}
+        onChangeCommitted={() => setSliderGrains(null)}
+      />
     </PlotListItemCard>
   );
 });
