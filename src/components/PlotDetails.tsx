@@ -1,11 +1,16 @@
 import React from "react";
-import { uniq, sum, clamp, last } from "lodash";
+import { uniq, sum, last } from "lodash";
 
 import { Card, CardContent, Typography } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { pointArrayLength } from "@/point-array";
 import { vec2Magnitude, vec2Subtract, Vec2Zero } from "@/vector2";
+import {
+  DANGER_LENGTH_LETHAL,
+  DANGER_HEALTH_DECREASE_PER_UNIT,
+  LIFE_HEALTH_PER_GRAIN,
+} from "@/game-settings";
 
 import {
   AddIngredientPlotItem,
@@ -15,8 +20,11 @@ import {
 } from "@/services/plotter/types";
 import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 import { MapEntity, PotionEffectMapEntity } from "@/services/potion-maps/types";
-import { getEffectTier, longestDangerLength } from "@/services/plotter/utils";
-import { DANGER_LENGTH_LETHAL } from "@/game-settings";
+import {
+  getEffectTier,
+  calculateDangerLengths,
+} from "@/services/plotter/utils";
+import FixedValue from "./FixedValue";
 
 export interface PlotDetailsProps {
   className?: string;
@@ -36,6 +44,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
     totalUniqueIngredients,
     stress,
     longestDanger,
+    lifeSaltRequired,
   ] = React.useMemo(() => {
     const allPoints = plot.committedPoints.concat(plot.pendingPoints);
     const sources = uniq(allPoints.map((point) => point.source));
@@ -70,7 +79,17 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
       )
     );
 
-    const longestDanger = longestDangerLength(plot.committedPoints);
+    const dangerLengths = calculateDangerLengths(plot.committedPoints);
+    const longestDanger = Math.max(...dangerLengths);
+    const lifeSaltRequiredLengths = dangerLengths
+      .map((x) => x - DANGER_LENGTH_LETHAL)
+      .filter((x) => x > 0);
+    const lifeSaltRequiredHealth = sum(
+      lifeSaltRequiredLengths.map((x) => x * -DANGER_HEALTH_DECREASE_PER_UNIT)
+    );
+    const lifeSaltRequired = Math.ceil(
+      lifeSaltRequiredHealth / LIFE_HEALTH_PER_GRAIN
+    );
 
     return [
       effects,
@@ -80,6 +99,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
       totalUniqueIngredients,
       stress,
       longestDanger,
+      lifeSaltRequired,
     ];
   }, [plot, IngredientRegistry]);
 
@@ -119,7 +139,9 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
                 <Typography>Ingredient stress:</Typography>
               </td>
               <td>
-                <Typography variant="overline">{stress.toFixed(2)}</Typography>
+                <Typography variant="overline">
+                  <FixedValue value={stress} />
+                </Typography>
               </td>
             </tr>
             <tr>
@@ -135,7 +157,9 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
                 <Typography>Committed length:</Typography>
               </td>
               <td>
-                <Typography variant="overline">{length.toFixed(2)}</Typography>
+                <Typography variant="overline">
+                  <FixedValue value={length} />
+                </Typography>
               </td>
             </tr>
             <tr>
@@ -144,7 +168,8 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
               </td>
               <td>
                 <Typography variant="overline">
-                  {endsAt.x.toFixed(2)}, {endsAt.y.toFixed(2)}
+                  <FixedValue value={endsAt.x} />,{" "}
+                  <FixedValue value={endsAt.y} />
                 </Typography>
               </td>
             </tr>
@@ -157,10 +182,20 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
                   variant="overline"
                   color={dangerIsDeath ? "error" : "textPrimary"}
                 >
-                  {longestDanger.toFixed(2)} / {DANGER_LENGTH_LETHAL}
+                  <FixedValue value={longestDanger} /> / {DANGER_LENGTH_LETHAL}
                 </Typography>
               </td>
             </tr>
+            {lifeSaltRequired > 0 && (
+              <tr>
+                <td>
+                  <Typography>Life salt required:</Typography>
+                </td>
+                <td>
+                  <Typography variant="overline">{lifeSaltRequired}</Typography>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </CardContent>

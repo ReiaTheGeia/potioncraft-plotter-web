@@ -1,15 +1,17 @@
 import { last } from "lodash";
 import { inject, injectable, singleton } from "microinject";
 
-import { POTION_RADIUS } from "@/game-settings";
+import { POTION_RADIUS, VOID_DISTANCE_PER_GRAIN } from "@/game-settings";
 import { degreesToRadians } from "@/utils";
-import { curveToPoints } from "@/curves";
+import { curvesToPoints, curveToPoints } from "@/curves";
 import {
   PointArray,
+  pointArrayLength,
   pointArrayLengthCached,
   pointArrayLineFromDistance,
   removePointArrayDistanceFromEnd,
   takePointArrayByDistance,
+  takePointArrayByPercent,
 } from "@/point-array";
 import {
   Vector2,
@@ -115,24 +117,21 @@ export class Plotter {
       throw new Error(`Unknown ingredient: ${ingredientId}`);
     }
 
-    const ingredientPoints: PointArray = [];
-    let ingredientLength = 0;
-    for (const curve of ingredient.path) {
-      const points = curveToPoints(curve);
-      ingredientPoints.push(...points);
-      // Use the cached length, as curveToPoints is cached and will return consistent array references.
-      // Note, this produces a very slightly incorrect length. A difference of around e-15 when compared to getting
-      // the length of the final ingredientPoints array.
-      ingredientLength += pointArrayLengthCached(points);
-    }
+    // const ingredientPoints: PointArray = [];
+    // for (const curve of ingredient.path) {
+    //   const points = curveToPoints(curve);
+    //   ingredientPoints.push(...points);
+    // }
+
+    const ingredientPoints = curvesToPoints(ingredient.path);
 
     const takePercent =
       ingredient.preGrindPercent +
       grindPercent * (1 - ingredient.preGrindPercent);
 
-    const [addedPoints] = takePointArrayByDistance(
+    const [addedPoints] = takePointArrayByPercent(
       ingredientPoints,
-      takePercent * ingredientLength
+      takePercent
     );
 
     const appendPendingPoints = addedPoints.map((point) =>
@@ -276,13 +275,9 @@ export class Plotter {
     result: PlotResult
   ): PlotResult {
     const { grains } = item;
-    // SaltVoid.OnCauldronDissolve
-    // Note: While the assembly sets this value to 0.1, the actual prefab deserializes it to 0.01, and the difference can be seen in gameplay.
-    const DISTANCE_PER_GRAIN = 0.01;
-
     const points = removePointArrayDistanceFromEnd(
       result.pendingPoints,
-      grains * DISTANCE_PER_GRAIN
+      grains * VOID_DISTANCE_PER_GRAIN
     );
 
     return {

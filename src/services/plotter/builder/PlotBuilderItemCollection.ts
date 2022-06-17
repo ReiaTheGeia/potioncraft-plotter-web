@@ -1,4 +1,10 @@
-import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  Subscription,
+  debounceTime,
+} from "rxjs";
 
 import { isNotNull } from "@/utils";
 
@@ -47,7 +53,9 @@ export class PlotBuilderItemCollection extends Observable<
 
   constructor() {
     super((observer) => this._items$.subscribe(observer));
-    this.plotBuilderItems$.subscribe((builderItems) => {
+
+    // Add a small debounce so we dont re-plot rapidly while loading items.
+    this.plotBuilderItems$.pipe(debounceTime(10)).subscribe((builderItems) => {
       if (this._itemSubscription) {
         this._itemSubscription.unsubscribe();
       }

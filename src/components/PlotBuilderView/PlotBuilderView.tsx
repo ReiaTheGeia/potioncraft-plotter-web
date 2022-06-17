@@ -14,6 +14,7 @@ import PanZoomViewport from "../PanZoomViewport";
 import Plot from "../Plot";
 
 import { IPlotBuilderViewModel } from "./PlotBuilderViewModel";
+import FixedValue from "../FixedValue";
 
 export interface PlotBuilderViewProps {
   className?: string;
@@ -106,7 +107,8 @@ const PlotBuilderView = ({ className, viewModel }: PlotBuilderViewProps) => {
         <Card className="mouse-coords">
           <CardContent>
             <Typography variant="overline">
-              ({mouseWorld.x.toFixed(2)}, {mouseWorld.y.toFixed(2)})
+              <FixedValue value={mouseWorld.x} />,{" "}
+              <FixedValue value={mouseWorld.y} />
             </Typography>
           </CardContent>
         </Card>

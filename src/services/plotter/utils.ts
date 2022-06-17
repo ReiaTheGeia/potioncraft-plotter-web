@@ -36,8 +36,8 @@ export function getEffectTier(
   return !(Math.abs(value - 1) < Number.EPSILON) ? 2 : 3;
 }
 
-export function longestDangerLength(items: PlotPoint[]): number {
-  let longestLength = 0;
+export function calculateDangerLengths(items: PlotPoint[]): number[] {
+  const lengths: number[] = [];
   let currentLength = 0;
   let prevItem = items[0];
   for (let i = 1; i < items.length; i++) {
@@ -45,11 +45,15 @@ export function longestDangerLength(items: PlotPoint[]): number {
     if (item.entities.some((x) => x.entityType === "DangerZonePart")) {
       currentLength += vec2Magnitude(vec2Subtract(item, prevItem));
     } else {
-      longestLength = Math.max(longestLength, currentLength);
+      lengths.push(currentLength);
       currentLength = 0;
     }
     prevItem = item;
   }
 
-  return Math.max(longestLength, currentLength);
+  if (currentLength > 0) {
+    lengths.push(currentLength);
+  }
+
+  return lengths;
 }

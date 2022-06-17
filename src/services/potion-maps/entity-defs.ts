@@ -75,16 +75,40 @@ export const EntityDefs: Record<MapEntity["entityType"], EntityDefinition> = {
       let r: Rectangle;
       switch (bone.prefab) {
         case "Fang1":
-          r = rectangle(-0.06, -0.02, 0.12, 0.4);
+          r = rectangle(
+            -0.1226 / 2 - 0.0085,
+            -0.4001 / 2 + 0.0116,
+            0.1226,
+            0.4001
+          );
+          // r = rectangle(-0.06, -0.02, 0.12, 0.4);
           break;
         case "Fang2":
-          r = rectangle(-0.065, -0.12, 0.13, 0.24);
+          r = rectangle(
+            -0.1372 / 2 + 0.0031,
+            -0.2445 / 2 + 0.0097,
+            0.1372,
+            0.2445
+          );
+          // r = rectangle(-0.065, -0.12, 0.13, 0.24);
           break;
         case "Bone1":
-          r = rectangle(-0.06, -0.345, 0.12, 0.69);
+          r = rectangle(
+            -0.1288 / 2 - 0.0196,
+            -0.6983 / 2 + 0.0052,
+            0.1288,
+            0.6983
+          );
+          // r = rectangle(-0.06, -0.345, 0.12, 0.69);
           break;
         case "Bone2":
-          r = rectangle(-0.07, -0.36, 0.14, 0.72);
+          r = rectangle(
+            -0.1529 / 2 - 0.00042,
+            -0.725 / 2 + 0.0016,
+            0.1529,
+            0.725
+          );
+          //r = rectangle(-0.07, -0.36, 0.1529, 0.725);
           break;
         default:
           return false;

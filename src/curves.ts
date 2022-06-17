@@ -1,3 +1,4 @@
+import { last } from "lodash";
 import {
   BEZIER_CURVE_LENGTH_RESOLUTION,
   PATH_SPACING_PHYSICS,
@@ -11,7 +12,6 @@ import {
   vec2Normalize,
   vec2Scale,
   vec2Subtract,
-  Vec2Zero,
 } from "./vector2";
 
 export interface CubicBezierCurve {
@@ -58,25 +58,21 @@ export function getCurvePoint(curve: CubicBezierCurve, t: number): Vector2 {
 }
 
 const curveLengthCache = new Map<CubicBezierCurve, number>();
-export function getCurveLength(
-  curve: CubicBezierCurve
-  // resolution: number = BEZIER_CURVE_LENGTH_RESOLUTION
-): number {
-  const resolution = BEZIER_CURVE_LENGTH_RESOLUTION;
+export function getCurveLength(curve: CubicBezierCurve): number {
   const cached = curveLengthCache.get(curve);
   if (cached !== undefined) {
     return cached;
   }
 
+  const resolution = BEZIER_CURVE_LENGTH_RESOLUTION;
+
   let length = 0.0;
-
-  let previousPoint = getCurvePoint(curve, 0);
-
-  for (let index = 1; index <= resolution; index++) {
+  let prevPoint = getCurvePoint(curve, 0);
+  for (let index = 1; index <= resolution; ++index) {
     const point = getCurvePoint(curve, index / resolution);
-    const vector2_2 = vec2Subtract(point, previousPoint);
-    length += vec2Magnitude(vector2_2);
-    previousPoint = point;
+    const offset = vec2Subtract(point, prevPoint);
+    length += vec2Magnitude(offset);
+    prevPoint = point;
   }
 
   curveLengthCache.set(curve, length);
@@ -84,12 +80,55 @@ export function getCurveLength(
   return length;
 }
 
-const curvePointsCache = new Map<CubicBezierCurve, readonly Vector2[]>();
+const curvesToPointsCache = new Map<CubicBezierCurve[], Vector2[]>();
+export function curvesToPoints(curves: CubicBezierCurve[]): Vector2[] {
+  const cached = curvesToPointsCache.get(curves);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const resolution = 1;
+  const spacing = PATH_SPACING_PHYSICS;
+  const points: Vector2[] = [];
+  let consumedLength = 0;
+  let prevPoint = curves[0].start;
+  points.push(prevPoint);
+  for (const cubicBezierCurve of curves) {
+    const samples = Math.ceil(
+      getCurveLength(cubicBezierCurve) * resolution * 10.0
+    );
+    for (let index = 0; index <= samples; ++index) {
+      const t = (index * 1) / samples;
+      const point = getCurvePoint(cubicBezierCurve, t);
+      consumedLength += vec2Distance(prevPoint, point);
+      while (consumedLength >= spacing) {
+        const num3 = consumedLength - spacing;
+        const vector2 = vec2Add(
+          point,
+          vec2Scale(vec2Normalize(vec2Subtract(prevPoint, point)), num3)
+        );
+        points.push(vector2);
+        consumedLength = num3;
+        prevPoint = vector2;
+      }
+      prevPoint = point;
+    }
+  }
+  if (consumedLength > 0.0) {
+    points.push(getCurvePoint(curves[curves.length - 1], 1));
+  }
+
+  curvesToPointsCache.set(curves, points);
+
+  return points;
+}
+
+const curvePointsCache = new Map<CubicBezierCurve, Vector2[]>();
 export function curveToPoints(
   curve: CubicBezierCurve
   // spacing: number = PATH_SPACING_PHYSICS,
   // resolution: number = 1
-): readonly Vector2[] {
+): Vector2[] {
   const spacing: number = PATH_SPACING_PHYSICS;
   const resolution: number = 1;
 

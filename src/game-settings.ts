@@ -1,6 +1,10 @@
 export const PATH_SPACING_PHYSICS = 0.05;
 export const BEZIER_CURVE_LENGTH_RESOLUTION = 200;
 export const MAP_EXTENT_RADIUS = 60;
-export const POTION_RADIUS = 0.79;
+export const POTION_RADIUS = 0.74;
+// export const POTION_RADIUS = 0.79;
 export const MAX_INGREDIENT_EXTENT = 10;
+export const DANGER_HEALTH_DECREASE_PER_UNIT = -0.4;
 export const DANGER_LENGTH_LETHAL = 2.5;
+export const VOID_DISTANCE_PER_GRAIN = 0.01;
+export const LIFE_HEALTH_PER_GRAIN = 0.004;

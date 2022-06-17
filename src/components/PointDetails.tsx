@@ -8,6 +8,8 @@ import { EntityDefs } from "@/services/potion-maps/entity-defs";
 
 import { PlotPoint } from "@/services/plotter/types";
 
+import FixedValue from "./FixedValue";
+
 export interface PointDetailsProps {
   point: PlotPoint;
 }
@@ -21,7 +23,7 @@ const PointDetails = ({ point }: PointDetailsProps) => {
       <CardContent>
         <Typography variant="h6">Point at mouse</Typography>
         <Typography variant="overline">
-          {point.x.toFixed(2)}, {point.y.toFixed(2)}
+          <FixedValue value={point.x} />, <FixedValue value={point.y} />
         </Typography>
         {touchedItems.length > 0 && (
           <>

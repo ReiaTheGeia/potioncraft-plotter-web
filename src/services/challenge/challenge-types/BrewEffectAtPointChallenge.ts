@@ -7,11 +7,11 @@ import { pointArrayLength } from "@/point-array";
 import { AddIngredientPlotItem, PlotItem } from "@/services/plotter/types";
 
 import { Plotter } from "../../plotter/Plotter";
-import { getEffectTier, longestDangerLength } from "../../plotter/utils";
+import { getEffectTier, calculateDangerLengths } from "../../plotter/utils";
 
 import { PotionMap } from "../../potion-maps/PotionMap";
 
-import { ChallengeResults, ChallengeScoreItem, IChallenge } from "../Challenge";
+import { ChallengeResults, IChallenge } from "../Challenge";
 import { DANGER_LENGTH_LETHAL } from "@/game-settings";
 import { IngredientRegistry } from "@/services/ingredients/IngredientRegistry";
 
@@ -185,7 +185,7 @@ class BrewEffectAtPointChallenge implements IChallenge {
       score: costScore,
     };
 
-    const dangerLength = longestDangerLength(committedPoints);
+    const dangerLength = Math.max(...calculateDangerLengths(committedPoints));
     if (dangerLength > DANGER_LENGTH_LETHAL) {
       // TODO: Charge for life salt for bones.
       // Each unit of life salt costs (8736 / 5000) to produce.  Check how much life it regens and use that to find the cost

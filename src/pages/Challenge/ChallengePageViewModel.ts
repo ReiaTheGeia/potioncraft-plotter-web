@@ -18,7 +18,6 @@ export class ChallengePageViewModel extends PlotBuilderViewModel {
   ) {
     super(plotBuilder);
     this._challenge = challengeFactory.createDailyChallenge();
-    console.log("Got challenge", this._challenge);
     plotBuilder.setMap(this._challenge.map);
     this._results$ = plotBuilder.plotItems$.pipe(
       map((plotItems) => this._challenge.getScore(plotItems))
