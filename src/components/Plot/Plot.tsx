@@ -102,7 +102,13 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
             cx={lastCommitPoint.x}
             cy={lastCommitPoint.y}
             r={POTION_RADIUS}
-            fill="blue"
+            fill={
+              lastCommitPoint.entities.some(
+                (x) => x.entityType === "DangerZonePart"
+              )
+                ? "red"
+                : "blue"
+            }
             opacity={0.2}
           />
         )}
