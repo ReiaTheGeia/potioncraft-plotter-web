@@ -39,7 +39,7 @@ import {
   PourSolventPlotItem,
   SetPositionPlotItem,
   StirCauldronPlotItem,
-  VoidSaltPlotItem,
+  AddVoidSaltPlotItem,
 } from "./types";
 
 @injectable()
@@ -271,7 +271,7 @@ export class Plotter {
   }
 
   private _plotVoidSalt(
-    item: VoidSaltPlotItem,
+    item: AddVoidSaltPlotItem,
     result: PlotResult
   ): PlotResult {
     const { grains } = item;

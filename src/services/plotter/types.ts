@@ -9,7 +9,7 @@ export type PlotItem =
   | PourSolventPlotItem
   | StirCauldronPlotItem
   | HeatVortexPlotItem
-  | VoidSaltPlotItem;
+  | AddVoidSaltPlotItem;
 
 export interface SetPositionPlotItem {
   type: "set-position";
@@ -37,7 +37,7 @@ export interface HeatVortexPlotItem {
   distance: number;
 }
 
-export interface VoidSaltPlotItem {
+export interface AddVoidSaltPlotItem {
   type: "void-salt";
   grains: number;
 }

@@ -6,10 +6,10 @@ import {
 } from "base64-arraybuffer";
 import { inject } from "microinject";
 
-import { PlotBuilder } from "@/components/PlotBuilderView/builder/PlotBuilder";
 import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
 import { PotionBaseId } from "@/services/potion-bases/types";
 
+import { PlotBuilder } from "@/components/PlotBuilderView/builder/PlotBuilder";
 import { PlotBuilderViewModel } from "@/components/PlotBuilderView/PlotBuilderViewModel";
 
 export class PlotterPageViewModel extends PlotBuilderViewModel {

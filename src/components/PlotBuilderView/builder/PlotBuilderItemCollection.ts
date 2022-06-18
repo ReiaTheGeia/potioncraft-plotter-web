@@ -4,6 +4,7 @@ import {
   Observable,
   Subscription,
   debounceTime,
+  map,
 } from "rxjs";
 
 import { isNotNull } from "@/utils";
@@ -15,7 +16,7 @@ import {
   PourSolventPlotItem,
   SetPositionPlotItem,
   StirCauldronPlotItem,
-  VoidSaltPlotItem,
+  AddVoidSaltPlotItem,
 } from "../../../services/plotter/types";
 
 import { PlotBuilderItem } from "./PlotBuilderItem";
@@ -26,6 +27,7 @@ import { PourSolventPlotBuilderItem } from "./PourSolventPlotBuilderItem";
 import { StirCauldronPlotBuilderItem } from "./StirCauldronPlotBuilderItem";
 import { VoidSaltPlotBuilderItem } from "./VoidSaltPlotBuilderItem";
 import { SetPositionPlotBuilderItem } from "./SetPositionPlotBuilderItem";
+import { observeAll } from "@/observables";
 
 export interface IPlotBuilderItemCollection {
   readonly items$: Observable<readonly PlotBuilderItem[]>;
@@ -38,7 +40,7 @@ export interface IPlotBuilderItemCollection {
   addStirCauldron(plotItem?: StirCauldronPlotItem): StirCauldronPlotBuilderItem;
   addPourSolvent(plotItem?: PourSolventPlotItem): PourSolventPlotBuilderItem;
   addHeatVortex(plotItem?: HeatVortexPlotItem): HeatVortexPlotBuilderItem;
-  addVoidSalt(plotItem?: VoidSaltPlotItem): VoidSaltPlotBuilderItem;
+  addVoidSalt(plotItem?: AddVoidSaltPlotItem): VoidSaltPlotBuilderItem;
 }
 
 export class PlotBuilderItemCollection extends Observable<
@@ -54,33 +56,18 @@ export class PlotBuilderItemCollection extends Observable<
   constructor() {
     super((observer) => this._items$.subscribe(observer));
 
-    // Add a small debounce so we dont re-plot rapidly while loading items.
-    this.plotBuilderItems$.pipe(debounceTime(10)).subscribe((builderItems) => {
-      if (this._itemSubscription) {
-        this._itemSubscription.unsubscribe();
-      }
-
-      if (builderItems.length === 0) {
-        this._plotItems$.next([]);
-        return;
-      }
-
-      this._itemSubscription = combineLatest(
-        builderItems.map((x) => x.plotItem$)
-      )
-        .pipe(debounceTime(10))
-        .subscribe((plotItems) => {
-          this._plotItems$.next(plotItems.filter(isNotNull));
-        });
-    });
+    this.plotBuilderItems$
+      .pipe(map((item) => item.map((x) => x.plotItem$)))
+      .pipe(observeAll())
+      // Add a small debounce so we dont re-plot rapidly while loading items or making changes.
+      .pipe(debounceTime(10))
+      .subscribe((items) => {
+        this._plotItems$.next(items.filter(isNotNull));
+      });
   }
 
   get plotBuilderItems$(): Observable<readonly PlotBuilderItem[]> {
     return this._items$;
-  }
-
-  get plotBuilderItems(): readonly PlotBuilderItem[] {
-    return this._items$.value;
   }
 
   get plotItems$(): Observable<readonly PlotItem[]> {
@@ -198,7 +185,7 @@ export class PlotBuilderItemCollection extends Observable<
     return item;
   }
 
-  addVoidSalt(plotItem?: VoidSaltPlotItem): VoidSaltPlotBuilderItem {
+  addVoidSalt(plotItem?: AddVoidSaltPlotItem): VoidSaltPlotBuilderItem {
     const item = new VoidSaltPlotBuilderItem((item) => this._deleteItem(item));
     if (plotItem) {
       item.setGrains(plotItem.grains);
