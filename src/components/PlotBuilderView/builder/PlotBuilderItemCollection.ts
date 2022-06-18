@@ -16,7 +16,7 @@ import {
   SetPositionPlotItem,
   StirCauldronPlotItem,
   VoidSaltPlotItem,
-} from "../types";
+} from "../../../services/plotter/types";
 
 import { PlotBuilderItem } from "./PlotBuilderItem";
 
@@ -55,7 +55,7 @@ export class PlotBuilderItemCollection extends Observable<
     super((observer) => this._items$.subscribe(observer));
 
     // Add a small debounce so we dont re-plot rapidly while loading items.
-    this.plotBuilderItems$.pipe(debounceTime(10)).subscribe((builderItems) => {
+    this.plotBuilderItems$.subscribe((builderItems) => {
       if (this._itemSubscription) {
         this._itemSubscription.unsubscribe();
       }
@@ -67,9 +67,11 @@ export class PlotBuilderItemCollection extends Observable<
 
       this._itemSubscription = combineLatest(
         builderItems.map((x) => x.plotItem$)
-      ).subscribe((plotItems) => {
-        this._plotItems$.next(plotItems.filter(isNotNull));
-      });
+      )
+        .pipe(debounceTime(10))
+        .subscribe((plotItems) => {
+          this._plotItems$.next(plotItems.filter(isNotNull));
+        });
     });
   }
 

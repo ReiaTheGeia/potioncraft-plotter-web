@@ -5,8 +5,8 @@ import { vec2Distance, Vector2 } from "@/vector2";
 
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
-import { PlotBuilder } from "@/services/plotter/builder/PlotBuilder";
-import { PlotBuilderItem } from "@/services/plotter/builder/PlotBuilderItem";
+import { PlotBuilder } from "@/components/PlotBuilderView/builder/PlotBuilder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder/PlotBuilderItem";
 import { PlotItem, PlotPoint, PlotResult } from "@/services/plotter/types";
 import { MapEntity } from "@/services/potion-maps/types";
 import { PotionMap } from "@/services/potion-maps/PotionMap";

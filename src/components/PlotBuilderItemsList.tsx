@@ -25,7 +25,7 @@ import {
   HeatVortexPlotBuilderItem,
   PlotBuilderItemCollection,
   VoidSaltPlotBuilderItem,
-} from "@/services/plotter/builder";
+} from "@/components/PlotBuilderView/builder";
 import { IngredientId } from "@/services/ingredients/types";
 
 import DragReoderable from "./DragReorderable";

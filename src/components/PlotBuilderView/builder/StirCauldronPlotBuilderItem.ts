@@ -1,10 +1,10 @@
 import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
-import { PlotItem } from "../types";
+import { PlotItem } from "../../../services/plotter/types";
 
 import { PlotBuilderItem } from "./PlotBuilderItem";
 
-export class PourSolventPlotBuilderItem extends PlotBuilderItem {
+export class StirCauldronPlotBuilderItem extends PlotBuilderItem {
   private readonly _isValid$: Observable<boolean>;
   private readonly _distance$ = new BehaviorSubject<number | null>(null);
 
@@ -16,15 +16,15 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
       map(() => this.isValid)
     );
 
-    combineLatest([this._distance$]).subscribe(([distance]) => {
+    combineLatest([this._distance$]).subscribe(([stirDistance]) => {
       if (!this.isValid) {
         this._plotItem$.next(null);
         return;
       }
 
       this._plotItem$.next({
-        type: "pour-solvent",
-        distance: distance!,
+        type: "stir-cauldron",
+        distance: stirDistance!,
       });
     });
   }
@@ -34,8 +34,8 @@ export class PourSolventPlotBuilderItem extends PlotBuilderItem {
   }
 
   get isValid() {
-    const distance = this._distance$.value;
-    return distance != null && distance >= 0;
+    const stirDistance = this._distance$.value;
+    return stirDistance != null && stirDistance >= 0;
   }
 
   get plotItem$(): Observable<PlotItem | null> {

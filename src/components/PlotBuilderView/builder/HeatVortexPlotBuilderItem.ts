@@ -1,30 +1,30 @@
 import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
-import { PlotItem } from "../types";
+import { PlotItem } from "../../../services/plotter/types";
 
 import { PlotBuilderItem } from "./PlotBuilderItem";
 
-export class VoidSaltPlotBuilderItem extends PlotBuilderItem {
+export class HeatVortexPlotBuilderItem extends PlotBuilderItem {
   private readonly _isValid$: Observable<boolean>;
-  private readonly _grains$ = new BehaviorSubject<number | null>(null);
+  private readonly _distance$ = new BehaviorSubject<number | null>(null);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
   constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
     super();
-    this._isValid$ = combineLatest([this._grains$]).pipe(
+    this._isValid$ = combineLatest([this._distance$]).pipe(
       map(() => this.isValid)
     );
 
-    combineLatest([this._grains$]).subscribe(([grains]) => {
+    combineLatest([this._distance$]).subscribe(([distace]) => {
       if (!this.isValid) {
         this._plotItem$.next(null);
         return;
       }
 
       this._plotItem$.next({
-        type: "void-salt",
-        grains: grains!,
+        type: "heat-vortex",
+        distance: distace!,
       });
     });
   }
@@ -34,8 +34,8 @@ export class VoidSaltPlotBuilderItem extends PlotBuilderItem {
   }
 
   get isValid() {
-    const grains = this._grains$.value;
-    return grains != null && grains >= 0 && grains === Math.round(grains);
+    const distance = this._distance$.value;
+    return distance != null && distance >= 0;
   }
 
   get plotItem$(): Observable<PlotItem | null> {
@@ -46,12 +46,12 @@ export class VoidSaltPlotBuilderItem extends PlotBuilderItem {
     return this._plotItem$.value;
   }
 
-  get grains$(): Observable<number | null> {
-    return this._grains$;
+  get distance$(): Observable<number | null> {
+    return this._distance$;
   }
 
-  setGrains(grains: number | null) {
-    this._grains$.next(grains);
+  setDistance(distance: number | null) {
+    this._distance$.next(distance);
   }
 
   delete() {

@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { PlotItem } from "../types";
+import { PlotItem } from "../../../services/plotter/types";
 
 export abstract class PlotBuilderItem {
   abstract readonly isValid$: Observable<boolean>;

@@ -5,7 +5,7 @@ import { useDICreate } from "@/container";
 
 import { useObservation } from "@/hooks/observe";
 
-import { PlotBuilderItem } from "@/services/plotter/builder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 
 import PlotBuilderItemsList from "@/components/PlotBuilderItemsList";
 import Overlay from "@/components/Overlay";

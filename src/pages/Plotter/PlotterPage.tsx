@@ -5,7 +5,7 @@ import { useDICreate, useDIDependency } from "@/container";
 
 import { useObservation } from "@/hooks/observe";
 
-import { PlotBuilderItem } from "@/services/plotter/builder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 import { History } from "@/services/history/History";
 
 import PlotBuilderItemsList from "@/components/PlotBuilderItemsList";

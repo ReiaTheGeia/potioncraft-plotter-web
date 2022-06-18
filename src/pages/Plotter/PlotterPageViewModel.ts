@@ -6,7 +6,7 @@ import {
 } from "base64-arraybuffer";
 import { inject } from "microinject";
 
-import { PlotBuilder } from "@/services/plotter/builder/PlotBuilder";
+import { PlotBuilder } from "@/components/PlotBuilderView/builder/PlotBuilder";
 import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
 import { PotionBaseId } from "@/services/potion-bases/types";
 

@@ -1,7 +1,7 @@
 import { inject } from "microinject";
 import { Observable, map } from "rxjs";
 
-import { PlotBuilder } from "@/services/plotter/builder";
+import { PlotBuilder } from "@/components/PlotBuilderView/builder";
 import { ChallengeResults, IChallenge } from "@/services/challenge/Challenge";
 import { ChallengeFactory } from "@/services/challenge/ChallengeFactory";
 

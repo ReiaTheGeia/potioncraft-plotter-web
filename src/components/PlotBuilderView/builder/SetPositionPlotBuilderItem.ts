@@ -1,7 +1,7 @@
 import { MAP_EXTENT_RADIUS } from "@/game-settings";
 import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
-import { PlotItem } from "../types";
+import { PlotItem } from "../../../services/plotter/types";
 
 import { PlotBuilderItem } from "./PlotBuilderItem";
 

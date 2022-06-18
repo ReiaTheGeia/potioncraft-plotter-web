@@ -3,10 +3,10 @@ import { BehaviorSubject, combineLatest, map, Observable } from "rxjs";
 
 import { isNotNull } from "@/utils";
 
-import { PotionMap } from "../../potion-maps/PotionMap";
+import { PotionMap } from "../../../services/potion-maps/PotionMap";
 
-import { Plotter } from "../Plotter";
-import { PlotResult } from "../types";
+import { Plotter } from "../../../services/plotter/Plotter";
+import { PlotResult } from "../../../services/plotter/types";
 
 import { PlotBuilderItemCollection } from "./PlotBuilderItemCollection";
 
