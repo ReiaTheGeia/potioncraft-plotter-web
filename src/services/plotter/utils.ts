@@ -42,7 +42,7 @@ export function calculateDangerLengths(items: PlotPoint[]): number[] {
   let prevItem = items[0];
   for (let i = 1; i < items.length; i++) {
     const item = items[i];
-    if (item.entities.some((x) => x.entityType === "DangerZonePart")) {
+    if (item.bottleCollisions.some((x) => x.entityType === "DangerZonePart")) {
       currentLength += vec2Magnitude(vec2Subtract(item, prevItem));
     } else {
       lengths.push(currentLength);

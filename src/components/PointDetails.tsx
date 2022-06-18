@@ -16,7 +16,9 @@ export interface PointDetailsProps {
 
 const PointDetails = ({ point }: PointDetailsProps) => {
   const touchedItems = uniq(
-    point.entities.map((x) => EntityDefs[x.entityType].getFriendlyName(x))
+    point.bottleCollisions.map((x) =>
+      EntityDefs[x.entityType].getFriendlyName(x)
+    )
   );
   return (
     <Card variant="outlined">

@@ -44,7 +44,7 @@ export interface VoidSaltPlotItem {
 
 export interface PlotPoint extends Vector2 {
   source: PlotItem;
-  entities: Readonly<MapEntity>[];
+  bottleCollisions: Readonly<MapEntity>[];
 }
 
 export interface PlotResult {

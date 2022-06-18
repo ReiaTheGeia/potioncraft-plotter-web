@@ -80,7 +80,7 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
     );
 
     const dangerLengths = calculateDangerLengths(plot.committedPoints);
-    const longestDanger = Math.max(...dangerLengths);
+    const longestDanger = Math.max(...dangerLengths, 0);
     const lifeSaltRequiredLengths = dangerLengths
       .map((x) => x - DANGER_LENGTH_LETHAL)
       .filter((x) => x > 0);
@@ -214,7 +214,7 @@ export function isIngredientPoint(
 function getEffects(items: PlotPoint[]): Record<string, number> {
   const result: Record<string, number> = {};
   for (const item of items) {
-    const effect = item.entities.find(itemIsEffect);
+    const effect = item.bottleCollisions.find(itemIsEffect);
     if (!effect) {
       continue;
     }

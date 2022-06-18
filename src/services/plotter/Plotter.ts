@@ -62,8 +62,8 @@ export class Plotter {
     }
 
     for (const point of result.committedPoints.concat(result.pendingPoints)) {
-      const entities = map.hitTest(point, POTION_RADIUS);
-      point.entities = entities as any;
+      const collisions = map.hitTest(point, POTION_RADIUS);
+      point.bottleCollisions = collisions as any;
     }
 
     console.log("plotting took", Date.now() - now);
@@ -306,7 +306,7 @@ function appendPendingPlotPoints(
         x: point.x,
         y: point.y,
         source,
-        entities: [],
+        bottleCollisions: [],
       }))
     ),
   });
@@ -336,7 +336,7 @@ function commitPlotPoints(
         x: point.x,
         y: point.y,
         source,
-        entities: [],
+        bottleCollisions: [],
       }))
     ),
     pendingPoints: result.pendingPoints.map((point) => ({

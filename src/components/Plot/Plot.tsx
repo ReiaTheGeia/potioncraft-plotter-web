@@ -103,7 +103,7 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
             cy={lastCommitPoint.y}
             r={POTION_RADIUS}
             fill={
-              lastCommitPoint.entities.some(
+              lastCommitPoint.bottleCollisions.some(
                 (x) => x.entityType === "DangerZonePart"
               )
                 ? "red"
