@@ -55,7 +55,7 @@ export class PlotBuilderItemCollection extends Observable<
     super((observer) => this._items$.subscribe(observer));
 
     // Add a small debounce so we dont re-plot rapidly while loading items.
-    this.plotBuilderItems$.subscribe((builderItems) => {
+    this.plotBuilderItems$.pipe(debounceTime(10)).subscribe((builderItems) => {
       if (this._itemSubscription) {
         this._itemSubscription.unsubscribe();
       }
