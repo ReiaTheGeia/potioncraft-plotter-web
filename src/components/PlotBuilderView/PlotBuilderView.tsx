@@ -13,18 +13,30 @@ import PotionMap from "../Map";
 import PanZoomViewport from "../PanZoomViewport";
 import Plot from "../Plot";
 
-import { IPlotBuilderViewModel } from "./PlotBuilderViewModel";
 import FixedValue from "../FixedValue";
+
+import PlotBuilderItemsList from "./components/PlotBuilderItemsList";
+
+import { IPlotBuilderViewModel } from "./PlotBuilderViewModel";
+import { PlotBuilderItem } from "./builder";
 
 export interface PlotBuilderViewProps {
   className?: string;
+  enableCheats?: boolean;
   viewModel: IPlotBuilderViewModel;
+  mapOverlay?: React.ReactNode;
 }
 
 const Root = styled("div")(({ theme }) => ({
-  position: "relative",
   width: "100%",
   height: "100%",
+  display: "flex",
+  flexDirection: "row",
+  "& .map-view": {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
   "& .pan-zoom-container": {
     position: "relative",
     width: "100%",
@@ -70,9 +82,23 @@ const Root = styled("div")(({ theme }) => ({
     bottom: theme.spacing(2),
     left: theme.spacing(2),
   },
+  "& .divider": {
+    width: "2px",
+    height: "100%",
+    background: "grey",
+  },
+  "& .plot-items": {
+    width: "400px",
+    height: "100%",
+  },
 }));
 
-const PlotBuilderView = ({ className, viewModel }: PlotBuilderViewProps) => {
+const PlotBuilderView = ({
+  className,
+  viewModel,
+  mapOverlay,
+  enableCheats,
+}: PlotBuilderViewProps) => {
   const map = useObservation(viewModel.map$);
   const plot = useObservation(viewModel.plot$);
 
@@ -85,39 +111,66 @@ const PlotBuilderView = ({ className, viewModel }: PlotBuilderViewProps) => {
 
   const scale = useObservation(viewModel.viewScale$) ?? 1;
 
+  const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
+
+  const onBuildItemMouseOver = React.useCallback(
+    (item: PlotBuilderItem) => {
+      viewModel.onMouseOverBuilderItem(item);
+    },
+    [viewModel]
+  );
+
+  const onBuildItemMouseOut = React.useCallback(() => {
+    viewModel.onMouseOverBuilderItem(null);
+  }, [viewModel]);
+
   return (
     <Root className={className}>
-      <PanZoomViewport className="pan-zoom-container" viewModel={viewModel}>
-        {map && <PotionMap className="map" map={map} viewModel={viewModel} />}
-        <Plot
-          className="plot"
-          plot={plot ?? EmptyPlotResult}
-          viewModel={viewModel}
-        />
-      </PanZoomViewport>
-      <div className="inspect-stack">
-        {mouseOverPlotPoint && <PointDetails point={mouseOverPlotPoint} />}
-        {mouseOverPlotItem && <StepDetails step={mouseOverPlotItem} />}
-        {!mouseOverPlotItem && mouseOverEntity && (
-          <EntityDetails entity={mouseOverEntity} />
+      <div className="map-view">
+        <PanZoomViewport className="pan-zoom-container" viewModel={viewModel}>
+          {map && <PotionMap className="map" map={map} viewModel={viewModel} />}
+          <Plot
+            className="plot"
+            plot={plot ?? EmptyPlotResult}
+            viewModel={viewModel}
+          />
+        </PanZoomViewport>
+        <div className="inspect-stack">
+          {mouseOverPlotPoint && <PointDetails point={mouseOverPlotPoint} />}
+          {mouseOverPlotItem && <StepDetails step={mouseOverPlotItem} />}
+          {!mouseOverPlotItem && mouseOverEntity && (
+            <EntityDetails entity={mouseOverEntity} />
+          )}
+        </div>
+        {plot && <PlotDetails className="plot-details" plot={plot} />}
+        {mouseWorld && (
+          <Card className="mouse-coords">
+            <CardContent>
+              <Typography variant="overline">
+                <FixedValue value={mouseWorld.x} />,{" "}
+                <FixedValue value={mouseWorld.y} />
+              </Typography>
+            </CardContent>
+          </Card>
         )}
+        <IncDecSlider
+          className="zoom"
+          value={scale}
+          rate={14}
+          onChange={(value) => viewModel.setZoom(value)}
+        />
+        {mapOverlay}
       </div>
-      {plot && <PlotDetails className="plot-details" plot={plot} />}
-      {mouseWorld && (
-        <Card className="mouse-coords">
-          <CardContent>
-            <Typography variant="overline">
-              <FixedValue value={mouseWorld.x} />,{" "}
-              <FixedValue value={mouseWorld.y} />
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
-      <IncDecSlider
-        className="zoom"
-        value={scale}
-        rate={14}
-        onChange={(value) => viewModel.setZoom(value)}
+      <div className="divider" />
+      <PlotBuilderItemsList
+        className="plot-items"
+        items$={viewModel.plotBuilderItems$}
+        highlightItem={highlightItem}
+        enableCheats={enableCheats}
+        onMoveItem={(item, index) => viewModel.movePlotBuilderItem(item, index)}
+        onAddNewItem={(itemType) => viewModel.addPlotBuilderItem(itemType)}
+        onMouseOver={onBuildItemMouseOver}
+        onMouseOut={onBuildItemMouseOut}
       />
     </Root>
   );

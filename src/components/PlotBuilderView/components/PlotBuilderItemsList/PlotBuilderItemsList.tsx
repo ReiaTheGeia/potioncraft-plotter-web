@@ -1,4 +1,5 @@
 import React from "react";
+import { Observable } from "rxjs";
 
 import {
   styled,
@@ -16,6 +17,8 @@ import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 import { useObservation } from "@/hooks/observe";
 
+import { IngredientId } from "@/services/ingredients/types";
+
 import {
   PlotBuilderItem,
   SetPositionPlotBuilderItem,
@@ -23,20 +26,22 @@ import {
   PourSolventPlotBuilderItem,
   StirCauldronPlotBuilderItem,
   HeatVortexPlotBuilderItem,
-  PlotBuilderItemCollection,
   VoidSaltPlotBuilderItem,
 } from "@/components/PlotBuilderView/builder";
-import { IngredientId } from "@/services/ingredients/types";
 
-import DragReoderable from "./DragReorderable";
-import IngredientSelector from "./IngredientSelector";
-import IncDecSlider from "./IncDecSlider";
+import { PlotItem } from "@/services/plotter/types";
+
+import DragReorderable from "../../../DragReorderable";
+import IngredientSelector from "../../../IngredientSelector";
+import IncDecSlider from "../../../IncDecSlider";
 
 export interface PlotBuilderItemsListProps {
   className?: string;
-  plotBuilderItemCollection: PlotBuilderItemCollection;
+  items$: Observable<readonly PlotBuilderItem[]>;
   highlightItem?: PlotBuilderItem | null;
   enableCheats?: boolean;
+  onMoveItem(item: PlotBuilderItem, index: number): void;
+  onAddNewItem(itemType: PlotItem["type"]): void;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
@@ -87,23 +92,24 @@ const Root = styled("div")(({ theme }) => ({
 
 const PlotBuilderItemsList = ({
   className,
-  plotBuilderItemCollection,
+  items$,
   highlightItem,
   enableCheats,
+  onMoveItem,
+  onAddNewItem,
   onMouseOver,
   onMouseOut,
 }: PlotBuilderItemsListProps) => {
-  const items =
-    useObservation(plotBuilderItemCollection.plotBuilderItems$) ?? [];
+  const items = useObservation(items$) ?? [];
   return (
     <Root className={className}>
       <ul className="list">
-        <DragReoderable
+        <DragReorderable
           values={items}
           primaryAxis="top-to-bottom"
           dropIndicator={<div className="drop-indicator" />}
           onReorder={(_, p) => {
-            plotBuilderItemCollection.moveItem(items[p.fromIndex], p.toIndex);
+            onMoveItem(items[p.fromIndex], p.toIndex);
           }}
         >
           {(value, params, getRootProps, getDragHandleProps) => (
@@ -119,43 +125,28 @@ const PlotBuilderItemsList = ({
               </div>
             </div>
           )}
-        </DragReoderable>
+        </DragReorderable>
       </ul>
       <div className="buttons">
-        <Button
-          color="primary"
-          onClick={() => plotBuilderItemCollection.addIngredient()}
-        >
+        <Button color="primary" onClick={() => onAddNewItem("add-ingredient")}>
           <AddIcon /> Add Ingredient
         </Button>
-        <Button
-          color="primary"
-          onClick={() => plotBuilderItemCollection.addStirCauldron()}
-        >
+        <Button color="primary" onClick={() => onAddNewItem("stir-cauldron")}>
           <AddIcon /> Stir Cauldron
         </Button>
-        <Button
-          color="primary"
-          onClick={() => plotBuilderItemCollection.addPourSolvent()}
-        >
+        <Button color="primary" onClick={() => onAddNewItem("pour-solvent")}>
           <AddIcon /> Pour Solvent
         </Button>
-        <Button
-          color="primary"
-          onClick={() => plotBuilderItemCollection.addHeatVortex()}
-        >
+        <Button color="primary" onClick={() => onAddNewItem("heat-vortex")}>
           <AddIcon /> Heat Vortex
         </Button>
-        <Button
-          color="primary"
-          onClick={() => plotBuilderItemCollection.addVoidSalt()}
-        >
+        <Button color="primary" onClick={() => onAddNewItem("void-salt")}>
           <AddIcon /> Add Void Salt
         </Button>
         {enableCheats && (
           <Button
             color="secondary"
-            onClick={() => plotBuilderItemCollection.addSetPosition()}
+            onClick={() => onAddNewItem("set-position")}
           >
             <AddIcon /> Add Teleport
           </Button>

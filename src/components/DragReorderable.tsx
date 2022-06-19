@@ -111,7 +111,7 @@ interface ElementBounds {
   bottom: number;
 }
 
-const DragReoderable = <TValue,>({
+const DragReorderable = <TValue,>({
   values,
   primaryAxis,
   secondaryAxis = "none",
@@ -226,7 +226,7 @@ const DragReoderable = <TValue,>({
   );
 };
 
-export default DragReoderable;
+export default DragReorderable;
 
 interface DragReorderableItemProps {
   valueIndex: number;

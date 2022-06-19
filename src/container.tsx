@@ -8,6 +8,7 @@ import {
 } from "microinject";
 
 import servicesModule from "./services/module";
+import { PlotterPageViewModel } from "./pages/Plotter/PlotterPageViewModel";
 
 const modules = composeModules(servicesModule);
 

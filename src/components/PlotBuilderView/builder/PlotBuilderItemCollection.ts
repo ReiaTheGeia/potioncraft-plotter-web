@@ -50,7 +50,6 @@ export class PlotBuilderItemCollection extends Observable<
     []
   );
 
-  private _itemSubscription: Subscription | null = null;
   private readonly _plotItems$ = new BehaviorSubject<readonly PlotItem[]>([]);
 
   constructor() {
@@ -122,6 +121,29 @@ export class PlotBuilderItemCollection extends Observable<
     }
     items.splice(index, 0, item);
     this._items$.next(items);
+  }
+
+  addNewItem(itemType: PlotItem["type"]): void {
+    switch (itemType) {
+      case "set-position":
+        this.addSetPosition();
+        break;
+      case "add-ingredient":
+        this.addIngredient();
+        break;
+      case "stir-cauldron":
+        this.addStirCauldron();
+        break;
+      case "pour-solvent":
+        this.addPourSolvent();
+        break;
+      case "heat-vortex":
+        this.addHeatVortex();
+        break;
+      case "void-salt":
+        this.addVoidSalt();
+        break;
+    }
   }
 
   addSetPosition(plotItem?: SetPositionPlotItem): SetPositionPlotBuilderItem {

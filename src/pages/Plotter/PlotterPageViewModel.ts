@@ -8,25 +8,30 @@ import { inject } from "microinject";
 
 import { PotionBaseRegistry } from "@/services/potion-bases/PotionBaseRegistry";
 import { PotionBaseId } from "@/services/potion-bases/types";
+import { Plotter } from "@/services/plotter/Plotter";
 
-import { PlotBuilder } from "@/components/PlotBuilderView/builder/PlotBuilder";
 import { PlotBuilderViewModel } from "@/components/PlotBuilderView/PlotBuilderViewModel";
 
 export class PlotterPageViewModel extends PlotBuilderViewModel {
   private readonly _shareString$: Observable<string>;
 
   constructor(
-    @inject(PlotBuilder) builder: PlotBuilder,
+    @inject(Plotter) plotter: Plotter,
     @inject(PotionBaseRegistry) potionBaseRegistry: PotionBaseRegistry
   ) {
-    super(builder);
+    console.log(
+      "PlotterPageViewModel.constructor",
+      plotter.constructor.name,
+      potionBaseRegistry.constructor.name
+    );
+    super(plotter);
 
     const waterMap = potionBaseRegistry.getPotionBaseById(
       "water" as PotionBaseId
     )!.map;
-    builder.setMap(waterMap);
+    this.setMap(waterMap);
 
-    this._shareString$ = builder.plotItems$.pipe(debounceTime(1000)).pipe(
+    this._shareString$ = this.plotItems$.pipe(debounceTime(1000)).pipe(
       map((items) => {
         const encoded = pako.deflate(JSON.stringify(items));
         const data = new Uint8Array(1 + encoded.length);
@@ -48,8 +53,8 @@ export class PlotterPageViewModel extends PlotBuilderViewModel {
     const data = array.slice(1);
     if (version === 0) {
       const decoded = JSON.parse(pako.inflate(data, { to: "string" })) as any[];
-      this.builder.clear();
-      this.builder.loadPlotItems(decoded);
+      this.clear();
+      this.loadPlotItems(decoded);
     }
   }
 }

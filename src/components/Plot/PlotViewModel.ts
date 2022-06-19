@@ -1,4 +1,3 @@
-import React from "react";
 import { Observable } from "rxjs";
 
 import { Vector2 } from "@/vector2";
@@ -11,6 +10,8 @@ export interface IPlotViewModel {
   readonly viewOffset$: Observable<Vector2>;
   readonly viewScale$: Observable<number>;
   readonly mouseOverPlotItem$: Observable<PlotItem | null>;
+
+  // This is a little iffy.  This relies on us also being a IPanZoomViewportViewModel to know the mouse position.
   readonly mouseOverPlotPoint: Observable<PlotPoint | null>;
 
   onMouseOverPlotItem(item: PlotItem | null): void;
