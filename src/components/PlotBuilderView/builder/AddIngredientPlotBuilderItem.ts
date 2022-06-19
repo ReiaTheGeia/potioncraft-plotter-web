@@ -2,21 +2,25 @@ import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
 import { IngredientId } from "@/services/ingredients/types";
 
-import { PlotItem } from "../../../services/plotter/types";
+import {
+  AddIngredientPlotItem,
+  PlotItem,
+} from "../../../services/plotter/types";
 
-import { PlotBuilderItem } from "./PlotBuilderItem";
+import { PlotBuilderItem, PlotBuilderItemBase } from "./PlotBuilderItem";
 
-export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
+export class AddIngredientPlotBuilderItem
+  implements PlotBuilderItem<AddIngredientPlotItem>
+{
   private readonly _isValid$: Observable<boolean>;
   private readonly _ingredientId$ = new BehaviorSubject<IngredientId | null>(
     null
   );
-  private readonly _grindPercent$ = new BehaviorSubject<number>(1);
+  private readonly _grindPercent$ = new BehaviorSubject<number | null>(null);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
-  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
-    super();
+  constructor(private readonly _delete: (item: PlotBuilderItemBase) => void) {
     this._isValid$ = combineLatest([
       this._ingredientId$,
       this._grindPercent$,
@@ -32,7 +36,7 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
         this._plotItem$.next({
           type: "add-ingredient",
           ingredientId: ingredientId as IngredientId,
-          grindPercent,
+          grindPercent: grindPercent!,
         });
       }
     );
@@ -47,6 +51,7 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
     const grindPercent = this._grindPercent$.value;
     return (
       this._ingredientId$.value != null &&
+      grindPercent != null &&
       grindPercent >= 0 &&
       grindPercent <= 1
     );
@@ -60,7 +65,7 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
     return this._ingredientId$.value;
   }
 
-  get grindPercent$(): Observable<number> {
+  get grindPercent$(): Observable<number | null> {
     return this._grindPercent$;
   }
 
@@ -80,7 +85,7 @@ export class AddIngredientPlotBuilderItem extends PlotBuilderItem {
     this._ingredientId$.next(ingredientId);
   }
 
-  setGrindPercent(percent: number) {
+  setGrindPercent(percent: number | null) {
     if (percent === this._grindPercent$.value) {
       return;
     }

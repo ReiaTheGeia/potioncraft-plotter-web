@@ -1,11 +1,4 @@
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  Subscription,
-  debounceTime,
-  map,
-} from "rxjs";
+import { BehaviorSubject, Observable, debounceTime, map } from "rxjs";
 
 import { isNotNull } from "@/utils";
 
@@ -19,7 +12,7 @@ import {
   AddVoidSaltPlotItem,
 } from "../../../services/plotter/types";
 
-import { PlotBuilderItem } from "./PlotBuilderItem";
+import { PlotBuilderItemBase } from "./PlotBuilderItem";
 
 import { AddIngredientPlotBuilderItem } from "./AddIngredientPlotBuilderItem";
 import { HeatVortexPlotBuilderItem } from "./HeatVortexPlotBuilderItem";
@@ -30,11 +23,11 @@ import { SetPositionPlotBuilderItem } from "./SetPositionPlotBuilderItem";
 import { observeAll } from "@/observables";
 
 export interface IPlotBuilderItemCollection {
-  readonly items$: Observable<readonly PlotBuilderItem[]>;
+  readonly items$: Observable<readonly PlotBuilderItemBase[]>;
 
-  builderItemFor(item: PlotItem): PlotBuilderItem | null;
+  builderItemFor(item: PlotItem): PlotBuilderItemBase | null;
 
-  moveItem(item: PlotBuilderItem, index: number): void;
+  moveItem(item: PlotBuilderItemBase, index: number): void;
 
   addIngredient(plotItem?: AddIngredientPlotItem): AddIngredientPlotBuilderItem;
   addStirCauldron(plotItem?: StirCauldronPlotItem): StirCauldronPlotBuilderItem;
@@ -44,11 +37,11 @@ export interface IPlotBuilderItemCollection {
 }
 
 export class PlotBuilderItemCollection extends Observable<
-  readonly PlotBuilderItem[]
+  readonly PlotBuilderItemBase[]
 > {
-  private readonly _items$ = new BehaviorSubject<readonly PlotBuilderItem[]>(
-    []
-  );
+  private readonly _items$ = new BehaviorSubject<
+    readonly PlotBuilderItemBase[]
+  >([]);
 
   private readonly _plotItems$ = new BehaviorSubject<readonly PlotItem[]>([]);
 
@@ -65,7 +58,7 @@ export class PlotBuilderItemCollection extends Observable<
       });
   }
 
-  get plotBuilderItems$(): Observable<readonly PlotBuilderItem[]> {
+  get plotBuilderItems$(): Observable<readonly PlotBuilderItemBase[]> {
     return this._items$;
   }
 
@@ -104,7 +97,7 @@ export class PlotBuilderItemCollection extends Observable<
     }
   }
 
-  moveItem(item: PlotBuilderItem, index: number) {
+  moveItem(item: PlotBuilderItemBase, index: number) {
     if (index < 0 || index > this._items$.value.length) {
       return;
     }
@@ -216,12 +209,12 @@ export class PlotBuilderItemCollection extends Observable<
     return item;
   }
 
-  builderItemFor(item: PlotItem): PlotBuilderItem | null {
+  builderItemFor(item: PlotItem): PlotBuilderItemBase | null {
     const result = this._items$.value.find((x) => x.plotItem === item) || null;
     return result;
   }
 
-  private _deleteItem(item: PlotBuilderItem) {
+  private _deleteItem(item: PlotBuilderItemBase) {
     this._items$.next(this._items$.value.filter((x) => x !== item));
   }
 }

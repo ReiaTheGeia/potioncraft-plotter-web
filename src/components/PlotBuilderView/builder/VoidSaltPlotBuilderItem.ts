@@ -2,15 +2,15 @@ import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
 import { PlotItem } from "../../../services/plotter/types";
 
-import { PlotBuilderItem } from "./PlotBuilderItem";
+import { PlotBuilderItemBase } from "./PlotBuilderItem";
 
-export class VoidSaltPlotBuilderItem extends PlotBuilderItem {
+export class VoidSaltPlotBuilderItem extends PlotBuilderItemBase {
   private readonly _isValid$: Observable<boolean>;
   private readonly _grains$ = new BehaviorSubject<number | null>(null);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
-  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
+  constructor(private readonly _delete: (item: PlotBuilderItemBase) => void) {
     super();
     this._isValid$ = combineLatest([this._grains$]).pipe(
       map(() => this.isValid)
