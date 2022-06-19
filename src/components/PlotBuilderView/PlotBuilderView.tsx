@@ -100,6 +100,7 @@ const PlotBuilderView = ({
   enableCheats,
 }: PlotBuilderViewProps) => {
   const map = useObservation(viewModel.map$);
+  const items = useObservation(viewModel.plotItems$);
   const plot = useObservation(viewModel.plot$);
 
   const mouseOverPlotPoint =
@@ -142,7 +143,9 @@ const PlotBuilderView = ({
             <EntityDetails entity={mouseOverEntity} />
           )}
         </div>
-        {plot && <PlotDetails className="plot-details" plot={plot} />}
+        {plot && items && (
+          <PlotDetails className="plot-details" items={items} plot={plot} />
+        )}
         {mouseWorld && (
           <Card className="mouse-coords">
             <CardContent>
