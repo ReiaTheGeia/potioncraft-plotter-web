@@ -1,7 +1,15 @@
 import React from "react";
 import { uniq, sum, last } from "lodash";
 
-import { Card, CardContent, Typography } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  IconButton,
+  styled,
+  IconButtonProps,
+} from "@mui/material";
+import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
 
 import { useDIDependency } from "@/container";
 import { pointArrayLength } from "@/point-array";
@@ -14,6 +22,7 @@ import {
 
 import {
   AddIngredientPlotItem,
+  AddVoidSaltPlotItem,
   PlotItem,
   PlotPoint,
   PlotResult,
@@ -28,11 +37,24 @@ import FixedValue from "./FixedValue";
 
 export interface PlotDetailsProps {
   className?: string;
+  items: readonly PlotItem[];
   plot: PlotResult;
 }
 
-const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
+const ExpandMore = styled((props: IconButtonProps & { expand: boolean }) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
+  marginLeft: "auto",
+  transition: theme.transitions.create("transform", {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
+
+const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
   const ingredientRegistry = useDIDependency(IngredientRegistry);
+  const [ingredientsExpanded, setIngredientsExpanded] = React.useState(false);
 
   const endsAt = last(plot.committedPoints) ?? Vec2Zero;
 
@@ -40,15 +62,14 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
     effects,
     baseCost,
     length,
+    ingredientMap,
     totalIngredients,
     totalUniqueIngredients,
     stress,
     longestDanger,
     lifeSaltRequired,
   ] = React.useMemo(() => {
-    const allPoints = plot.committedPoints.concat(plot.pendingPoints);
-    const sources = uniq(allPoints.map((point) => point.source));
-    const ingredients = sources.filter(isIngredientPoint);
+    const ingredients = items.filter(isIngredientPlotItem);
 
     const effects = getEffects(plot.committedPoints);
 
@@ -66,6 +87,20 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
 
     const length = pointArrayLength(plot.committedPoints);
 
+    const ingredientMap: Record<string, number> = {};
+    for (const { ingredientId } of ingredients) {
+      const name = ingredientRegistry.getIngredientById(ingredientId)?.name;
+      if (!name) {
+        continue;
+      }
+      ingredientMap[name] = (ingredientMap[name] ?? 0) + 1;
+    }
+    const voidSaltCount = sum(
+      items.filter(isVoidSaltPlotItem).map((x) => x.grains)
+    );
+    if (voidSaltCount > 0) {
+      ingredientMap["Void Salt"] = voidSaltCount;
+    }
     const totalIngredients = ingredients.length;
     const totalUniqueIngredients = uniq(
       ingredients.map((x) => x.ingredientId)
@@ -95,13 +130,14 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
       effects,
       baseCost,
       length,
+      ingredientMap,
       totalIngredients,
       totalUniqueIngredients,
       stress,
       longestDanger,
       lifeSaltRequired,
     ];
-  }, [plot, IngredientRegistry]);
+  }, [items, plot, IngredientRegistry]);
 
   // PotionCraft subtract .4 health each unit of distance against a max of 1.
   const dangerIsDeath = longestDanger >= DANGER_LENGTH_LETHAL;
@@ -112,28 +148,47 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
         <Typography variant="h6">Details</Typography>
         <table>
           <tbody>
-            <tr>
-              <td>
-                <Typography>Possible Effects on Path:</Typography>
-              </td>
-              <td>
-                <Typography variant="overline">
-                  {Object.keys(effects)
-                    .map((effect) => `${effect} (${effects[effect]})`)
-                    .join(", ")}
-                </Typography>
-              </td>
-            </tr>
+            {Object.keys(effects).length > 0 && (
+              <tr>
+                <td>
+                  <Typography>Effects on Path:</Typography>
+                </td>
+                <td>
+                  <Typography variant="overline">
+                    {Object.keys(effects)
+                      .map((effect) => `${effect} (${effects[effect]})`)
+                      .join(", ")}
+                  </Typography>
+                </td>
+              </tr>
+            )}
             <tr>
               <td>
                 <Typography>Ingredient count:</Typography>
               </td>
               <td>
-                <Typography variant="overline">
+                <Typography variant="overline" component="span">
                   {totalIngredients} ({totalUniqueIngredients} unique)
                 </Typography>
+                <ExpandMore
+                  expand={ingredientsExpanded}
+                  onClick={() => setIngredientsExpanded(!ingredientsExpanded)}
+                >
+                  <ExpandMoreIcon />
+                </ExpandMore>
               </td>
             </tr>
+            {ingredientsExpanded &&
+              Object.keys(ingredientMap).map((ingredient) => (
+                <tr>
+                  <td style={{ paddingLeft: "8px" }}>{ingredient}</td>
+                  <td>
+                    <Typography variant="overline">
+                      {ingredientMap[ingredient]}
+                    </Typography>
+                  </td>
+                </tr>
+              ))}
             <tr>
               <td>
                 <Typography>Ingredient stress:</Typography>
@@ -205,10 +260,12 @@ const PlotDetails = ({ className, plot }: PlotDetailsProps) => {
 
 export default PlotDetails;
 
-export function isIngredientPoint(
-  point: PlotItem
-): point is AddIngredientPlotItem {
-  return point.type === "add-ingredient";
+function isIngredientPlotItem(item: PlotItem): item is AddIngredientPlotItem {
+  return item.type === "add-ingredient";
+}
+
+function isVoidSaltPlotItem(item: PlotItem): item is AddVoidSaltPlotItem {
+  return item.type === "void-salt";
 }
 
 function getEffects(items: PlotPoint[]): Record<string, number> {
