@@ -18,21 +18,24 @@ import { IPlotViewModel } from "@/components/Plot/PlotViewModel";
 import { IPanZoomViewportViewModel } from "@/components/PanZoomViewport/PanZoomViewportViewModel";
 import { CoordinateMappingViewportViewModel } from "@/components/PanZoomViewport/CoordinateMappingViewportViewModel";
 
-import { PlotBuilderItem } from "./builder/PlotBuilderItem";
-import { PlotBuilderItemCollection } from "./builder";
+import { PlotBuilderItem, PlotBuilderItemCollection } from "./builder";
 
 export interface IPlotBuilderViewModel
   extends IPanZoomViewportViewModel,
     IPlotViewModel {
   get map$(): Observable<PotionMap | null>;
-  get plot$(): Observable<Readonly<PlotResult> | null>;
-  get mouseOverPlotItem$(): Observable<PlotItem | null>;
-  get mouseOverBuilderItem$(): Observable<PlotBuilderItem | null>;
-  get mouseOverEntity$(): Observable<MapEntity | null>;
-  get mouseOverPlotPoint(): Observable<PlotPoint | null>;
-  get mouseWorldPosition$(): Observable<Vector2 | null>;
 
   get plotBuilderItems$(): Observable<readonly PlotBuilderItem[]>;
+  get plotItems$(): Observable<readonly PlotItem[]>;
+
+  get plot$(): Observable<Readonly<PlotResult> | null>;
+
+  get mouseWorldPosition$(): Observable<Vector2 | null>;
+
+  get highlightBuilderItem$(): Observable<PlotBuilderItem | null>;
+  get highlightEntity$(): Observable<MapEntity | null>;
+
+  setZoom(zoom: number): void;
 
   movePlotBuilderItem(item: PlotBuilderItem, newIndex: number): void;
   addPlotBuilderItem(itemType: PlotItem["type"]): void;
@@ -161,19 +164,19 @@ export class PlotBuilderViewModel
     return this._plot$;
   }
 
-  get mouseOverPlotItem$(): Observable<PlotItem | null> {
-    return this._mouseOverPlotItem$;
-  }
-
-  get mouseOverBuilderItem$(): Observable<PlotBuilderItem | null> {
+  get highlightBuilderItem$(): Observable<PlotBuilderItem | null> {
     return this._mouseOverBuilderItem$;
   }
 
-  get mouseOverEntity$(): Observable<MapEntity | null> {
+  get highlightEntity$(): Observable<MapEntity | null> {
     return this._mouseOverEntity$;
   }
 
-  get mouseOverPlotPoint(): Observable<PlotPoint | null> {
+  get highlightPlotItem$(): Observable<PlotItem | null> {
+    return this._mouseOverPlotItem$;
+  }
+
+  get highlightPlotPoint$(): Observable<PlotPoint | null> {
     return this._mouseOverPlotPoint$;
   }
 

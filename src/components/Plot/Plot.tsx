@@ -44,8 +44,8 @@ const Plot = ({ className, plot, viewModel }: PlotProps) => {
   const { width, height } = useObservation(viewModel.viewportSize$) ?? SizeZero;
   const offset = useObservation(viewModel.viewOffset$) ?? Vec2Zero;
   const scale = useObservation(viewModel.viewScale$) ?? 1;
-  const mouseOverItem = useObservation(viewModel.mouseOverPlotItem$) ?? null;
-  const mouseOverPoint = useObservation(viewModel.mouseOverPlotPoint) ?? null;
+  const mouseOverItem = useObservation(viewModel.highlightPlotItem$) ?? null;
+  const mouseOverPoint = useObservation(viewModel.highlightPlotPoint$) ?? null;
 
   const lastCommitPoint = last(plot.committedPoints) ?? null;
 

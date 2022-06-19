@@ -9,10 +9,9 @@ export interface IPlotViewModel {
   readonly viewportSize$: Observable<Size>;
   readonly viewOffset$: Observable<Vector2>;
   readonly viewScale$: Observable<number>;
-  readonly mouseOverPlotItem$: Observable<PlotItem | null>;
 
-  // This is a little iffy.  This relies on us also being a IPanZoomViewportViewModel to know the mouse position.
-  readonly mouseOverPlotPoint: Observable<PlotPoint | null>;
+  readonly highlightPlotItem$: Observable<PlotItem | null>;
+  readonly highlightPlotPoint$: Observable<PlotPoint | null>;
 
   onMouseOverPlotItem(item: PlotItem | null): void;
 }

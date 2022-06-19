@@ -103,15 +103,15 @@ const PlotBuilderView = ({
   const plot = useObservation(viewModel.plot$);
 
   const mouseOverPlotPoint =
-    useObservation(viewModel.mouseOverPlotPoint) ?? null;
+    useObservation(viewModel.highlightPlotPoint$) ?? null;
   const mouseOverPlotItem =
-    useObservation(viewModel.mouseOverPlotItem$) ?? null;
-  const mouseOverEntity = useObservation(viewModel.mouseOverEntity$) ?? null;
+    useObservation(viewModel.highlightPlotItem$) ?? null;
+  const mouseOverEntity = useObservation(viewModel.highlightEntity$) ?? null;
   const mouseWorld = useObservation(viewModel.mouseWorldPosition$) ?? null;
 
   const scale = useObservation(viewModel.viewScale$) ?? 1;
 
-  const highlightItem = useObservation(viewModel.mouseOverBuilderItem$) ?? null;
+  const highlightItem = useObservation(viewModel.highlightBuilderItem$) ?? null;
 
   const onBuildItemMouseOver = React.useCallback(
     (item: PlotBuilderItem) => {
