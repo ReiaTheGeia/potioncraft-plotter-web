@@ -82,14 +82,15 @@ class BrewEffectAtPointChallenge implements IChallenge {
     const WATERLESS_REWARD = 500;
     const VORTEXLESS_REWARD = 200;
 
-    // Penalty for distance scaled by the actual distance divided by linear distance.  Twice as long will subtract 100 points.
-    const DISTANCE_PENALTY = -100;
+    // Penalty for distance scaled by the actual distance divided by linear distance.
+    const DISTANCE_PENALTY = -20;
 
     // Penalty for stress.  Penalty applies to any stress value over 1.
     const STRESS_PENALTY = -100;
+    const HIGHLANDER_BONUS = 500;
 
     // Each unit of cost subtracts this from the score.
-    const COST_PENALTY = -5;
+    const COST_PENALTY = -10;
 
     const { committedPoints } = this._plotter.plotItems(plotItems, this._map);
     const lastPoint = last(committedPoints) ?? Vec2Zero;
@@ -175,6 +176,13 @@ class BrewEffectAtPointChallenge implements IChallenge {
       results["stress"] = {
         value: `${stress.toFixed(2)} / ${potentialHighlanderStress.toFixed(2)}`,
         score: stressScore,
+      };
+    }
+    if (stress === potentialHighlanderStress) {
+      totalScore += HIGHLANDER_BONUS;
+      results["highlander"] = {
+        value: "Highlander Bonus",
+        score: HIGHLANDER_BONUS,
       };
     }
 

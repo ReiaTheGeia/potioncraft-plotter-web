@@ -62,10 +62,6 @@ export class AddIngredientPlotBuilderItem
     return this._ingredientId$;
   }
 
-  get ingredientId(): IngredientId | null {
-    return this._ingredientId$.value;
-  }
-
   get grindPercent$(): Observable<number | null> {
     return this._grindPercent$;
   }

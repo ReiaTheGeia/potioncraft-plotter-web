@@ -202,7 +202,7 @@ export class PlotBuilderViewModel
   }
 
   loadPlotItems(items: PlotItem[]) {
-    this._plotBuilderItems.loadPlotItems(items);
+    this._plotBuilderItems.addPlotItems(items);
   }
 
   movePlotBuilderItem(item: PlotBuilderItem, newIndex: number): void {

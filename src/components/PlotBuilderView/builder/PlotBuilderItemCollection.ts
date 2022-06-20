@@ -29,6 +29,7 @@ export interface IPlotBuilderItemCollection {
 
   moveItem(item: PlotBuilderItem, index: number): void;
 
+  addPlotItems(items: readonly PlotItem[]): void;
   addPlotItem(item: PlotItem): void;
   addPlotItem(itemType: PlotItem["type"]): void;
 }
@@ -67,29 +68,10 @@ export class PlotBuilderItemCollection extends Observable<
     this._items$.next([]);
   }
 
-  loadPlotItems(items: PlotItem[]) {
+  addPlotItems(items: readonly PlotItem[]) {
     for (const item of items) {
       this.addPlotItem(item);
     }
-  }
-
-  moveItem(item: PlotBuilderItem, index: number) {
-    if (index < 0 || index > this._items$.value.length) {
-      return;
-    }
-
-    const sourceIndex = this._items$.value.indexOf(item);
-    if (sourceIndex === -1) {
-      return;
-    }
-
-    const items = [...this._items$.value];
-    items.splice(sourceIndex, 1);
-    if (sourceIndex < index) {
-      index--;
-    }
-    items.splice(index, 0, item);
-    this._items$.next(items);
   }
 
   addPlotItem(plotItem: PlotItem): void;
@@ -119,6 +101,25 @@ export class PlotBuilderItemCollection extends Observable<
       default:
         throw new Error(`Unknown plot item type: ${itemType}`);
     }
+  }
+
+  moveItem(item: PlotBuilderItem, index: number) {
+    if (index < 0 || index > this._items$.value.length) {
+      return;
+    }
+
+    const sourceIndex = this._items$.value.indexOf(item);
+    if (sourceIndex === -1) {
+      return;
+    }
+
+    const items = [...this._items$.value];
+    items.splice(sourceIndex, 1);
+    if (sourceIndex < index) {
+      index--;
+    }
+    items.splice(index, 0, item);
+    this._items$.next(items);
   }
 
   builderItemFor(item: PlotItem): PlotBuilderItem | null {

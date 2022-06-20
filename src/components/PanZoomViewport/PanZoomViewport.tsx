@@ -46,10 +46,7 @@ const PanZoomViewport = ({
     const modifiers = getModifiers(e);
 
     if (modifiers.ctrlMetaKey) {
-      viewModel.zoom(e.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR, {
-        x: e.clientX,
-        y: e.clientY,
-      });
+      viewModel.pan(0, e.deltaY * PAN_FACTOR, true);
       e.preventDefault();
       e.stopPropagation();
     } else if (modifiers.shiftKey) {
@@ -57,7 +54,10 @@ const PanZoomViewport = ({
       e.preventDefault();
       e.stopPropagation();
     } else {
-      viewModel.pan(0, e.deltaY * PAN_FACTOR, true);
+      viewModel.zoom(e.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR, {
+        x: e.clientX,
+        y: e.clientY,
+      });
       e.preventDefault();
       e.stopPropagation();
     }
