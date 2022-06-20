@@ -2,6 +2,7 @@ import React from "react";
 import { styled, Card, CardContent, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
+
 import { EmptyPlotResult } from "@/services/plotter/types";
 
 import IncDecSlider from "../IncDecSlider";

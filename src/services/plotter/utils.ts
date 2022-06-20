@@ -1,7 +1,8 @@
 import { POTION_RADIUS } from "@/game-settings";
 import { vec2Magnitude, vec2Subtract } from "@/vector2";
 import { clamp } from "lodash";
-import { PlotPoint } from "./types";
+import { IngredientRegistry } from "../ingredients/IngredientRegistry";
+import { isIngredientPlotItem, PlotPoint } from "./types";
 
 export function getEffectTier(
   distance: number,
@@ -36,13 +37,28 @@ export function getEffectTier(
   return !(Math.abs(value - 1) < Number.EPSILON) ? 2 : 3;
 }
 
-export function calculateDangerLengths(items: PlotPoint[]): number[] {
+export function calculateDangerLengths(
+  items: PlotPoint[],
+  ingredientRegistry: IngredientRegistry
+): number[] {
   const lengths: number[] = [];
   let currentLength = 0;
   let prevItem = items[0];
   for (let i = 1; i < items.length; i++) {
     const item = items[i];
-    if (item.bottleCollisions.some((x) => x.entityType === "DangerZonePart")) {
+    let teleports = false;
+    if (isIngredientPlotItem(item.source)) {
+      const ingredient = ingredientRegistry.getIngredientById(
+        item.source.ingredientId
+      );
+      if (ingredient && ingredient.teleports) {
+        teleports = true;
+      }
+    }
+    if (
+      !teleports &&
+      item.bottleCollisions.some((x) => x.entityType === "DangerZonePart")
+    ) {
       currentLength += vec2Magnitude(vec2Subtract(item, prevItem));
     } else {
       lengths.push(currentLength);
