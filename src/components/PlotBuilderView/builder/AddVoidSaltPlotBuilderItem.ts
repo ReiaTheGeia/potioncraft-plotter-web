@@ -1,17 +1,18 @@
 import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
-import { PlotItem } from "../../../services/plotter/types";
+import { AddVoidSaltPlotItem, PlotItem } from "@/services/plotter/types";
 
-import { PlotBuilderItemBase } from "./PlotBuilderItem";
+import { PlotBuilderItem } from "./PlotBuilderItem";
 
-export class VoidSaltPlotBuilderItem extends PlotBuilderItemBase {
+export class AddVoidSaltPlotBuilderItem
+  implements PlotBuilderItem<AddVoidSaltPlotItem>
+{
   private readonly _isValid$: Observable<boolean>;
   private readonly _grains$ = new BehaviorSubject<number | null>(null);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
-  constructor(private readonly _delete: (item: PlotBuilderItemBase) => void) {
-    super();
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
     this._isValid$ = combineLatest([this._grains$]).pipe(
       map(() => this.isValid)
     );
@@ -27,6 +28,10 @@ export class VoidSaltPlotBuilderItem extends PlotBuilderItemBase {
         grains: grains!,
       });
     });
+  }
+
+  get type() {
+    return "void-salt" as const;
   }
 
   get isValid$() {

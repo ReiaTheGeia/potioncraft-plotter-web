@@ -3,11 +3,13 @@ import { TextField, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
 
+import { AddVoidSaltPlotItem } from "@/services/plotter/types";
+
 import IncDecSlider from "@/components/IncDecSlider";
-import { VoidSaltPlotBuilderItem } from "@/components/PlotBuilderView/builder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 
 export interface AddVoidSaltPlotListItemProps {
-  item: VoidSaltPlotBuilderItem;
+  item: PlotBuilderItem<AddVoidSaltPlotItem>;
 }
 const AddVoidSaltPlotListItem = ({ item }: AddVoidSaltPlotListItemProps) => {
   const grains = useObservation(item.grains$);
@@ -51,7 +53,7 @@ const AddVoidSaltPlotListItem = ({ item }: AddVoidSaltPlotListItemProps) => {
       />
       <IncDecSlider
         value={sliderGrains ?? grains ?? 0}
-        rate={100}
+        rate={200}
         onChange={onGrainsChange}
         onChangeCommitted={() => setSliderGrains(null)}
       />

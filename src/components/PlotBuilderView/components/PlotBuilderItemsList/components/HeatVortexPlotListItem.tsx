@@ -3,11 +3,13 @@ import { TextField, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
 
+import { HeatVortexPlotItem } from "@/services/plotter/types";
+
 import IncDecSlider from "@/components/IncDecSlider";
-import { HeatVortexPlotBuilderItem } from "@/components/PlotBuilderView/builder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 
 export interface HeatVortexPlotListItemProps {
-  item: HeatVortexPlotBuilderItem;
+  item: PlotBuilderItem<HeatVortexPlotItem>;
 }
 const HeatVortexPlotListItem = ({ item }: HeatVortexPlotListItemProps) => {
   const distance = useObservation(item.distance$);

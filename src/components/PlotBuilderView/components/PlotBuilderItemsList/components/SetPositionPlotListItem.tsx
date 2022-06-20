@@ -3,10 +3,12 @@ import { TextField, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
 
-import { SetPositionPlotBuilderItem } from "@/components/PlotBuilderView/builder";
+import { SetPositionPlotItem } from "@/services/plotter/types";
+
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 
 export interface SetPositionPlotListItemProps {
-  item: SetPositionPlotBuilderItem;
+  item: PlotBuilderItem<SetPositionPlotItem>;
 }
 const SetPositionPlotListItem = ({ item }: SetPositionPlotListItemProps) => {
   const [xInput, setXInput] = React.useState<string | null>(null);

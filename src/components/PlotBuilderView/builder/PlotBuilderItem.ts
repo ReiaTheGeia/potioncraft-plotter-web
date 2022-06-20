@@ -1,5 +1,6 @@
 import { Observable } from "rxjs";
-import { PlotItem } from "../../../services/plotter/types";
+
+import { PlotItem } from "@/services/plotter/types";
 
 export interface PlotBuilderItemBase {
   readonly type: PlotItem["type"];
@@ -19,10 +20,12 @@ type PlotBuilderItemObservables<TPlotItem extends PlotItem> = {
   >;
 };
 type PlotBuilderItemSetters<TPlotItem extends PlotItem> = {
-  [K in keyof Omit<TPlotItem, "type"> as `set${Capitalize<string & K>}`]: void;
+  [K in keyof Omit<TPlotItem, "type"> as `set${Capitalize<string & K>}`]: (
+    value: TPlotItem[K] | null
+  ) => void;
 };
 
-export type PlotBuilderItem<TPlotItem extends PlotItem> = {
+export type PlotBuilderItem<TPlotItem extends PlotItem = PlotItem> = {
   type: TPlotItem["type"];
 } & PlotBuilderItemBase &
   PlotBuilderItemObservables<TPlotItem> &

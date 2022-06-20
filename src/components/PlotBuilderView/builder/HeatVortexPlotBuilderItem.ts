@@ -1,17 +1,18 @@
 import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
-import { PlotItem } from "../../../services/plotter/types";
+import { HeatVortexPlotItem, PlotItem } from "@/services/plotter/types";
 
-import { PlotBuilderItemBase } from "./PlotBuilderItem";
+import { PlotBuilderItem } from "./PlotBuilderItem";
 
-export class HeatVortexPlotBuilderItem extends PlotBuilderItemBase {
+export class HeatVortexPlotBuilderItem
+  implements PlotBuilderItem<HeatVortexPlotItem>
+{
   private readonly _isValid$: Observable<boolean>;
   private readonly _distance$ = new BehaviorSubject<number | null>(null);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
-  constructor(private readonly _delete: (item: PlotBuilderItemBase) => void) {
-    super();
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
     this._isValid$ = combineLatest([this._distance$]).pipe(
       map(() => this.isValid)
     );
@@ -27,6 +28,10 @@ export class HeatVortexPlotBuilderItem extends PlotBuilderItemBase {
         distance: distace!,
       });
     });
+  }
+
+  get type() {
+    return "heat-vortex" as const;
   }
 
   get isValid$() {

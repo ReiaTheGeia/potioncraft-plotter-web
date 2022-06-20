@@ -98,9 +98,9 @@ export class Plotter {
     item: SetPositionPlotItem,
     result: PlotResult
   ): PlotResult {
-    const { position } = item;
+    const { x, y } = item;
 
-    return commitPlotPoints([position], item, result);
+    return commitPlotPoints([{ x, y }], item, result);
   }
 
   private _plotAddIngredient(

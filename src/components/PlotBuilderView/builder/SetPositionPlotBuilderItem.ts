@@ -1,19 +1,21 @@
-import { MAP_EXTENT_RADIUS } from "@/game-settings";
 import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
-import { PlotItem } from "../../../services/plotter/types";
+import { MAP_EXTENT_RADIUS } from "@/game-settings";
 
-import { PlotBuilderItemBase } from "./PlotBuilderItem";
+import { PlotItem, SetPositionPlotItem } from "@/services/plotter/types";
 
-export class SetPositionPlotBuilderItem extends PlotBuilderItemBase {
+import { PlotBuilderItem } from "./PlotBuilderItem";
+
+export class SetPositionPlotBuilderItem
+  implements PlotBuilderItem<SetPositionPlotItem>
+{
   private readonly _isValid$: Observable<boolean>;
   private readonly _x$ = new BehaviorSubject<number | null>(null);
   private readonly _y$ = new BehaviorSubject<number | null>(null);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
-  constructor(private readonly _delete: (item: PlotBuilderItemBase) => void) {
-    super();
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
     this._isValid$ = combineLatest([this._x$, this._y$]).pipe(
       map(() => this.isValid)
     );
@@ -26,9 +28,14 @@ export class SetPositionPlotBuilderItem extends PlotBuilderItemBase {
 
       this._plotItem$.next({
         type: "set-position",
-        position: { x: x!, y: y! },
+        x: this._x$.value!,
+        y: this._y$.value!,
       });
     });
+  }
+
+  get type() {
+    return "set-position" as const;
   }
 
   get isValid$() {

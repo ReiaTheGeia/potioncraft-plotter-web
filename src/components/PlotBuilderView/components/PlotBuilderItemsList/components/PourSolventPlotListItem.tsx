@@ -3,11 +3,13 @@ import { Typography, TextField } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
 
-import { PourSolventPlotBuilderItem } from "@/components/PlotBuilderView/builder";
+import { PourSolventPlotItem } from "@/services/plotter/types";
+
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 import IncDecSlider from "@/components/IncDecSlider";
 
 export interface PourSolventPlotListItemProps {
-  item: PourSolventPlotBuilderItem;
+  item: PlotBuilderItem<PourSolventPlotItem>;
 }
 const PourSolventPlotListItem = ({ item }: PourSolventPlotListItemProps) => {
   const distance = useObservation(item.distance$);

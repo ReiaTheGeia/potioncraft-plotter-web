@@ -2,12 +2,9 @@ import { BehaviorSubject, combineLatest, Observable, map } from "rxjs";
 
 import { IngredientId } from "@/services/ingredients/types";
 
-import {
-  AddIngredientPlotItem,
-  PlotItem,
-} from "../../../services/plotter/types";
+import { AddIngredientPlotItem, PlotItem } from "@/services/plotter/types";
 
-import { PlotBuilderItem, PlotBuilderItemBase } from "./PlotBuilderItem";
+import { PlotBuilderItem } from "./PlotBuilderItem";
 
 export class AddIngredientPlotBuilderItem
   implements PlotBuilderItem<AddIngredientPlotItem>
@@ -16,11 +13,11 @@ export class AddIngredientPlotBuilderItem
   private readonly _ingredientId$ = new BehaviorSubject<IngredientId | null>(
     null
   );
-  private readonly _grindPercent$ = new BehaviorSubject<number | null>(null);
+  private readonly _grindPercent$ = new BehaviorSubject<number | null>(1);
 
   private readonly _plotItem$ = new BehaviorSubject<PlotItem | null>(null);
 
-  constructor(private readonly _delete: (item: PlotBuilderItemBase) => void) {
+  constructor(private readonly _delete: (item: PlotBuilderItem) => void) {
     this._isValid$ = combineLatest([
       this._ingredientId$,
       this._grindPercent$,
@@ -40,6 +37,10 @@ export class AddIngredientPlotBuilderItem
         });
       }
     );
+  }
+
+  get type() {
+    return "add-ingredient" as const;
   }
 
   get isValid$() {
@@ -77,7 +78,7 @@ export class AddIngredientPlotBuilderItem
     return this._plotItem$.value;
   }
 
-  setIngredient(ingredientId: IngredientId | null) {
+  setIngredientId(ingredientId: IngredientId | null) {
     if (ingredientId === this._ingredientId$.value) {
       return;
     }

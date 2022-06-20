@@ -13,7 +13,8 @@ export type PlotItem =
 
 export interface SetPositionPlotItem {
   type: "set-position";
-  position: Vector2;
+  x: number;
+  y: number;
 }
 
 export interface AddIngredientPlotItem {

@@ -1,14 +1,6 @@
 import React from "react";
 
-import {
-  AddIngredientPlotBuilderItem,
-  HeatVortexPlotBuilderItem,
-  PlotBuilderItem,
-  PourSolventPlotBuilderItem,
-  SetPositionPlotBuilderItem,
-  StirCauldronPlotBuilderItem,
-  VoidSaltPlotBuilderItem,
-} from "@/components/PlotBuilderView/builder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 
 import PlotListItemCard from "./PlotListItemCard";
 
@@ -36,20 +28,27 @@ const PlotListItem = ({
   onMouseOut,
 }: PlotListItemProps) => {
   let content: React.ReactNode;
-  if (item instanceof AddIngredientPlotBuilderItem) {
-    content = <AddIngredientPlotListItem item={item} />;
-  } else if (item instanceof StirCauldronPlotBuilderItem) {
-    content = <StirCauldronPlotListItem item={item} />;
-  } else if (item instanceof PourSolventPlotBuilderItem) {
-    content = <PourSolventPlotListItem item={item} />;
-  } else if (item instanceof HeatVortexPlotBuilderItem) {
-    content = <HeatVortexPlotListItem item={item} />;
-  } else if (item instanceof VoidSaltPlotBuilderItem) {
-    content = <AddVoidSaltPlotListItem item={item} />;
-  } else if (item instanceof SetPositionPlotBuilderItem) {
-    content = <SetPositionPlotListItem item={item} />;
-  } else {
-    content = <div>Unknown PlotItemBuilder {item.constructor.name}</div>;
+  switch (item.type) {
+    case "add-ingredient":
+      content = <AddIngredientPlotListItem item={item as any} />;
+      break;
+    case "stir-cauldron":
+      content = <StirCauldronPlotListItem item={item as any} />;
+      break;
+    case "pour-solvent":
+      content = <PourSolventPlotListItem item={item as any} />;
+      break;
+    case "heat-vortex":
+      content = <HeatVortexPlotListItem item={item as any} />;
+      break;
+    case "void-salt":
+      content = <AddVoidSaltPlotListItem item={item as any} />;
+      break;
+    case "set-position":
+      content = <SetPositionPlotListItem item={item as any} />;
+      break;
+    default:
+      content = <div>Unknown plot type {item.type as any}</div>;
   }
 
   return (

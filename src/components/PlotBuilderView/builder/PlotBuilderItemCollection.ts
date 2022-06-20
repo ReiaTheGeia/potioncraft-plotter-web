@@ -1,6 +1,7 @@
 import { BehaviorSubject, Observable, debounceTime, map } from "rxjs";
 
 import { isNotNull } from "@/utils";
+import { observeAll } from "@/observables";
 
 import {
   AddIngredientPlotItem,
@@ -10,38 +11,37 @@ import {
   SetPositionPlotItem,
   StirCauldronPlotItem,
   AddVoidSaltPlotItem,
-} from "../../../services/plotter/types";
+} from "@/services/plotter/types";
 
-import { PlotBuilderItemBase } from "./PlotBuilderItem";
+import { PlotBuilderItem } from "./PlotBuilderItem";
 
 import { AddIngredientPlotBuilderItem } from "./AddIngredientPlotBuilderItem";
 import { HeatVortexPlotBuilderItem } from "./HeatVortexPlotBuilderItem";
 import { PourSolventPlotBuilderItem } from "./PourSolventPlotBuilderItem";
 import { StirCauldronPlotBuilderItem } from "./StirCauldronPlotBuilderItem";
-import { VoidSaltPlotBuilderItem } from "./VoidSaltPlotBuilderItem";
+import { AddVoidSaltPlotBuilderItem } from "./AddVoidSaltPlotBuilderItem";
 import { SetPositionPlotBuilderItem } from "./SetPositionPlotBuilderItem";
-import { observeAll } from "@/observables";
 
 export interface IPlotBuilderItemCollection {
-  readonly items$: Observable<readonly PlotBuilderItemBase[]>;
+  readonly items$: Observable<readonly PlotBuilderItem[]>;
 
-  builderItemFor(item: PlotItem): PlotBuilderItemBase | null;
+  builderItemFor(item: PlotItem): PlotBuilderItem | null;
 
-  moveItem(item: PlotBuilderItemBase, index: number): void;
+  moveItem(item: PlotBuilderItem, index: number): void;
 
   addIngredient(plotItem?: AddIngredientPlotItem): AddIngredientPlotBuilderItem;
   addStirCauldron(plotItem?: StirCauldronPlotItem): StirCauldronPlotBuilderItem;
   addPourSolvent(plotItem?: PourSolventPlotItem): PourSolventPlotBuilderItem;
   addHeatVortex(plotItem?: HeatVortexPlotItem): HeatVortexPlotBuilderItem;
-  addVoidSalt(plotItem?: AddVoidSaltPlotItem): VoidSaltPlotBuilderItem;
+  addVoidSalt(plotItem?: AddVoidSaltPlotItem): AddVoidSaltPlotBuilderItem;
 }
 
 export class PlotBuilderItemCollection extends Observable<
-  readonly PlotBuilderItemBase[]
+  readonly PlotBuilderItem[]
 > {
-  private readonly _items$ = new BehaviorSubject<
-    readonly PlotBuilderItemBase[]
-  >([]);
+  private readonly _items$ = new BehaviorSubject<readonly PlotBuilderItem[]>(
+    []
+  );
 
   private readonly _plotItems$ = new BehaviorSubject<readonly PlotItem[]>([]);
 
@@ -58,7 +58,7 @@ export class PlotBuilderItemCollection extends Observable<
       });
   }
 
-  get plotBuilderItems$(): Observable<readonly PlotBuilderItemBase[]> {
+  get plotBuilderItems$(): Observable<readonly PlotBuilderItem[]> {
     return this._items$;
   }
 
@@ -73,9 +73,18 @@ export class PlotBuilderItemCollection extends Observable<
   loadPlotItems(items: PlotItem[]) {
     for (const item of items) {
       switch (item.type) {
-        case "set-position":
-          this.addSetPosition(item);
+        case "set-position": {
+          let value = item as any;
+          if (value.position) {
+            value = {
+              ...item,
+              x: value.position.x,
+              y: value.position.y,
+            };
+          }
+          this.addSetPosition(value);
           break;
+        }
         case "add-ingredient":
           this.addIngredient(item);
           break;
@@ -97,7 +106,7 @@ export class PlotBuilderItemCollection extends Observable<
     }
   }
 
-  moveItem(item: PlotBuilderItemBase, index: number) {
+  moveItem(item: PlotBuilderItem, index: number) {
     if (index < 0 || index > this._items$.value.length) {
       return;
     }
@@ -148,8 +157,8 @@ export class PlotBuilderItemCollection extends Observable<
       this._deleteItem(item)
     );
     if (plotItem) {
-      item.setX(plotItem.position.x);
-      item.setY(plotItem.position.y);
+      item.setX(plotItem.x);
+      item.setY(plotItem.y);
     }
     this._items$.next([...this._items$.value, item]);
     return item;
@@ -162,7 +171,7 @@ export class PlotBuilderItemCollection extends Observable<
       this._deleteItem(item)
     );
     if (plotItem) {
-      item.setIngredient(plotItem.ingredientId);
+      item.setIngredientId(plotItem.ingredientId);
       item.setGrindPercent(plotItem.grindPercent);
     }
     this._items$.next([...this._items$.value, item]);
@@ -204,8 +213,10 @@ export class PlotBuilderItemCollection extends Observable<
     return item;
   }
 
-  addVoidSalt(plotItem?: AddVoidSaltPlotItem): VoidSaltPlotBuilderItem {
-    const item = new VoidSaltPlotBuilderItem((item) => this._deleteItem(item));
+  addVoidSalt(plotItem?: AddVoidSaltPlotItem): AddVoidSaltPlotBuilderItem {
+    const item = new AddVoidSaltPlotBuilderItem((item) =>
+      this._deleteItem(item)
+    );
     if (plotItem) {
       item.setGrains(plotItem.grains);
     }
@@ -213,12 +224,12 @@ export class PlotBuilderItemCollection extends Observable<
     return item;
   }
 
-  builderItemFor(item: PlotItem): PlotBuilderItemBase | null {
+  builderItemFor(item: PlotItem): PlotBuilderItem | null {
     const result = this._items$.value.find((x) => x.plotItem === item) || null;
     return result;
   }
 
-  private _deleteItem(item: PlotBuilderItemBase) {
+  private _deleteItem(item: PlotBuilderItem) {
     this._items$.next(this._items$.value.filter((x) => x !== item));
   }
 }

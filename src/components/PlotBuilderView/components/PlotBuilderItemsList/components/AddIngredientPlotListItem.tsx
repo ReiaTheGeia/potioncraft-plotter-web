@@ -4,12 +4,13 @@ import { Grid, Slider, TextField, Typography } from "@mui/material";
 import { useObservation } from "@/hooks/observe";
 
 import { IngredientId } from "@/services/ingredients/types";
+import { AddIngredientPlotItem } from "@/services/plotter/types";
 
-import { AddIngredientPlotBuilderItem } from "@/components/PlotBuilderView/builder";
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 import IngredientSelector from "@/components/IngredientSelector";
 
 export interface AddIngredientPlotListItemProps {
-  item: AddIngredientPlotBuilderItem;
+  item: PlotBuilderItem<AddIngredientPlotItem>;
 }
 const AddIngredientPlotListItem = ({
   item,
@@ -33,17 +34,17 @@ const AddIngredientPlotListItem = ({
   const grindPercent = useObservation(item.grindPercent$) ?? 0;
 
   const onIngredientSelectorOpen = React.useCallback(() => {
-    savedIngredientRef.current = item.ingredientId;
+    savedIngredientRef.current = ingredientId;
     setIsPreviewing(true);
     isPreviewingRef.current = true;
-  }, []);
+  }, [ingredientId]);
 
   const onIngredientSelectorMouseOverItem = React.useCallback(
     (value: IngredientId) => {
       if (!isPreviewing) {
         return;
       }
-      item.setIngredient(value);
+      item.setIngredientId(value);
     },
     [item, isPreviewing]
   );
@@ -52,14 +53,14 @@ const AddIngredientPlotListItem = ({
     (value: IngredientId | null) => {
       setIsPreviewing(false);
       isPreviewingRef.current = false;
-      item.setIngredient(value);
+      item.setIngredientId(value);
     },
     [item]
   );
 
   const onIngredientSelectorClose = React.useCallback(() => {
     if (isPreviewingRef.current) {
-      item.setIngredient(savedIngredientRef.current);
+      item.setIngredientId(savedIngredientRef.current);
       setIsPreviewing(false);
       isPreviewingRef.current = false;
     }

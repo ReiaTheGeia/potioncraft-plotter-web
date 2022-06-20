@@ -3,11 +3,13 @@ import { TextField, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
 
-import { StirCauldronPlotBuilderItem } from "@/components/PlotBuilderView/builder";
+import { StirCauldronPlotItem } from "@/services/plotter/types";
+
+import { PlotBuilderItem } from "@/components/PlotBuilderView/builder";
 import IncDecSlider from "@/components/IncDecSlider";
 
 export interface StirCauldronPlotListItemProps {
-  item: StirCauldronPlotBuilderItem;
+  item: PlotBuilderItem<StirCauldronPlotItem>;
 }
 
 const StirCauldronPlotListItem = ({ item }: StirCauldronPlotListItemProps) => {
