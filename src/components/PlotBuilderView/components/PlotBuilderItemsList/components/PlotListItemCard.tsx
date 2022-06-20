@@ -6,7 +6,10 @@ import {
   CardContent,
   styled,
 } from "@mui/material";
-import { Delete as DeleteIcon } from "@mui/icons-material";
+import {
+  Delete as DeleteIcon,
+  ContentCopy as CopyIcon,
+} from "@mui/icons-material";
 
 import { useObservation } from "@/hooks/observe";
 
@@ -17,6 +20,7 @@ export interface PlotListItemCardProps {
   index: number;
   highlight: boolean;
   children: React.ReactNode;
+  onDuplicate(item: PlotBuilderItem): void;
   onMouseOver?(item: PlotBuilderItem): void;
   onMouseOut?(): void;
 }
@@ -31,11 +35,16 @@ const Root = styled(Card)(({ theme }) => ({
   },
   "& .delete-button": {
     position: "absolute",
-    top: "5px",
-    right: "15px",
+    top: theme.spacing(1),
+    right: theme.spacing(1),
+  },
+  "& .duplicate-button": {
+    position: "absolute",
+    top: theme.spacing(1),
+    right: theme.spacing(5),
   },
   "& .item-content": {
-    paddingTop: theme.spacing(4),
+    paddingTop: theme.spacing(5),
   },
 }));
 
@@ -44,6 +53,7 @@ const PlotListItemCard = ({
   index,
   highlight,
   children,
+  onDuplicate,
   onMouseOver,
   onMouseOut,
 }: PlotListItemCardProps) => {
@@ -74,9 +84,18 @@ const PlotListItemCard = ({
       <IconButton
         size="small"
         className="delete-button"
+        title="Delete"
         onClick={onDeleteClick}
       >
         <DeleteIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        className="duplicate-button"
+        title="Duplicate"
+        onClick={() => onDuplicate(item)}
+      >
+        <CopyIcon />
       </IconButton>
       <CardContent className="item-content">{children}</CardContent>
     </Root>

@@ -116,25 +116,29 @@ export class PlotBuilderItemCollection extends Observable<
     this._items$.next(items);
   }
 
-  addNewItem(itemType: PlotItem["type"]): void {
+  addNewItem(plotItem: PlotItem): void;
+  addNewItem(itemType: PlotItem["type"]): void;
+  addNewItem(item: PlotItem | PlotItem["type"]) {
+    const itemType = typeof item === "string" ? item : item.type;
+    const itemBase = typeof item === "string" ? undefined : item;
     switch (itemType) {
       case "set-position":
-        this.addSetPosition();
+        this.addSetPosition(itemBase as any);
         break;
       case "add-ingredient":
-        this.addIngredient();
+        this.addIngredient(itemBase as any);
         break;
       case "stir-cauldron":
-        this.addStirCauldron();
+        this.addStirCauldron(itemBase as any);
         break;
       case "pour-solvent":
-        this.addPourSolvent();
+        this.addPourSolvent(itemBase as any);
         break;
       case "heat-vortex":
-        this.addHeatVortex();
+        this.addHeatVortex(itemBase as any);
         break;
       case "void-salt":
-        this.addVoidSalt();
+        this.addVoidSalt(itemBase as any);
         break;
     }
   }

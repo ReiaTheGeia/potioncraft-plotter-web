@@ -56,3 +56,15 @@ export const EmptyPlotResult: Readonly<PlotResult> = Object.freeze({
   committedPoints: [],
   pendingPoints: [],
 }) as any;
+
+export function isIngredientPlotItem(
+  item: PlotItem
+): item is AddIngredientPlotItem {
+  return item.type === "add-ingredient";
+}
+
+export function isVoidSaltPlotItem(
+  item: PlotItem
+): item is AddVoidSaltPlotItem {
+  return item.type === "void-salt";
+}

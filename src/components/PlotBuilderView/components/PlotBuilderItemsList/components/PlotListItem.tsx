@@ -23,6 +23,7 @@ export interface PlotListItemProps {
   item: PlotBuilderItem;
   index: number;
   highlight?: boolean;
+  onDuplicate(item: PlotBuilderItem): void;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
 }
@@ -30,6 +31,7 @@ const PlotListItem = ({
   item,
   index,
   highlight = false,
+  onDuplicate,
   onMouseOver,
   onMouseOut,
 }: PlotListItemProps) => {
@@ -55,6 +57,7 @@ const PlotListItem = ({
       item={item}
       index={index}
       highlight={highlight}
+      onDuplicate={onDuplicate}
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
     >

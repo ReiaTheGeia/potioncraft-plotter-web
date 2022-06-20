@@ -185,7 +185,9 @@ class BrewEffectAtPointChallenge implements IChallenge {
       score: costScore,
     };
 
-    const dangerLength = Math.max(...calculateDangerLengths(committedPoints));
+    const dangerLength = Math.max(
+      ...calculateDangerLengths(committedPoints, this._ingredientRegistry)
+    );
     if (dangerLength > DANGER_LENGTH_LETHAL) {
       // TODO: Charge for life salt for bones.
       // Each unit of life salt costs (8736 / 5000) to produce.  Check how much life it regens and use that to find the cost

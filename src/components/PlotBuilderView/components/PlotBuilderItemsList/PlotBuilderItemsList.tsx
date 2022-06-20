@@ -21,6 +21,7 @@ export interface PlotBuilderItemsListProps {
   highlightItem?: PlotBuilderItem | null;
   enableCheats?: boolean;
   onMoveItem(item: PlotBuilderItem, index: number): void;
+  onDuplicateItem(item: PlotBuilderItem): void;
   onAddNewItem(itemType: PlotItem["type"]): void;
   onMouseOver(item: PlotBuilderItem): void;
   onMouseOut(): void;
@@ -65,6 +66,7 @@ const PlotBuilderItemsList = ({
   highlightItem,
   enableCheats,
   onMoveItem,
+  onDuplicateItem,
   onAddNewItem,
   onMouseOver,
   onMouseOut,
@@ -87,6 +89,7 @@ const PlotBuilderItemsList = ({
                 item={value}
                 index={items.indexOf(value)}
                 highlight={value === highlightItem}
+                onDuplicate={onDuplicateItem}
                 onMouseOver={onMouseOver}
                 onMouseOut={onMouseOut}
               />

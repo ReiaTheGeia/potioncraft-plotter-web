@@ -2,6 +2,7 @@ import React from "react";
 import { styled, Card, CardContent, Typography } from "@mui/material";
 
 import { useObservation } from "@/hooks/observe";
+
 import { EmptyPlotResult } from "@/services/plotter/types";
 
 import IncDecSlider from "../IncDecSlider";
@@ -171,6 +172,7 @@ const PlotBuilderView = ({
         highlightItem={highlightItem}
         enableCheats={enableCheats}
         onMoveItem={(item, index) => viewModel.movePlotBuilderItem(item, index)}
+        onDuplicateItem={(item) => viewModel.duplicatePlotBuilderItem(item)}
         onAddNewItem={(itemType) => viewModel.addPlotBuilderItem(itemType)}
         onMouseOver={onBuildItemMouseOver}
         onMouseOut={onBuildItemMouseOut}

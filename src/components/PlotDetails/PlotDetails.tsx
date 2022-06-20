@@ -23,6 +23,8 @@ import {
 import {
   AddIngredientPlotItem,
   AddVoidSaltPlotItem,
+  isIngredientPlotItem,
+  isVoidSaltPlotItem,
   PlotItem,
   PlotPoint,
   PlotResult,
@@ -33,24 +35,15 @@ import {
   getEffectTier,
   calculateDangerLengths,
 } from "@/services/plotter/utils";
-import FixedValue from "./FixedValue";
+
+import FixedValue from "../FixedValue";
+import ExpandButton from "../ExpandButton";
 
 export interface PlotDetailsProps {
   className?: string;
   items: readonly PlotItem[];
   plot: PlotResult;
 }
-
-const ExpandMore = styled((props: IconButtonProps & { expand: boolean }) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
 
 const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
   const ingredientRegistry = useDIDependency(IngredientRegistry);
@@ -114,7 +107,10 @@ const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
       )
     );
 
-    const dangerLengths = calculateDangerLengths(plot.committedPoints);
+    const dangerLengths = calculateDangerLengths(
+      plot.committedPoints,
+      ingredientRegistry
+    );
     const longestDanger = Math.max(...dangerLengths, 0);
     const lifeSaltRequiredLengths = dangerLengths
       .map((x) => x - DANGER_LENGTH_LETHAL)
@@ -170,12 +166,10 @@ const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
                 <Typography variant="overline" component="span">
                   {totalIngredients} ({totalUniqueIngredients} unique)
                 </Typography>
-                <ExpandMore
-                  expand={ingredientsExpanded}
-                  onClick={() => setIngredientsExpanded(!ingredientsExpanded)}
-                >
-                  <ExpandMoreIcon />
-                </ExpandMore>
+                <ExpandButton
+                  expanded={ingredientsExpanded}
+                  onExpanded={setIngredientsExpanded}
+                />
               </td>
             </tr>
             {ingredientsExpanded &&
@@ -259,14 +253,6 @@ const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
 };
 
 export default PlotDetails;
-
-function isIngredientPlotItem(item: PlotItem): item is AddIngredientPlotItem {
-  return item.type === "add-ingredient";
-}
-
-function isVoidSaltPlotItem(item: PlotItem): item is AddVoidSaltPlotItem {
-  return item.type === "void-salt";
-}
 
 function getEffects(items: PlotPoint[]): Record<string, number> {
   const result: Record<string, number> = {};
