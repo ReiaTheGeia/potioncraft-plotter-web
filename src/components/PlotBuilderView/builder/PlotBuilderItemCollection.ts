@@ -69,15 +69,7 @@ export class PlotBuilderItemCollection extends Observable<
 
   loadPlotItems(items: PlotItem[]) {
     for (const item of items) {
-      let value = item as any;
-      if (value.type === "set-position" && value.position) {
-        value = {
-          ...item,
-          x: value.position.x,
-          y: value.position.y,
-        };
-      }
-      this.addPlotItem(value);
+      this.addPlotItem(item);
     }
   }
 
