@@ -84,6 +84,7 @@ const PlotListItemCard = ({
       <IconButton
         size="small"
         className="delete-button"
+        title="Delete"
         onClick={onDeleteClick}
       >
         <DeleteIcon />
@@ -91,6 +92,7 @@ const PlotListItemCard = ({
       <IconButton
         size="small"
         className="duplicate-button"
+        title="Duplicate"
         onClick={() => onDuplicate(item)}
       >
         <CopyIcon />
