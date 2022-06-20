@@ -211,12 +211,12 @@ export class PlotBuilderViewModel
 
   duplicatePlotBuilderItem(item: PlotBuilderItem): void {
     if (item.plotItem) {
-      this._plotBuilderItems.addNewItem(item.plotItem);
+      this._plotBuilderItems.addPlotItem(item.plotItem);
     }
   }
 
   addPlotBuilderItem(itemType: PlotItem["type"]): void {
-    this._plotBuilderItems.addNewItem(itemType);
+    this._plotBuilderItems.addPlotItem(itemType);
   }
 
   onViewportResized(width: number, height: number): void {
