@@ -38,6 +38,7 @@ export interface IPlotBuilderViewModel
   setZoom(zoom: number): void;
 
   movePlotBuilderItem(item: PlotBuilderItem, newIndex: number): void;
+  duplicatePlotBuilderItem(item: PlotBuilderItem): void;
   addPlotBuilderItem(itemType: PlotItem["type"]): void;
 
   onMouseOverPlotItem(item: PlotItem | null): void;
@@ -206,6 +207,12 @@ export class PlotBuilderViewModel
 
   movePlotBuilderItem(item: PlotBuilderItem, newIndex: number): void {
     this._plotBuilderItems.moveItem(item, newIndex);
+  }
+
+  duplicatePlotBuilderItem(item: PlotBuilderItem): void {
+    if (item.plotItem) {
+      this._plotBuilderItems.addNewItem(item.plotItem);
+    }
   }
 
   addPlotBuilderItem(itemType: PlotItem["type"]): void {

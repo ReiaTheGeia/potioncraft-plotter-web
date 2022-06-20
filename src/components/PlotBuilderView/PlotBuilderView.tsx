@@ -172,6 +172,7 @@ const PlotBuilderView = ({
         highlightItem={highlightItem}
         enableCheats={enableCheats}
         onMoveItem={(item, index) => viewModel.movePlotBuilderItem(item, index)}
+        onDuplicateItem={(item) => viewModel.duplicatePlotBuilderItem(item)}
         onAddNewItem={(itemType) => viewModel.addPlotBuilderItem(itemType)}
         onMouseOver={onBuildItemMouseOver}
         onMouseOut={onBuildItemMouseOut}
