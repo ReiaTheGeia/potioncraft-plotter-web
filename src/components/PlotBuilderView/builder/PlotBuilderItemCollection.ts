@@ -13,14 +13,7 @@ import {
   AddVoidSaltPlotItem,
 } from "@/services/plotter/types";
 
-import { PlotBuilderItem } from "./PlotBuilderItem";
-
-import { AddIngredientPlotBuilderItem } from "./AddIngredientPlotBuilderItem";
-import { HeatVortexPlotBuilderItem } from "./HeatVortexPlotBuilderItem";
-import { PourSolventPlotBuilderItem } from "./PourSolventPlotBuilderItem";
-import { StirCauldronPlotBuilderItem } from "./StirCauldronPlotBuilderItem";
-import { AddVoidSaltPlotBuilderItem } from "./AddVoidSaltPlotBuilderItem";
-import { SetPositionPlotBuilderItem } from "./SetPositionPlotBuilderItem";
+import { createPlotBuilderItem, PlotBuilderItem } from "./PlotBuilderItem";
 
 export interface IPlotBuilderItemCollection {
   readonly items$: Observable<readonly PlotBuilderItem[]>;
@@ -129,9 +122,10 @@ export class PlotBuilderItemCollection extends Observable<
 
   private _addSetPosition(
     plotItem?: SetPositionPlotItem
-  ): SetPositionPlotBuilderItem {
-    const item = new SetPositionPlotBuilderItem((item) =>
-      this._deleteItem(item)
+  ): PlotBuilderItem<SetPositionPlotItem> {
+    const item = createPlotBuilderItem<SetPositionPlotItem>(
+      "set-position",
+      (item) => this._deleteItem(item)
     );
     if (plotItem) {
       item.setX(plotItem.x);
@@ -143,9 +137,10 @@ export class PlotBuilderItemCollection extends Observable<
 
   private _addIngredient(
     plotItem?: AddIngredientPlotItem
-  ): AddIngredientPlotBuilderItem {
-    const item = new AddIngredientPlotBuilderItem((item) =>
-      this._deleteItem(item)
+  ): PlotBuilderItem<AddIngredientPlotItem> {
+    const item = createPlotBuilderItem<AddIngredientPlotItem>(
+      "add-ingredient",
+      (item) => this._deleteItem(item)
     );
     if (plotItem) {
       item.setIngredientId(plotItem.ingredientId);
@@ -157,9 +152,10 @@ export class PlotBuilderItemCollection extends Observable<
 
   private _addStirCauldron(
     plotItem?: StirCauldronPlotItem
-  ): StirCauldronPlotBuilderItem {
-    const item = new StirCauldronPlotBuilderItem((item) =>
-      this._deleteItem(item)
+  ): PlotBuilderItem<StirCauldronPlotItem> {
+    const item = createPlotBuilderItem<StirCauldronPlotItem>(
+      "stir-cauldron",
+      (item) => this._deleteItem(item)
     );
     if (plotItem) {
       item.setDistance(plotItem.distance);
@@ -170,9 +166,10 @@ export class PlotBuilderItemCollection extends Observable<
 
   private _addPourSolvent(
     plotItem?: PourSolventPlotItem
-  ): PourSolventPlotBuilderItem {
-    const item = new PourSolventPlotBuilderItem((item) =>
-      this._deleteItem(item)
+  ): PlotBuilderItem<PourSolventPlotItem> {
+    const item = createPlotBuilderItem<PourSolventPlotItem>(
+      "pour-solvent",
+      (item) => this._deleteItem(item)
     );
     if (plotItem) {
       item.setDistance(plotItem.distance);
@@ -183,9 +180,10 @@ export class PlotBuilderItemCollection extends Observable<
 
   private _addHeatVortex(
     plotItem?: HeatVortexPlotItem
-  ): HeatVortexPlotBuilderItem {
-    const item = new HeatVortexPlotBuilderItem((item) =>
-      this._deleteItem(item)
+  ): PlotBuilderItem<HeatVortexPlotItem> {
+    const item = createPlotBuilderItem<HeatVortexPlotItem>(
+      "heat-vortex",
+      (item) => this._deleteItem(item)
     );
     if (plotItem) {
       item.setDistance(plotItem.distance);
@@ -196,9 +194,10 @@ export class PlotBuilderItemCollection extends Observable<
 
   private _addVoidSalt(
     plotItem?: AddVoidSaltPlotItem
-  ): AddVoidSaltPlotBuilderItem {
-    const item = new AddVoidSaltPlotBuilderItem((item) =>
-      this._deleteItem(item)
+  ): PlotBuilderItem<AddVoidSaltPlotItem> {
+    const item = createPlotBuilderItem<AddVoidSaltPlotItem>(
+      "void-salt",
+      (item) => this._deleteItem(item)
     );
     if (plotItem) {
       item.setGrains(plotItem.grains);

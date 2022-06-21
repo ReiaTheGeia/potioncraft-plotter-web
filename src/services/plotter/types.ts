@@ -3,6 +3,54 @@ import { Vector2 } from "@/vector2";
 import { IngredientId } from "../ingredients/types";
 import { MapEntity } from "../potion-maps/types";
 
+export interface SetPositionPlotItem {
+  type: "set-position";
+  x: number;
+  y: number;
+}
+const SetPositionPlotItemKeys = ["x", "y"] as const;
+
+export interface AddIngredientPlotItem {
+  type: "add-ingredient";
+  ingredientId: IngredientId;
+  grindPercent: number;
+}
+const AddIngredientPlotItemKeys = ["ingredientId", "grindPercent"] as const;
+export function isIngredientPlotItem(
+  item: PlotItem
+): item is AddIngredientPlotItem {
+  return item.type === "add-ingredient";
+}
+
+export interface PourSolventPlotItem {
+  type: "pour-solvent";
+  distance: number;
+}
+const PourSolventPlotItemKeys = ["distance"] as const;
+
+export interface StirCauldronPlotItem {
+  type: "stir-cauldron";
+  distance: number;
+}
+const StirCauldronPlotItemKeys = ["distance"] as const;
+
+export interface HeatVortexPlotItem {
+  type: "heat-vortex";
+  distance: number;
+}
+const HeatVortexPlotItemKeys = ["distance"] as const;
+
+export interface AddVoidSaltPlotItem {
+  type: "void-salt";
+  grains: number;
+}
+const AddVoidSaltPlotItemKeys = ["grains"] as const;
+export function isVoidSaltPlotItem(
+  item: PlotItem
+): item is AddVoidSaltPlotItem {
+  return item.type === "void-salt";
+}
+
 export type PlotItem =
   | SetPositionPlotItem
   | AddIngredientPlotItem
@@ -11,37 +59,14 @@ export type PlotItem =
   | HeatVortexPlotItem
   | AddVoidSaltPlotItem;
 
-export interface SetPositionPlotItem {
-  type: "set-position";
-  x: number;
-  y: number;
-}
-
-export interface AddIngredientPlotItem {
-  type: "add-ingredient";
-  ingredientId: IngredientId;
-  grindPercent: number;
-}
-
-export interface PourSolventPlotItem {
-  type: "pour-solvent";
-  distance: number;
-}
-
-export interface StirCauldronPlotItem {
-  type: "stir-cauldron";
-  distance: number;
-}
-
-export interface HeatVortexPlotItem {
-  type: "heat-vortex";
-  distance: number;
-}
-
-export interface AddVoidSaltPlotItem {
-  type: "void-salt";
-  grains: number;
-}
+export const PlotItemKeysByType: Record<PlotItem["type"], readonly string[]> = {
+  "set-position": SetPositionPlotItemKeys,
+  "add-ingredient": AddIngredientPlotItemKeys,
+  "pour-solvent": PourSolventPlotItemKeys,
+  "stir-cauldron": StirCauldronPlotItemKeys,
+  "heat-vortex": HeatVortexPlotItemKeys,
+  "void-salt": AddVoidSaltPlotItemKeys,
+};
 
 export interface PlotPoint extends Vector2 {
   source: PlotItem;
@@ -57,15 +82,3 @@ export const EmptyPlotResult: Readonly<PlotResult> = Object.freeze({
   committedPoints: [],
   pendingPoints: [],
 }) as any;
-
-export function isIngredientPlotItem(
-  item: PlotItem
-): item is AddIngredientPlotItem {
-  return item.type === "add-ingredient";
-}
-
-export function isVoidSaltPlotItem(
-  item: PlotItem
-): item is AddVoidSaltPlotItem {
-  return item.type === "void-salt";
-}
