@@ -174,7 +174,7 @@ const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
             </tr>
             {ingredientsExpanded &&
               Object.keys(ingredientMap).map((ingredient) => (
-                <tr>
+                <tr key={ingredient}>
                   <td style={{ paddingLeft: "8px" }}>{ingredient}</td>
                   <td>
                     <Typography variant="overline">
