@@ -1,6 +1,11 @@
 import { Observable, BehaviorSubject, combineLatest } from "rxjs";
 
-import { PlotItem, PlotItemKeysByType } from "@/services/plotter/types";
+import {
+  DefaultPlotItemByType,
+  PlotItem,
+  PlotItemKeysByType,
+  PlotItemValidatorByType,
+} from "@/services/plotter/types";
 
 export interface PlotBuilderItemBase {
   readonly type: PlotItem["type"];
@@ -40,7 +45,9 @@ export function createPlotBuilderItem<T extends PlotItem>(
 
   const builderItem = {} as any;
   for (const key of keys) {
-    itemPropObservables[key] = new BehaviorSubject<any>(null);
+    itemPropObservables[key] = new BehaviorSubject<any>(
+      (DefaultPlotItemByType[type] as any)[key]
+    );
     builderItem[`set${key[0].toUpperCase() + key.substring(1)}`] = (
       value: any
     ) => itemPropObservables[key].next(value);
@@ -61,8 +68,13 @@ export function createPlotBuilderItem<T extends PlotItem>(
         }
         item[keys[i]] = values[i];
       }
-      plotItem$.next(item);
-      isValid$.next(true);
+      if (!PlotItemValidatorByType[type](item)) {
+        plotItem$.next(null);
+        isValid$.next(false);
+      } else {
+        plotItem$.next(item);
+        isValid$.next(true);
+      }
     }
   );
 
@@ -73,7 +85,6 @@ export function createPlotBuilderItem<T extends PlotItem>(
     value: type,
   });
 
-  // TODO: Validate individual props
   Object.defineProperty(builderItem, "isValid", {
     configurable: false,
     enumerable: true,

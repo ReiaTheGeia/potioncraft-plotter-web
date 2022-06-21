@@ -9,6 +9,14 @@ export interface SetPositionPlotItem {
   y: number;
 }
 const SetPositionPlotItemKeys = ["x", "y"] as const;
+export const DefaultSetPositionPlotItem = Object.freeze({
+  type: "set-position",
+  x: 0,
+  y: 0,
+});
+export function isValidSetPositionPlotItem(item: SetPositionPlotItem) {
+  return true;
+}
 
 export interface AddIngredientPlotItem {
   type: "add-ingredient";
@@ -16,6 +24,22 @@ export interface AddIngredientPlotItem {
   grindPercent: number;
 }
 const AddIngredientPlotItemKeys = ["ingredientId", "grindPercent"] as const;
+export const DefaultAddIngredientPlotItem = Object.freeze({
+  type: "add-ingredient",
+  ingredientId: null as any as IngredientId,
+  grindPercent: 1,
+});
+export function isValidAddIngredientPlotItem(
+  item: AddIngredientPlotItem
+): boolean {
+  const { ingredientId, grindPercent } = item;
+  return (
+    ingredientId != null &&
+    ingredientId !== "" &&
+    grindPercent >= 0 &&
+    grindPercent <= 1
+  );
+}
 export function isIngredientPlotItem(
   item: PlotItem
 ): item is AddIngredientPlotItem {
@@ -27,10 +51,24 @@ export interface PourSolventPlotItem {
   distance: number;
 }
 const PourSolventPlotItemKeys = ["distance"] as const;
+export const DefaultPourSolventPlotItem = Object.freeze({
+  type: "pour-solvent",
+  distance: 0,
+});
+export function isValidPourSolventPlotItem(item: PourSolventPlotItem) {
+  return item.distance >= 0;
+}
 
 export interface StirCauldronPlotItem {
   type: "stir-cauldron";
   distance: number;
+}
+export const DefaultStirCauldronPlotItem = Object.freeze({
+  type: "stir-cauldron",
+  distance: 0,
+});
+export function isValidStirCauldronPlotItem(item: StirCauldronPlotItem) {
+  return item.distance >= 0;
 }
 const StirCauldronPlotItemKeys = ["distance"] as const;
 
@@ -39,6 +77,13 @@ export interface HeatVortexPlotItem {
   distance: number;
 }
 const HeatVortexPlotItemKeys = ["distance"] as const;
+export const DefaultHeatVortexPlotItem = Object.freeze({
+  type: "heat-vortex",
+  distance: 0,
+});
+export function isValidHeatVortexPlotItem(item: HeatVortexPlotItem) {
+  return item.distance >= 0;
+}
 
 export interface AddVoidSaltPlotItem {
   type: "void-salt";
@@ -49,6 +94,13 @@ export function isVoidSaltPlotItem(
   item: PlotItem
 ): item is AddVoidSaltPlotItem {
   return item.type === "void-salt";
+}
+export const DefaultAddVoidSaltPlotItemItem = Object.freeze({
+  type: "void-salt",
+  grains: 0,
+});
+export function isValidAddVoidSaltPlotItem(item: AddVoidSaltPlotItem) {
+  return item.grains >= 0;
 }
 
 export type PlotItem =
@@ -66,6 +118,30 @@ export const PlotItemKeysByType: Record<PlotItem["type"], readonly string[]> = {
   "stir-cauldron": StirCauldronPlotItemKeys,
   "heat-vortex": HeatVortexPlotItemKeys,
   "void-salt": AddVoidSaltPlotItemKeys,
+};
+
+export const DefaultPlotItemByType: Record<
+  PlotItem["type"],
+  Readonly<PlotItem>
+> = {
+  "set-position": DefaultSetPositionPlotItem,
+  "add-ingredient": DefaultAddIngredientPlotItem,
+  "pour-solvent": DefaultPourSolventPlotItem,
+  "stir-cauldron": DefaultStirCauldronPlotItem,
+  "heat-vortex": DefaultHeatVortexPlotItem,
+  "void-salt": DefaultAddVoidSaltPlotItemItem,
+};
+
+export const PlotItemValidatorByType: Record<
+  PlotItem["type"],
+  (value: any) => boolean
+> = {
+  "set-position": isValidSetPositionPlotItem,
+  "add-ingredient": isValidAddIngredientPlotItem,
+  "pour-solvent": isValidPourSolventPlotItem,
+  "stir-cauldron": isValidStirCauldronPlotItem,
+  "heat-vortex": isValidHeatVortexPlotItem,
+  "void-salt": isValidAddVoidSaltPlotItem,
 };
 
 export interface PlotPoint extends Vector2 {
