@@ -81,7 +81,7 @@ export class ChallengeFactory {
         continue;
       }
 
-      // Area must be free.  This means we also cant stomp on top of vortexes.
+      // Area must be free.  This means we also cant stomp on top of vortices.
       const hit = map.hitTest(p, POTION_RADIUS);
       if (hit.length > 0) {
         continue;

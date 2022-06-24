@@ -314,8 +314,8 @@ function renderExperienceBonusEntity(
 }
 
 const VortexImagesSrc: Record<string, string> = {
-  Large: require("@/assets/vortexes/Vortex Large Idle.png"),
-  Medium: require("@/assets/vortexes/Vortex Medium Idle.png"),
+  Large: require("@/assets/vortices/Vortex Large Idle.png"),
+  Medium: require("@/assets/vortices/Vortex Medium Idle.png"),
 };
 
 function renderVortexEntity(
