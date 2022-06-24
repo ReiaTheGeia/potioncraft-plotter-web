@@ -1,15 +1,7 @@
 import React from "react";
 import { uniq, sum, last } from "lodash";
 
-import {
-  Card,
-  CardContent,
-  Typography,
-  IconButton,
-  styled,
-  IconButtonProps,
-} from "@mui/material";
-import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
+import { Card, CardContent, Typography, styled } from "@mui/material";
 
 import { useDIDependency } from "@/container";
 import { pointArrayLength } from "@/point-array";
@@ -21,8 +13,6 @@ import {
 } from "@/game-settings";
 
 import {
-  AddIngredientPlotItem,
-  AddVoidSaltPlotItem,
   isIngredientPlotItem,
   isVoidSaltPlotItem,
   PlotItem,
@@ -45,8 +35,15 @@ export interface PlotDetailsProps {
   plot: PlotResult;
 }
 
+const Root = styled(Card)({
+  "& .details-expand": {
+    float: "right",
+  },
+});
+
 const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
   const ingredientRegistry = useDIDependency(IngredientRegistry);
+  const [detailsExpanded, setDetailsExpanded] = React.useState(true);
   const [ingredientsExpanded, setIngredientsExpanded] = React.useState(false);
 
   const endsAt = last(plot.committedPoints) ?? Vec2Zero;
@@ -139,116 +136,130 @@ const PlotDetails = ({ className, items, plot }: PlotDetailsProps) => {
   const dangerIsDeath = longestDanger >= DANGER_LENGTH_LETHAL;
 
   return (
-    <Card className={className} variant="outlined">
+    <Root className={className} variant="outlined">
       <CardContent>
-        <Typography variant="h6">Details</Typography>
-        <table>
-          <tbody>
-            {Object.keys(effects).length > 0 && (
-              <tr>
-                <td>
-                  <Typography>Effects on Path:</Typography>
-                </td>
-                <td>
-                  <Typography variant="overline">
-                    {Object.keys(effects)
-                      .map((effect) => `${effect} (${effects[effect]})`)
-                      .join(", ")}
-                  </Typography>
-                </td>
-              </tr>
-            )}
-            <tr>
-              <td>
-                <Typography>Ingredient count:</Typography>
-              </td>
-              <td>
-                <Typography variant="overline" component="span">
-                  {totalIngredients} ({totalUniqueIngredients} unique)
-                </Typography>
-                <ExpandButton
-                  expanded={ingredientsExpanded}
-                  onExpanded={setIngredientsExpanded}
-                />
-              </td>
-            </tr>
-            {ingredientsExpanded &&
-              Object.keys(ingredientMap).map((ingredient) => (
-                <tr key={ingredient}>
-                  <td style={{ paddingLeft: "8px" }}>{ingredient}</td>
+        <div>
+          <Typography variant="h6" component="span">
+            Details
+          </Typography>
+          <ExpandButton
+            className="details-expand"
+            expanded={detailsExpanded}
+            onExpanded={setDetailsExpanded}
+          />
+        </div>
+        {detailsExpanded && (
+          <table>
+            <tbody>
+              {Object.keys(effects).length > 0 && (
+                <tr>
+                  <td>
+                    <Typography>Effects on Path:</Typography>
+                  </td>
                   <td>
                     <Typography variant="overline">
-                      {ingredientMap[ingredient]}
+                      {Object.keys(effects)
+                        .map((effect) => `${effect} (${effects[effect]})`)
+                        .join(", ")}
                     </Typography>
                   </td>
                 </tr>
-              ))}
-            <tr>
-              <td>
-                <Typography>Ingredient stress:</Typography>
-              </td>
-              <td>
-                <Typography variant="overline">
-                  <FixedValue value={stress} />
-                </Typography>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <Typography>Cost:</Typography>
-              </td>
-              <td>
-                <Typography variant="overline">{baseCost}</Typography>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <Typography>Committed length:</Typography>
-              </td>
-              <td>
-                <Typography variant="overline">
-                  <FixedValue value={length} />
-                </Typography>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <Typography>Ends at:</Typography>
-              </td>
-              <td>
-                <Typography variant="overline">
-                  <FixedValue value={endsAt.x} />,{" "}
-                  <FixedValue value={endsAt.y} />
-                </Typography>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <Typography>Longest length in bones:</Typography>
-              </td>
-              <td>
-                <Typography
-                  variant="overline"
-                  color={dangerIsDeath ? "error" : "textPrimary"}
-                >
-                  <FixedValue value={longestDanger} /> / {DANGER_LENGTH_LETHAL}
-                </Typography>
-              </td>
-            </tr>
-            {lifeSaltRequired > 0 && (
+              )}
               <tr>
                 <td>
-                  <Typography>Life salt required:</Typography>
+                  <Typography>Ingredient count:</Typography>
                 </td>
-                <td>
-                  <Typography variant="overline">{lifeSaltRequired}</Typography>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <Typography variant="overline" component="span">
+                    {totalIngredients} ({totalUniqueIngredients} unique)
+                  </Typography>
+                  <ExpandButton
+                    expanded={ingredientsExpanded}
+                    onExpanded={setIngredientsExpanded}
+                  />
                 </td>
               </tr>
-            )}
-          </tbody>
-        </table>
+              {ingredientsExpanded &&
+                Object.keys(ingredientMap).map((ingredient) => (
+                  <tr key={ingredient}>
+                    <td style={{ paddingLeft: "8px" }}>{ingredient}</td>
+                    <td>
+                      <Typography variant="overline">
+                        {ingredientMap[ingredient]}
+                      </Typography>
+                    </td>
+                  </tr>
+                ))}
+              <tr>
+                <td>
+                  <Typography>Ingredient stress:</Typography>
+                </td>
+                <td>
+                  <Typography variant="overline">
+                    <FixedValue value={stress} />
+                  </Typography>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <Typography>Cost:</Typography>
+                </td>
+                <td>
+                  <Typography variant="overline">{baseCost}</Typography>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <Typography>Committed length:</Typography>
+                </td>
+                <td>
+                  <Typography variant="overline">
+                    <FixedValue value={length} />
+                  </Typography>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <Typography>Ends at:</Typography>
+                </td>
+                <td>
+                  <Typography variant="overline">
+                    <FixedValue value={endsAt.x} />,{" "}
+                    <FixedValue value={endsAt.y} />
+                  </Typography>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <Typography>Longest length in bones:</Typography>
+                </td>
+                <td>
+                  <Typography
+                    variant="overline"
+                    color={dangerIsDeath ? "error" : "textPrimary"}
+                  >
+                    <FixedValue value={longestDanger} /> /{" "}
+                    {DANGER_LENGTH_LETHAL}
+                  </Typography>
+                </td>
+              </tr>
+              {lifeSaltRequired > 0 && (
+                <tr>
+                  <td>
+                    <Typography>Life salt required:</Typography>
+                  </td>
+                  <td>
+                    <Typography variant="overline">
+                      {lifeSaltRequired}
+                    </Typography>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </CardContent>
-    </Card>
+    </Root>
   );
 };
 

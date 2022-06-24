@@ -11,7 +11,8 @@ import { PlotItem } from "../plotter/types";
 @singleton()
 export class ShareStringSerializer {
   serialize(items: readonly PlotItem[]): string {
-    const encoded = pako.deflate(JSON.stringify(items));
+    const json = JSON.stringify(items);
+    const encoded = pako.deflate(json);
     const data = new Uint8Array(1 + encoded.length);
     data.set(encoded, 1);
     new DataView(data.buffer).setUint8(0, 0);
@@ -23,15 +24,20 @@ export class ShareStringSerializer {
     const dv = new DataView(array);
     const version = dv.getUint8(0);
     const data = array.slice(1);
-
     if (version === 0) {
-      const decoded = JSON.parse(pako.inflate(data, { to: "string" })) as any[];
+      let zipData: string;
+      try {
+        zipData = pako.inflate(data, { to: "string" });
+      } catch (e: any) {
+        // pako throws strings.
+        throw new Error("Failed to decode share data: " + e);
+      }
+      const decoded = JSON.parse(zipData) as any[];
       if (!Array.isArray(decoded)) {
         return [];
       }
       return decoded.map((item) => this._deserializePlotItemV0(item));
     }
-
     throw new Error(`Unknown shareString version ${version}.`);
   }
 

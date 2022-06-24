@@ -14,13 +14,22 @@ const ExpandMore = styled((props: IconButtonProps & { expand: boolean }) => {
 }));
 
 export interface ExpandButtonProps {
+  className?: string;
   expanded: boolean;
   onExpanded(expanded: boolean): void;
 }
 
-const ExpandButton = ({ expanded, onExpanded }: ExpandButtonProps) => {
+const ExpandButton = ({
+  className,
+  expanded,
+  onExpanded,
+}: ExpandButtonProps) => {
   return (
-    <ExpandMore expand={expanded} onClick={() => onExpanded(!expanded)}>
+    <ExpandMore
+      className={className}
+      expand={expanded}
+      onClick={() => onExpanded(!expanded)}
+    >
       <ExpandMoreIcon />
     </ExpandMore>
   );

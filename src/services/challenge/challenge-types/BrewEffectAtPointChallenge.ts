@@ -83,14 +83,14 @@ class BrewEffectAtPointChallenge implements IChallenge {
     const VORTEXLESS_REWARD = 200;
 
     // Penalty for distance scaled by the actual distance divided by linear distance.
-    const DISTANCE_PENALTY = -20;
+    const DISTANCE_PENALTY = -40;
 
     // Penalty for stress.  Penalty applies to any stress value over 1.
     const STRESS_PENALTY = -100;
-    const HIGHLANDER_BONUS = 500;
+    const HIGHLANDER_BONUS = 200;
 
     // Each unit of cost subtracts this from the score.
-    const COST_PENALTY = -10;
+    const COST_PENALTY = -5;
 
     const { committedPoints } = this._plotter.plotItems(plotItems, this._map);
     const lastPoint = last(committedPoints) ?? Vec2Zero;
